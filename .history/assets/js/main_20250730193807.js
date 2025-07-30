@@ -4,7 +4,6 @@
 let selectedDate = null;
 let portfolioItems = [];
 let currentFilter = 'todos';
-let calendar = null; // Variável global para o calendário
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
@@ -165,7 +164,7 @@ async function initCalendar() {
     
     if (!calendarEl) return;
     
-    calendar = new FullCalendar.Calendar(calendarEl, {
+    const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         locale: 'pt-br',
         headerToolbar: {

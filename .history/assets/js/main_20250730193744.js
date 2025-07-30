@@ -4,7 +4,6 @@
 let selectedDate = null;
 let portfolioItems = [];
 let currentFilter = 'todos';
-let calendar = null; // Variável global para o calendário
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
@@ -165,7 +164,7 @@ async function initCalendar() {
     
     if (!calendarEl) return;
     
-    calendar = new FullCalendar.Calendar(calendarEl, {
+    const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         locale: 'pt-br',
         headerToolbar: {
@@ -739,53 +738,6 @@ function closeModal() {
         modal.style.display = 'none';
         document.body.style.overflow = 'auto';
     }, 300);
-}
-
-// Modal de confirmação para exclusão
-function showConfirmModal(message, onConfirm) {
-    // Criar modal de confirmação
-    const modal = document.createElement('div');
-    modal.className = 'confirm-modal-overlay';
-    modal.innerHTML = `
-        <div class="confirm-modal-content">
-            <div class="confirm-modal-header">
-                <h3>Confirmação</h3>
-                <button class="confirm-modal-close">&times;</button>
-            </div>
-            <div class="confirm-modal-body">
-                ${message}
-            </div>
-            <div class="confirm-modal-footer">
-                <button class="confirm-btn cancel-btn">Cancelar</button>
-                <button class="confirm-btn delete-btn">Excluir</button>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    // Event listeners
-    const closeBtn = modal.querySelector('.confirm-modal-close');
-    const cancelBtn = modal.querySelector('.cancel-btn');
-    const deleteBtn = modal.querySelector('.delete-btn');
-    
-    const closeModal = () => {
-        modal.remove();
-    };
-    
-    closeBtn.addEventListener('click', closeModal);
-    cancelBtn.addEventListener('click', closeModal);
-    deleteBtn.addEventListener('click', () => {
-        onConfirm();
-        closeModal();
-    });
-    
-    // Fechar ao clicar fora
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeModal();
-        }
-    });
 }
 
 // ===== SCROLL SUAVE =====

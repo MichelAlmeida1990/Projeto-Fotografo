@@ -165,7 +165,7 @@ async function initCalendar() {
     
     if (!calendarEl) return;
     
-    calendar = new FullCalendar.Calendar(calendarEl, {
+    const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
         locale: 'pt-br',
         headerToolbar: {
