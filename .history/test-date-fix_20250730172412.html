@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Correção de Data</title>
+</head>
+<body>
+    <h1>Teste de Correção de Timezone</h1>
+    
+    <div>
+        <h2>Teste de Datas</h2>
+        <button onclick="testDate('2025-08-02')">Testar 02/08/2025 (Sábado)</button>
+        <button onclick="testDate('2025-08-03')">Testar 03/08/2025 (Domingo)</button>
+        <button onclick="testDate('2025-08-06')">Testar 06/08/2025 (Quarta)</button>
+        <button onclick="testDate('2025-08-01')">Testar 01/08/2025 (Sexta)</button>
+    </div>
+    
+    <div id="output"></div>
+    
+    <script>
+        function testDate(dateStr) {
+            console.log('=== TESTE DE DATA ===');
+            console.log('Data recebida:', dateStr);
+            
+            // Método antigo (problemático)
+            const oldDate = new Date(dateStr);
+            const oldDayOfWeek = oldDate.getDay();
+            
+            // Método novo (corrigido)
+            const [year, month, day] = dateStr.split('-').map(Number);
+            const newDate = new Date(year, month - 1, day);
+            const newDayOfWeek = newDate.getDay();
+            
+            const dayNames = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+            
+            console.log('Método antigo:', {
+                date: oldDate,
+                dayOfWeek: oldDayOfWeek,
+                dayName: dayNames[oldDayOfWeek]
+            });
+            
+            console.log('Método novo:', {
+                date: newDate,
+                dayOfWeek: newDayOfWeek,
+                dayName: dayNames[newDayOfWeek]
+            });
+            
+            const isAvailableOld = oldDayOfWeek === 3 || oldDayOfWeek === 6 || oldDayOfWeek === 0;
+            const isAvailableNew = newDayOfWeek === 3 || newDayOfWeek === 6 || newDayOfWeek === 0;
+            
+            document.getElementById('output').innerHTML = `
+                <h3>Resultado para ${dateStr}:</h3>
+                <p><strong>Método Antigo:</strong> ${dayNames[oldDayOfWeek]} (${oldDayOfWeek}) - Disponível: ${isAvailableOld ? 'SIM' : 'NÃO'}</p>
+                <p><strong>Método Novo:</strong> ${dayNames[newDayOfWeek]} (${newDayOfWeek}) - Disponível: ${isAvailableNew ? 'SIM' : 'NÃO'}</p>
+                <hr>
+            `;
+        }
+    </script>
+</body>
+</html> 

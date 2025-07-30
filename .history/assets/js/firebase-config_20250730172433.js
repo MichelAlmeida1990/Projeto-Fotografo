@@ -37,22 +37,22 @@ async function loadAppointments() {
         const appointments = [];
         snapshot.forEach(doc => {
             const data = doc.data();
-                    appointments.push({
-            id: doc.id,
-            title: 'Agendado',
-            start: data.date,
-            backgroundColor: '#FF0000',
-            borderColor: '#FF0000',
-            textColor: '#FFFFFF',
-            extendedProps: {
-                clientName: data.clientName,
-                clientEmail: data.clientEmail,
-                clientPhone: data.clientPhone,
-                serviceType: data.serviceType,
-                message: data.message,
-                status: data.status
-            }
-        });
+            appointments.push({
+                id: doc.id,
+                title: `${data.clientName} - ${data.serviceType}`,
+                start: data.date,
+                backgroundColor: '#FF0000',
+                borderColor: '#FF0000',
+                textColor: '#FFFFFF',
+                extendedProps: {
+                    clientName: data.clientName,
+                    clientEmail: data.clientEmail,
+                    clientPhone: data.clientPhone,
+                    serviceType: data.serviceType,
+                    message: data.message,
+                    status: data.status
+                }
+            });
         });
         return appointments;
     } catch (error) {
@@ -174,17 +174,7 @@ async function markDateAsAvailable(date) {
 async function cancelAppointment(appointmentId, date) {
     try {
         await appointmentsCollection.doc(appointmentId).delete();
-        
-        // Criar a data corretamente para o timezone local
-        let checkDate;
-        if (date.includes('-')) {
-            const [year, month, day] = date.split('-').map(Number);
-            checkDate = new Date(year, month - 1, day);
-        } else {
-            checkDate = new Date(date);
-        }
-        
-        await markDateAsAvailable(checkDate);
+        await markDateAsAvailable(new Date(date));
         return { success: true };
     } catch (error) {
         console.error('Erro ao cancelar agendamento:', error);
@@ -194,47 +184,13 @@ async function cancelAppointment(appointmentId, date) {
 
 // Configurar listener em tempo real
 function setupRealtimeListener(calendar) {
-    let isInitialLoad = true;
-    
     appointmentsCollection.onSnapshot(snapshot => {
-        // Se for o carregamento inicial, adicionar todos os eventos de uma vez
-        if (isInitialLoad) {
-            const events = [];
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                events.push({
-                    id: doc.id,
-                    title: 'Agendado',
-                    start: data.date,
-                    backgroundColor: '#FF0000',
-                    borderColor: '#FF0000',
-                    textColor: '#FFFFFF',
-                    extendedProps: {
-                        clientName: data.clientName,
-                        clientEmail: data.clientEmail,
-                        clientPhone: data.clientPhone,
-                        serviceType: data.serviceType,
-                        message: data.message,
-                        status: data.status
-                    }
-                });
-            });
-            
-            if (events.length > 0) {
-                calendar.addEventSource(events);
-            }
-            
-            isInitialLoad = false;
-            return;
-        }
-        
-        // Para mudanças subsequentes, processar apenas as mudanças
         snapshot.docChanges().forEach(change => {
             if (change.type === 'added') {
                 const data = change.doc.data();
                 calendar.addEvent({
                     id: change.doc.id,
-                    title: 'Agendado',
+                    title: `${data.clientName} - ${data.serviceType}`,
                     start: data.date,
                     backgroundColor: '#FF0000',
                     borderColor: '#FF0000',

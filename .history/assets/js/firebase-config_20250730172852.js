@@ -194,41 +194,7 @@ async function cancelAppointment(appointmentId, date) {
 
 // Configurar listener em tempo real
 function setupRealtimeListener(calendar) {
-    let isInitialLoad = true;
-    
     appointmentsCollection.onSnapshot(snapshot => {
-        // Se for o carregamento inicial, adicionar todos os eventos de uma vez
-        if (isInitialLoad) {
-            const events = [];
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                events.push({
-                    id: doc.id,
-                    title: 'Agendado',
-                    start: data.date,
-                    backgroundColor: '#FF0000',
-                    borderColor: '#FF0000',
-                    textColor: '#FFFFFF',
-                    extendedProps: {
-                        clientName: data.clientName,
-                        clientEmail: data.clientEmail,
-                        clientPhone: data.clientPhone,
-                        serviceType: data.serviceType,
-                        message: data.message,
-                        status: data.status
-                    }
-                });
-            });
-            
-            if (events.length > 0) {
-                calendar.addEventSource(events);
-            }
-            
-            isInitialLoad = false;
-            return;
-        }
-        
-        // Para mudanças subsequentes, processar apenas as mudanças
         snapshot.docChanges().forEach(change => {
             if (change.type === 'added') {
                 const data = change.doc.data();

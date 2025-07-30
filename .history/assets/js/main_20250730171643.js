@@ -178,20 +178,9 @@ async function initCalendar() {
         },
         selectable: true,
         selectMirror: true,
-        dayMaxEvents: false, // Mostrar todos os eventos
+        dayMaxEvents: true,
         weekends: true,
         events: [], // Será carregado do Firebase
-        eventDisplay: 'block', // Mostrar eventos como blocos
-        eventDidMount: function(info) {
-            // Adicionar tooltip com informações do cliente
-            const event = info.event;
-            const clientName = event.extendedProps.clientName;
-            const serviceType = event.extendedProps.serviceType;
-            
-            if (clientName) {
-                info.el.title = `Cliente: ${clientName}\nServiço: ${serviceType}`;
-            }
-        },
         select: function(arg) {
             handleDateSelection(arg.startStr);
         },
@@ -232,11 +221,8 @@ async function initCalendar() {
             console.log('Data clicada (info.date):', info.date);
             console.log('Data como string (info.dateStr):', info.dateStr);
             
-            // Usar a mesma lógica de criação de data para evitar problemas de timezone
-            const dateStr = info.dateStr;
-            const [year, month, day] = dateStr.split('-').map(Number);
-            const clickedDate = new Date(year, month - 1, day);
-            const dayOfWeek = clickedDate.getDay();
+            const date = info.date;
+            const dayOfWeek = date.getDay();
             const isAvailableDay = dayOfWeek === 3 || dayOfWeek === 6 || dayOfWeek === 0;
             
             console.log('Dia da semana:', dayOfWeek);
@@ -255,9 +241,14 @@ async function initCalendar() {
     
     calendar.render();
     
-    // Configurar listener em tempo real (que também carrega eventos existentes)
+    // Carregar agendamentos do Firebase
     try {
+        const appointments = await FirebaseAppointment.loadAppointments();
+        calendar.addEventSource(appointments);
+        
+        // Configurar listener em tempo real
         FirebaseAppointment.setupRealtimeListener(calendar);
+        
         showNotification('Calendário carregado com sucesso!', 'success');
     } catch (error) {
         console.error('Erro ao carregar agendamentos:', error);
@@ -301,15 +292,10 @@ async function handleDateClick(dateStr) {
     console.log('Tipo de dateStr:', typeof dateStr);
     
     const today = new Date();
-    
-    // Criar a data corretamente para o timezone local
-    // Dividir a string da data (YYYY-MM-DD) e criar a data no timezone local
-    const [year, month, day] = dateStr.split('-').map(Number);
-    const clickedDate = new Date(year, month - 1, day); // month - 1 porque getMonth() retorna 0-11
+    const clickedDate = new Date(dateStr);
     
     console.log('Data de hoje:', today);
     console.log('Data clicada (objeto Date):', clickedDate);
-    console.log('Componentes da data:', { year, month, day });
     
     if (clickedDate < today) {
         showNotification('Não é possível selecionar datas passadas', 'error');
@@ -377,15 +363,7 @@ async function handleDateClick(dateStr) {
 }
 
 function handleEventClick(info) {
-    const event = info.event;
-    const clientName = event.extendedProps.clientName;
-    const serviceType = event.extendedProps.serviceType;
-    const clientEmail = event.extendedProps.clientEmail;
-    const clientPhone = event.extendedProps.clientPhone;
-    
-    const message = `Agendamento:\nCliente: ${clientName}\nServiço: ${serviceType}\nE-mail: ${clientEmail}\nTelefone: ${clientPhone}`;
-    
-    showNotification(message, 'info');
+    showNotification('Esta data já está ocupada. Escolha outra data.', 'warning');
 }
 
 function formatDate(dateStr) {
@@ -405,17 +383,7 @@ function formatDate(dateStr) {
         return dateStr;
     }
     
-    // Criar a data corretamente para o timezone local
-    let date;
-    if (dateStr.includes('-')) {
-        // Formato YYYY-MM-DD
-        const [year, month, day] = dateStr.split('-').map(Number);
-        date = new Date(year, month - 1, day);
-    } else {
-        // Outros formatos
-        date = new Date(dateStr);
-    }
-    
+    const date = new Date(dateStr);
     console.log('Data criada (objeto Date):', date);
     console.log('Data é válida:', !isNaN(date.getTime()));
     
@@ -559,15 +527,7 @@ async function handleBookingSubmit(e) {
     
     // Verificar disponibilidade novamente antes de enviar
     try {
-        // Criar a data corretamente para o timezone local
-        let checkDate;
-        if (selectedDate.includes('-')) {
-            const [year, month, day] = selectedDate.split('-').map(Number);
-            checkDate = new Date(year, month - 1, day);
-        } else {
-            checkDate = new Date(selectedDate);
-        }
-        const isAvailable = await FirebaseAppointment.checkAvailability(checkDate);
+        const isAvailable = await FirebaseAppointment.checkAvailability(new Date(selectedDate));
         
         if (!isAvailable) {
             showNotification('Esta data não está mais disponível. Escolha outra data.', 'error');
@@ -957,41 +917,6 @@ function trackEvent(category, action, label) {
             event_label: label
         });
     }
-}
-
-// ===== FUNÇÃO DE TESTE TEMPORÁRIA =====
-function testDateInput() {
-    console.log('=== TESTE DE INPUT DE DATA ===');
-    
-    const dateInput = document.getElementById('date');
-    console.log('Input encontrado:', dateInput);
-    console.log('Valor atual:', dateInput ? dateInput.value : 'N/A');
-    
-    if (!dateInput) {
-        console.error('Input não encontrado!');
-        alert('Erro: Input de data não encontrado!');
-        return;
-    }
-    
-    // Testar com data específica
-    const testDate = '2025-08-01';
-    const formattedDate = formatDate(testDate);
-    
-    console.log('Data de teste:', testDate);
-    console.log('Data formatada:', formattedDate);
-    
-    // Definir o valor
-    dateInput.value = formattedDate;
-    
-    console.log('Valor após definição:', dateInput.value);
-    
-    // Forçar eventos
-    dateInput.dispatchEvent(new Event('input', { bubbles: true }));
-    dateInput.dispatchEvent(new Event('change', { bubbles: true }));
-    
-    console.log('Valor após eventos:', dateInput.value);
-    
-    alert(`Teste concluído!\nData definida: ${formattedDate}\nValor do input: ${dateInput.value}`);
 }
 
 // ===== INICIALIZAÇÃO FINAL =====

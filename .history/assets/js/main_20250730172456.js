@@ -178,20 +178,9 @@ async function initCalendar() {
         },
         selectable: true,
         selectMirror: true,
-        dayMaxEvents: false, // Mostrar todos os eventos
+        dayMaxEvents: true,
         weekends: true,
         events: [], // Será carregado do Firebase
-        eventDisplay: 'block', // Mostrar eventos como blocos
-        eventDidMount: function(info) {
-            // Adicionar tooltip com informações do cliente
-            const event = info.event;
-            const clientName = event.extendedProps.clientName;
-            const serviceType = event.extendedProps.serviceType;
-            
-            if (clientName) {
-                info.el.title = `Cliente: ${clientName}\nServiço: ${serviceType}`;
-            }
-        },
         select: function(arg) {
             handleDateSelection(arg.startStr);
         },
@@ -255,9 +244,14 @@ async function initCalendar() {
     
     calendar.render();
     
-    // Configurar listener em tempo real (que também carrega eventos existentes)
+    // Carregar agendamentos do Firebase
     try {
+        const appointments = await FirebaseAppointment.loadAppointments();
+        calendar.addEventSource(appointments);
+        
+        // Configurar listener em tempo real
         FirebaseAppointment.setupRealtimeListener(calendar);
+        
         showNotification('Calendário carregado com sucesso!', 'success');
     } catch (error) {
         console.error('Erro ao carregar agendamentos:', error);
@@ -377,15 +371,7 @@ async function handleDateClick(dateStr) {
 }
 
 function handleEventClick(info) {
-    const event = info.event;
-    const clientName = event.extendedProps.clientName;
-    const serviceType = event.extendedProps.serviceType;
-    const clientEmail = event.extendedProps.clientEmail;
-    const clientPhone = event.extendedProps.clientPhone;
-    
-    const message = `Agendamento:\nCliente: ${clientName}\nServiço: ${serviceType}\nE-mail: ${clientEmail}\nTelefone: ${clientPhone}`;
-    
-    showNotification(message, 'info');
+    showNotification('Esta data já está ocupada. Escolha outra data.', 'warning');
 }
 
 function formatDate(dateStr) {

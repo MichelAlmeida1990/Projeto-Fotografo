@@ -37,22 +37,22 @@ async function loadAppointments() {
         const appointments = [];
         snapshot.forEach(doc => {
             const data = doc.data();
-                    appointments.push({
-            id: doc.id,
-            title: 'Agendado',
-            start: data.date,
-            backgroundColor: '#FF0000',
-            borderColor: '#FF0000',
-            textColor: '#FFFFFF',
-            extendedProps: {
-                clientName: data.clientName,
-                clientEmail: data.clientEmail,
-                clientPhone: data.clientPhone,
-                serviceType: data.serviceType,
-                message: data.message,
-                status: data.status
-            }
-        });
+            appointments.push({
+                id: doc.id,
+                title: `${data.clientName} - ${data.serviceType}`,
+                start: data.date,
+                backgroundColor: '#FF0000',
+                borderColor: '#FF0000',
+                textColor: '#FFFFFF',
+                extendedProps: {
+                    clientName: data.clientName,
+                    clientEmail: data.clientEmail,
+                    clientPhone: data.clientPhone,
+                    serviceType: data.serviceType,
+                    message: data.message,
+                    status: data.status
+                }
+            });
         });
         return appointments;
     } catch (error) {
@@ -64,46 +64,31 @@ async function loadAppointments() {
 // Verificar disponibilidade de uma data
 async function checkAvailability(date) {
     try {
-        console.log('=== FIREBASE checkAvailability ===');
-        console.log('Data recebida:', date);
-        console.log('Tipo da data:', typeof date);
-        
+        console.log('Firebase: Verificando disponibilidade para data:', date);
         const dateStr = date.toISOString().split('T')[0];
-        console.log('Data formatada para consulta:', dateStr);
+        console.log('Firebase: Data formatada:', dateStr);
         
-        // Primeiro, verificar se há agendamentos para esta data
-        console.log('Verificando agendamentos existentes...');
+        const doc = await availabilityCollection.doc(dateStr).get();
+        console.log('Firebase: Documento de disponibilidade existe:', doc.exists);
+        
+        if (doc.exists) {
+            const isAvailable = doc.data().available;
+            console.log('Firebase: Disponibilidade do documento:', isAvailable);
+            return isAvailable;
+        }
+        
+        // Se não existe registro, verificar se há agendamentos
+        console.log('Firebase: Verificando agendamentos para a data');
         const appointments = await appointmentsCollection
             .where('date', '==', dateStr)
             .get();
         
-        const hasAppointments = !appointments.empty;
-        console.log('Há agendamentos para esta data:', hasAppointments);
-        
-        if (hasAppointments) {
-            console.log('Data ocupada - retornando false');
-            return false;
-        }
-        
-        // Se não há agendamentos, verificar se há registro de disponibilidade
-        console.log('Verificando registro de disponibilidade...');
-        const availabilityDoc = await availabilityCollection.doc(dateStr).get();
-        console.log('Documento de disponibilidade existe:', availabilityDoc.exists);
-        
-        if (availabilityDoc.exists) {
-            const isAvailable = availabilityDoc.data().available;
-            console.log('Disponibilidade do documento:', isAvailable);
-            return isAvailable;
-        }
-        
-        // Se não há registro de disponibilidade nem agendamentos, a data está disponível
-        console.log('Data disponível - retornando true');
-        return true;
-        
+        const isEmpty = appointments.empty;
+        console.log('Firebase: Agendamentos encontrados:', !isEmpty);
+        return isEmpty;
     } catch (error) {
-        console.error('Erro ao verificar disponibilidade:', error);
+        console.error('Firebase: Erro ao verificar disponibilidade:', error);
         // Em caso de erro, retornar true (disponível) para não bloquear a seleção
-        console.log('Erro - retornando true (disponível)');
         return true;
     }
 }
@@ -112,15 +97,7 @@ async function checkAvailability(date) {
 async function createAppointment(appointmentData) {
     try {
         // Verificar disponibilidade novamente antes de salvar
-        // Criar a data corretamente para o timezone local
-        let checkDate;
-        if (appointmentData.date.includes('-')) {
-            const [year, month, day] = appointmentData.date.split('-').map(Number);
-            checkDate = new Date(year, month - 1, day);
-        } else {
-            checkDate = new Date(appointmentData.date);
-        }
-        const isAvailable = await checkAvailability(checkDate);
+        const isAvailable = await checkAvailability(new Date(appointmentData.date));
         if (!isAvailable) {
             return { success: false, error: 'Data não está mais disponível' };
         }
@@ -133,7 +110,7 @@ async function createAppointment(appointmentData) {
         });
 
         // Marcar data como indisponível
-        await markDateAsUnavailable(checkDate);
+        await markDateAsUnavailable(new Date(appointmentData.date));
 
         return { success: true, appointmentId: docRef.id };
     } catch (error) {
@@ -174,17 +151,7 @@ async function markDateAsAvailable(date) {
 async function cancelAppointment(appointmentId, date) {
     try {
         await appointmentsCollection.doc(appointmentId).delete();
-        
-        // Criar a data corretamente para o timezone local
-        let checkDate;
-        if (date.includes('-')) {
-            const [year, month, day] = date.split('-').map(Number);
-            checkDate = new Date(year, month - 1, day);
-        } else {
-            checkDate = new Date(date);
-        }
-        
-        await markDateAsAvailable(checkDate);
+        await markDateAsAvailable(new Date(date));
         return { success: true };
     } catch (error) {
         console.error('Erro ao cancelar agendamento:', error);
@@ -194,47 +161,13 @@ async function cancelAppointment(appointmentId, date) {
 
 // Configurar listener em tempo real
 function setupRealtimeListener(calendar) {
-    let isInitialLoad = true;
-    
     appointmentsCollection.onSnapshot(snapshot => {
-        // Se for o carregamento inicial, adicionar todos os eventos de uma vez
-        if (isInitialLoad) {
-            const events = [];
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                events.push({
-                    id: doc.id,
-                    title: 'Agendado',
-                    start: data.date,
-                    backgroundColor: '#FF0000',
-                    borderColor: '#FF0000',
-                    textColor: '#FFFFFF',
-                    extendedProps: {
-                        clientName: data.clientName,
-                        clientEmail: data.clientEmail,
-                        clientPhone: data.clientPhone,
-                        serviceType: data.serviceType,
-                        message: data.message,
-                        status: data.status
-                    }
-                });
-            });
-            
-            if (events.length > 0) {
-                calendar.addEventSource(events);
-            }
-            
-            isInitialLoad = false;
-            return;
-        }
-        
-        // Para mudanças subsequentes, processar apenas as mudanças
         snapshot.docChanges().forEach(change => {
             if (change.type === 'added') {
                 const data = change.doc.data();
                 calendar.addEvent({
                     id: change.doc.id,
-                    title: 'Agendado',
+                    title: `${data.clientName} - ${data.serviceType}`,
                     start: data.date,
                     backgroundColor: '#FF0000',
                     borderColor: '#FF0000',
