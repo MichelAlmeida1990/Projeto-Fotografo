@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerador de Imagens</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f0f0f0;
+        }
+        .image-container {
+            display: inline-block;
+            margin: 10px;
+            text-align: center;
+        }
+        canvas {
+            border: 1px solid #ccc;
+            background: linear-gradient(45deg, #FFC1CC, #FFE4E1);
+        }
+        .category-name {
+            margin-top: 5px;
+            font-size: 12px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Gerador de Imagens para Portfólio</h1>
+    <div id="images"></div>
+
+    <script>
+        const categories = [
+            'Ensaio Feminino',
+            'Ensaio Gestante', 
+            'Ensaio Masculino',
+            'Ensaio Casal',
+            'Ensaio Boudoir',
+            'Ensaio Newborn',
+            'Casamento',
+            'Debutante',
+            'Aniversário',
+            'Corporativo',
+            'Formatura',
+            'Batizado',
+            'Retrato Profissional',
+            'Retrato Familiar',
+            'Retrato Infantil',
+            'Retrato Artístico',
+            'Retrato Empresarial',
+            'Retrato Criativo'
+        ];
+
+        function createImage(category, index) {
+            const container = document.getElementById('images');
+            const div = document.createElement('div');
+            div.className = 'image-container';
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = 300;
+            canvas.height = 200;
+            canvas.id = `canvas-${index}`;
+            
+            const ctx = canvas.getContext('2d');
+            
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 300, 200);
+            gradient.addColorStop(0, '#FFC1CC');
+            gradient.addColorStop(1, '#FFE4E1');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 300, 200);
+            
+            // Add some decorative elements
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.beginPath();
+            ctx.arc(50, 50, 30, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(250, 150, 20, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Text
+            ctx.fillStyle = '#000000';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(category, 150, 100);
+            
+            ctx.font = '12px Arial';
+            ctx.fillText('Fotografia Profissional', 150, 120);
+            
+            // Add camera icon
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(140, 140, 20, 15);
+            ctx.fillRect(135, 145, 30, 5);
+            
+            div.appendChild(canvas);
+            
+            const label = document.createElement('div');
+            label.className = 'category-name';
+            label.textContent = `foto_${String(index + 1).padStart(2, '0')}.jpg`;
+            div.appendChild(label);
+            
+            container.appendChild(div);
+            
+            // Download functionality
+            canvas.addEventListener('click', () => {
+                const link = document.createElement('a');
+                link.download = `foto_${String(index + 1).padStart(2, '0')}.jpg`;
+                link.href = canvas.toDataURL('image/jpeg', 0.8);
+                link.click();
+            });
+        }
+        
+        categories.forEach((category, index) => {
+            createImage(category, index);
+        });
+    </script>
+</body>
+</html> 
