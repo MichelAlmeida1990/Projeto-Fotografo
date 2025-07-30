@@ -23,11 +23,6 @@ const db = firebase.firestore();
 const appointmentsCollection = db.collection('appointments');
 const availabilityCollection = db.collection('availability');
 
-// Inicializar Analytics (opcional)
-if (typeof firebase.analytics !== 'undefined') {
-    firebase.analytics();
-}
-
 // ===== FUNÇÕES DO FIREBASE =====
 
 // Carregar agendamentos existentes

@@ -8,13 +8,12 @@
 // 5. Copie a configuração e substitua abaixo
 
 const firebaseConfig = {
-    apiKey: "AIzaSyB_iUzatG_vYbZRr7qMHqO3y0leBoTghcU",
+    apiKey: "SUA_API_KEY_AQUI",
     authDomain: "cristiane-justino-fotografia.firebaseapp.com",
     projectId: "cristiane-justino-fotografia",
-    storageBucket: "cristiane-justino-fotografia.firebasestorage.app",
-    messagingSenderId: "475947671200",
-    appId: "1:475947671200:web:9d391f4f3e051ced4bf3c5",
-    measurementId: "G-WC96G4XVHC"
+    storageBucket: "cristiane-justino-fotografia.appspot.com",
+    messagingSenderId: "123456789012",
+    appId: "1:123456789012:web:abcdef1234567890"
 };
 
 // ===== INICIALIZAÇÃO DO FIREBASE =====
@@ -22,11 +21,6 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const appointmentsCollection = db.collection('appointments');
 const availabilityCollection = db.collection('availability');
-
-// Inicializar Analytics (opcional)
-if (typeof firebase.analytics !== 'undefined') {
-    firebase.analytics();
-}
 
 // ===== FUNÇÕES DO FIREBASE =====
 
