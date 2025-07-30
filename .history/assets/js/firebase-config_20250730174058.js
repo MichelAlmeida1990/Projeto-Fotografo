@@ -33,30 +33,10 @@ if (typeof firebase.analytics !== 'undefined') {
 // Função para enviar notificação por e-mail
 async function sendEmailNotification(appointmentData) {
     try {
-        console.log('=== ENVIANDO E-MAIL DE NOTIFICAÇÃO ===');
-        
-        const templateParams = {
-            clientName: appointmentData.clientName,
-            clientEmail: appointmentData.clientEmail,
-            clientPhone: appointmentData.clientPhone,
-            serviceType: appointmentData.serviceType,
-            date: appointmentData.date,
-            message: appointmentData.message,
-            createdAt: new Date().toLocaleString('pt-BR')
-        };
-
-        const result = await emailjs.send(
-            'service_g2cr22t',
-            'template_71hujhc',
-            templateParams
-        );
-
-        console.log('✅ E-mail enviado com sucesso!');
-        console.log('Resultado:', result);
-        
-    } catch (error) {
-        console.error('❌ Erro ao enviar e-mail:', error);
-        console.log('=== DETALHES DO AGENDAMENTO ===');
+        // Usar EmailJS ou similar para enviar e-mail
+        // Por enquanto, vamos apenas logar a notificação
+        console.log('=== NOTIFICAÇÃO DE AGENDAMENTO ===');
+        console.log('Novo agendamento recebido:');
         console.log('Cliente:', appointmentData.clientName);
         console.log('E-mail:', appointmentData.clientEmail);
         console.log('Telefone:', appointmentData.clientPhone);
@@ -64,6 +44,16 @@ async function sendEmailNotification(appointmentData) {
         console.log('Data:', appointmentData.date);
         console.log('Mensagem:', appointmentData.message);
         console.log('================================');
+        
+        // Aqui você pode integrar com serviços como:
+        // - EmailJS
+        // - SendGrid
+        // - Nodemailer (se tiver backend)
+        // - Zapier
+        // - IFTTT
+        
+    } catch (error) {
+        console.error('Erro ao enviar notificação:', error);
     }
 }
 
@@ -171,9 +161,6 @@ async function createAppointment(appointmentData) {
 
         // Marcar data como indisponível
         await markDateAsUnavailable(checkDate);
-        
-        // Enviar notificação por e-mail
-        await sendEmailNotification(appointmentData);
 
         return { success: true, appointmentId: docRef.id };
     } catch (error) {
@@ -303,6 +290,5 @@ window.FirebaseAppointment = {
     markDateAsUnavailable,
     markDateAsAvailable,
     cancelAppointment,
-    setupRealtimeListener,
-    sendEmailNotification
+    setupRealtimeListener
 }; 
