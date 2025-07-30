@@ -388,8 +388,8 @@ function validateForm(form) {
     return isValid;
 }
 
-// ===== HANDLERS DE FORMULÁRIO COM FIREBASE =====
-async function handleBookingSubmit(e) {
+// ===== HANDLERS DE FORMULÁRIO =====
+function handleBookingSubmit(e) {
     e.preventDefault();
     
     if (!validateForm(e.target)) {
@@ -402,59 +402,22 @@ async function handleBookingSubmit(e) {
         return;
     }
     
-    // Verificar disponibilidade novamente antes de enviar
-    try {
-        const isAvailable = await FirebaseAppointment.checkAvailability(new Date(selectedDate));
-        
-        if (!isAvailable) {
-            showNotification('Esta data não está mais disponível. Escolha outra data.', 'error');
-            return;
-        }
-        
-        // Preparar dados do agendamento
-        const formData = new FormData(e.target);
-        const appointmentData = {
-            clientName: formData.get('name'),
-            clientEmail: formData.get('email'),
-            clientPhone: formData.get('phone'),
-            serviceType: formData.get('service'),
-            date: selectedDate,
-            message: formData.get('message') || ''
-        };
-        
-        // Mostrar loading
-        const submitBtn = e.target.querySelector('.submit-btn');
-        const originalText = submitBtn.innerHTML;
-        
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
-        submitBtn.disabled = true;
-        
-        // Salvar no Firebase
-        const result = await FirebaseAppointment.createAppointment(appointmentData);
-        
-        if (result.success) {
-            showNotification('Agendamento enviado com sucesso! Entraremos em contato em breve.', 'success');
-            e.target.reset();
-            selectedDate = null;
-            document.getElementById('date').value = '';
-            
-            // Track do evento
-            trackEvent('Agendamento', 'Submit', appointmentData.serviceType);
-        } else {
-            showNotification('Erro ao enviar agendamento. Tente novamente.', 'error');
-        }
+    // Simular envio
+    const submitBtn = e.target.querySelector('.submit-btn');
+    const originalText = submitBtn.innerHTML;
+    
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+    submitBtn.disabled = true;
+    
+    setTimeout(() => {
+        showNotification('Agendamento enviado com sucesso! Entraremos em contato em breve.', 'success');
+        e.target.reset();
+        selectedDate = null;
+        document.getElementById('date').value = '';
         
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
-        
-    } catch (error) {
-        console.error('Erro ao processar agendamento:', error);
-        showNotification('Erro ao processar agendamento. Tente novamente.', 'error');
-        
-        const submitBtn = e.target.querySelector('.submit-btn');
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
-    }
+    }, 2000);
 }
 
 function handleContactSubmit(e) {
