@@ -67,6 +67,13 @@ const firebaseConfig = {
 - Atualização em tempo real do calendário
 - Prevenção de conflitos de horário
 
+### ✅ Sistema de Autenticação para Administradores
+- Controle de acesso para exclusão de agendamentos
+- Login seguro com Firebase Auth
+- Interface de login elegante
+- Verificação de permissões em tempo real
+- Botão de logout no header
+
 ### ✅ Interface do Usuário
 - Feedback visual durante o processo
 - Validação em tempo real
@@ -76,7 +83,8 @@ const firebaseConfig = {
 ### ✅ Segurança
 - Verificação dupla de disponibilidade
 - Validação de dados no frontend
-- Estrutura preparada para autenticação
+- Autenticação obrigatória para exclusão
+- Lista de e-mails autorizados (whitelist)
 
 ## 7. Estrutura dos Dados
 
@@ -88,6 +96,7 @@ const firebaseConfig = {
     clientPhone: "(11) 99999-9999",
     serviceType: "Ensaio Feminino",
     date: "2024-01-15",
+    time: "manha", // manha, tarde, noite
     message: "Mensagem opcional",
     status: "pending", // pending, confirmed, cancelled
     createdAt: Timestamp
@@ -102,11 +111,40 @@ const firebaseConfig = {
 }
 ```
 
-## 8. Próximos Passos
+## 8. Configuração da Autenticação de Administradores
+
+### Habilitar Autenticação no Firebase
+1. No Firebase Console, vá para **Authentication** → **Sign-in method**
+2. Habilite **Email/Password**
+3. Clique em **Save**
+
+### Criar Conta de Administrador
+1. Vá para **Authentication** → **Users**
+2. Clique em **Add user**
+3. Digite o e-mail: `krika.justino@gmail.com`
+4. Digite a senha: `Cris2025@1`
+5. Clique em **Add user**
+
+### E-mails de Administrador Configurados
+- `krika.justino@gmail.com` (Principal)
+- `cristiane@cristianejustino.com`
+- `admin@cristianejustino.com`
+
+Para adicionar mais administradores, edite `assets/js/firebase-config.js`:
+```javascript
+const adminEmails = [
+    'krika.justino@gmail.com',
+    'cristiane@cristianejustino.com',
+    'admin@cristianejustino.com',
+    'seu-email@exemplo.com'  // Adicione aqui
+];
+```
+
+## 9. Próximos Passos
 
 1. **Configurar Firebase** seguindo as instruções acima
-2. **Testar o sistema** de agendamento
-3. **Implementar autenticação** para admin (opcional)
+2. **Configurar autenticação** de administradores
+3. **Testar o sistema** de agendamento e exclusão
 4. **Configurar notificações** por email/WhatsApp
 5. **Deploy** em produção
 

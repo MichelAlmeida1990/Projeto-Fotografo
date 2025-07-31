@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- SEO Meta Tags -->
-    <title>Cristiane Justino - Fotógrafa Profissional | Ensaio Feminino, Casamento, Retratos</title>
-    <meta name="description" content="Fotógrafa profissional desde 2015. Especializada em ensaios femininos, casamentos, retratos e eventos. Agende sua sessão fotográfica em São Paulo.">
-    <meta name="keywords" content="fotógrafa São Paulo, ensaio feminino, casamento, retrato profissional, agendamento fotografia, Cristiane Justino">
+    <title>Cristiane Justino - Fotógrafa Profissional | Aniversários, Eventos, Casamento Civil, Gestante, Bebê</title>
+    <meta name="description" content="Fotógrafa profissional desde 2015. Especializada em aniversários, eventos, casamento civil, gestante, bebê e ensaios pessoais. Agende sua sessão fotográfica em São Paulo.">
+    <meta name="keywords" content="fotógrafa São Paulo, aniversário, evento, casamento civil, gestante, bebê, ensaio pessoal, agendamento fotografia, Cristiane Justino">
     <meta name="author" content="Cristiane Justino">
     <meta name="robots" content="index, follow">
     
     <!-- Open Graph Tags -->
     <meta property="og:title" content="Cristiane Justino - Fotógrafa Profissional">
-    <meta property="og:description" content="Fotógrafa profissional desde 2015. Especializada em ensaios femininos, casamentos, retratos e eventos.">
+    <meta property="og:description" content="Fotógrafa profissional desde 2015. Especializada em aniversários, eventos, casamento civil, gestante, bebê e ensaios pessoais.">
     <meta property="og:image" content="https://cristianejustino.com/assets/image/perfil2.jpg">
     <meta property="og:url" content="https://cristianejustino.com">
     <meta property="og:type" content="website">
@@ -21,7 +21,7 @@
     <!-- Twitter Card Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Cristiane Justino - Fotógrafa Profissional">
-    <meta name="twitter:description" content="Fotógrafa profissional desde 2015. Especializada em ensaios femininos, casamentos, retratos e eventos.">
+    <meta name="twitter:description" content="Fotógrafa profissional desde 2015. Especializada em aniversários, eventos, casamento civil, gestante, bebê e ensaios pessoais.">
     <meta name="twitter:image" content="https://cristianejustino.com/assets/image/perfil2.jpg">
     
     <!-- Schema Markup -->
@@ -30,7 +30,7 @@
         "@context": "https://schema.org",
         "@type": "ProfessionalService",
         "name": "Cristiane Justino Fotografia",
-        "description": "Fotógrafa profissional especializada em ensaios femininos, casamentos e retratos",
+        "description": "Fotógrafa profissional especializada em aniversários, eventos, casamento civil, gestante, bebê e ensaios pessoais",
         "url": "https://cristianejustino.com",
         "telephone": "+5511989079795",
         "email": "krika.justino@gmail.com",
@@ -101,6 +101,11 @@
                 <li><a href="#portfolio">Portfólio</a></li>
                 <li><a href="#agendamento">Agendamento</a></li>
                 <li><a href="#contato">Contato</a></li>
+                <li id="admin-logout-item" style="display: none;">
+                    <a href="#" id="admin-logout-btn" style="color: #B4457A; font-weight: 600;">
+                        <i class="fas fa-sign-out-alt"></i> Sair
+                    </a>
+                </li>
             </ul>
         </nav>
     </header>
@@ -122,7 +127,7 @@
                 <span class="typewriter-text">Capturando Momentos Únicos</span>
                 <span class="cursor">|</span>
             </h1>
-            <p>Fotógrafa profissional desde 2015, especializada em ensaios femininos, casamentos e retratos. Transformando momentos em memórias eternas.</p>
+            <p>Fotógrafa profissional desde 2015, especializada em aniversários, eventos, casamento civil, gestante, bebê e ensaios pessoais. Transformando momentos em memórias eternas.</p>
             <a href="#agendamento" class="cta-button">Agende sua Sessão</a>
         </div>
     </section>
@@ -133,7 +138,7 @@
             <div class="about-text">
                 <h2>Sobre Mim</h2>
                 <p>Olá, meu nome é <strong>Cristiane Justino</strong>, sou fotógrafa desde 2015, formada no Senac em São Paulo. Profissional comprometida e focada em entregar os melhores resultados, sou apaixonada pelo que faço.</p>
-                <p>Meu objetivo é registrar cada detalhe, congelar os melhores momentos e deixar o cliente despreocupado para curtir seu evento. Cada clique é uma oportunidade de contar uma história única através da fotografia.</p>
+                <p>Especializada em aniversários, eventos, casamento civil, gestante, bebê e ensaios pessoais, meu objetivo é registrar cada detalhe, congelar os melhores momentos e deixar o cliente despreocupado para curtir seu evento. Cada clique é uma oportunidade de contar uma história única através da fotografia.</p>
                 <p>Com anos de experiência e dedicação, transformo momentos especiais em memórias que durarão para sempre. Sua história merece ser contada com beleza e elegância.</p>
             </div>
             <div class="about-images">
@@ -159,10 +164,12 @@
         
         <div class="portfolio-filters">
             <button class="filter-btn active" data-category="todos">Todos</button>
-            <button class="filter-btn" data-category="ensaio-feminino">Ensaio Feminino</button>
-            <button class="filter-btn" data-category="casamento">Casamento</button>
-            <button class="filter-btn" data-category="retrato">Retrato</button>
+            <button class="filter-btn" data-category="aniversario">Aniversário</button>
             <button class="filter-btn" data-category="evento">Evento</button>
+            <button class="filter-btn" data-category="casamento-civil">Casamento Civil</button>
+            <button class="filter-btn" data-category="gestante">Gestante</button>
+            <button class="filter-btn" data-category="bebe">Bebê</button>
+            <button class="filter-btn" data-category="ensaio-pessoal">Ensaio Pessoal</button>
         </div>
         
         <div class="portfolio-grid" id="portfolio-grid">
@@ -184,8 +191,11 @@
             <div class="form-container">
                 <h3>Formulário de Agendamento</h3>
                 <div class="booking-info">
-                    <p><i class="fas fa-info-circle"></i> <strong>Horário de Atendimento:</strong> Quartas-feiras, Sábados e Domingos</p>
+                    <p><i class="fas fa-info-circle"></i> <strong>Horário de Atendimento:</strong> Terça a Quinta, Sábado e Domingo</p>
+                    <p><i class="fas fa-clock"></i> <strong>Horários:</strong> Manhã (8h-12h), Tarde (13h-17h), Noite (18h-21h)</p>
                     <p><i class="fas fa-calendar-check"></i> <strong>Dias disponíveis</strong> aparecem em verde no calendário</p>
+                    <p><i class="fas fa-calendar-times"></i> <strong>Não atendemos:</strong> Segunda e Sexta-feira</p>
+                    <p><i class="fas fa-users"></i> <strong>Limite:</strong> Máximo 3 agendamentos por dia</p>
                 </div>
                 <form id="booking-form">
                     <div class="form-group">
@@ -226,6 +236,16 @@
                         <button type="button" onclick="testDateInput()" style="margin-top: 10px; padding: 5px 10px; background: #6C1847; color: white; border: none; border-radius: 5px; cursor: pointer;">
                             Testar Data (01/08/2025)
                         </button>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="time">Horário *</label>
+                        <select id="time" name="time" required>
+                            <option value="">Selecione um horário</option>
+                            <option value="manha">Manhã (8h às 12h)</option>
+                            <option value="tarde">Tarde (13h às 17h)</option>
+                            <option value="noite">Noite (18h às 21h)</option>
+                        </select>
                     </div>
                     
                     <div class="form-group">
@@ -277,7 +297,7 @@
                     <i class="fas fa-clock"></i>
                     <div>
                         <h4>Horário de Atendimento</h4>
-                        <p>Quartas-feiras, Sábados e Domingos</p>
+                        <p>Terça a Quinta, Sábado e Domingo</p>
                         <p>Entre em contato e solicite orçamento</p>
                     </div>
                 </div>

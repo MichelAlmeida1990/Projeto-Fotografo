@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initFloatingElements();
     initTypewriter();
     initHeaderScroll();
+    initAdminAuth();
 });
 
 // ===== MENU MOBILE ELEGANTE =====
@@ -90,10 +91,12 @@ function initPortfolio() {
 function loadPortfolioImages() {
     // Simular carregamento de imagens do portfólio
     const categories = [
-        'ensaio-feminino', 'ensaio-feminino', 'ensaio-feminino',
-        'casamento', 'casamento', 'casamento',
-        'retrato', 'retrato', 'retrato',
-        'evento', 'evento', 'evento'
+        'aniversario', 'aniversario', 'aniversario',
+        'evento', 'evento', 'evento',
+        'casamento-civil', 'casamento-civil', 'casamento-civil',
+        'gestante', 'gestante', 'gestante',
+        'bebe', 'bebe', 'bebe',
+        'ensaio-pessoal', 'ensaio-pessoal', 'ensaio-pessoal'
     ];
     
     portfolioItems = [];
@@ -210,10 +213,10 @@ async function initCalendar() {
         // Configurações para dias disponíveis/indisponíveis
         dayCellDidMount: function(arg) {
             const date = arg.date;
-            const dayOfWeek = date.getDay(); // 0 = Domingo, 3 = Quarta, 6 = Sábado
+            const dayOfWeek = date.getDay(); // 0 = Domingo, 1 = Segunda, 2 = Terça, 3 = Quarta, 4 = Quinta, 5 = Sexta, 6 = Sábado
             
-            // Verificar se é um dia de atendimento (Quarta, Sábado, Domingo)
-            const isAvailableDay = dayOfWeek === 3 || dayOfWeek === 6 || dayOfWeek === 0;
+            // Verificar se é um dia de atendimento (Terça, Quarta, Quinta, Sábado, Domingo)
+            const isAvailableDay = dayOfWeek === 2 || dayOfWeek === 3 || dayOfWeek === 4 || dayOfWeek === 6 || dayOfWeek === 0;
             
             if (!isAvailableDay) {
                 // Dias não disponíveis ficam com fundo cinza
@@ -238,14 +241,15 @@ async function initCalendar() {
             const [year, month, day] = dateStr.split('-').map(Number);
             const clickedDate = new Date(year, month - 1, day);
             const dayOfWeek = clickedDate.getDay();
-            const isAvailableDay = dayOfWeek === 3 || dayOfWeek === 6 || dayOfWeek === 0;
+            const isAvailableDay = dayOfWeek === 2 || dayOfWeek === 3 || dayOfWeek === 4 || dayOfWeek === 6 || dayOfWeek === 0;
             
             console.log('Dia da semana:', dayOfWeek);
             console.log('É dia de atendimento:', isAvailableDay);
             
             if (!isAvailableDay) {
                 console.log('Dia não disponível - mostrando aviso');
-                showNotification('Atendimento apenas às quartas-feiras, sábados e domingos', 'warning');
+                const dayName = dayOfWeek === 1 ? 'segunda-feira' : 'sexta-feira';
+                showNotification(`Não atendemos às ${dayName}s. Escolha outro dia da semana.`, 'warning');
                 return;
             }
             
@@ -319,13 +323,14 @@ async function handleDateClick(dateStr) {
     
     // Verificar se é um dia de atendimento
     const dayOfWeek = clickedDate.getDay();
-    const isAvailableDay = dayOfWeek === 3 || dayOfWeek === 6 || dayOfWeek === 0;
+    const isAvailableDay = dayOfWeek !== 1 && dayOfWeek !== 5; // Não segunda (1) e não sexta (5)
     
     console.log('Dia da semana:', dayOfWeek);
     console.log('É dia de atendimento:', isAvailableDay);
     
     if (!isAvailableDay) {
-        showNotification('Atendimento apenas às quartas-feiras, sábados e domingos', 'warning');
+        const dayName = dayOfWeek === 1 ? 'segunda-feira' : 'sexta-feira';
+        showNotification(`Não atendemos às ${dayName}s. Escolha outro dia da semana.`, 'warning');
         return;
     }
     
@@ -363,14 +368,14 @@ async function handleDateClick(dateStr) {
         console.log('Disponibilidade:', isAvailable);
         
         if (!isAvailable) {
-            showNotification('Esta data já está ocupada. Escolha outra data.', 'warning');
+            showNotification('Esta data já está lotada (máximo 3 agendamentos). Escolha outra data.', 'warning');
             // Limpar a data se não estiver disponível
             selectedDate = null;
             dateInput.value = '';
             return;
         }
         
-        showNotification('Data disponível selecionada!', 'success');
+        showNotification('Data disponível selecionada! Escolha um horário.', 'success');
     } catch (error) {
         console.error('Erro ao verificar disponibilidade:', error);
         showNotification('Data selecionada! (Verificação de disponibilidade indisponível)', 'info');
@@ -379,10 +384,33 @@ async function handleDateClick(dateStr) {
 
 function handleEventClick(info) {
     const event = info.event;
+    
+    // Verificar se é um dia não disponível
+    if (event.extendedProps.unavailable) {
+        const reason = event.extendedProps.reason;
+        const unavailableMessage = `
+            <div style="text-align: center; padding: 20px;">
+                <h3 style="color: #666666; margin-bottom: 15px;">🚫 Dia Não Disponível</h3>
+                <p><strong>Data:</strong> ${formatDate(event.startStr)}</p>
+                <p><strong>Motivo:</strong> ${reason}</p>
+                <br>
+                <p style="color: #666666; font-weight: bold;">Não atendemos às segundas e sextas-feiras.</p>
+                <p style="color: #666666;">Escolha outro dia da semana para agendar.</p>
+            </div>
+        `;
+        
+        showConfirmModal(unavailableMessage, () => {
+            // Apenas fechar o modal
+        });
+        return;
+    }
+    
     const clientName = event.extendedProps.clientName;
     const serviceType = event.extendedProps.serviceType;
     const clientEmail = event.extendedProps.clientEmail;
     const clientPhone = event.extendedProps.clientPhone;
+    const time = event.extendedProps.time;
+    const timeText = time ? getTimeText(time) : 'Não informado';
     
     // Criar modal de confirmação para exclusão
     const confirmMessage = `
@@ -391,6 +419,7 @@ function handleEventClick(info) {
             <p><strong>Cliente:</strong> ${clientName}</p>
             <p><strong>Serviço:</strong> ${serviceType}</p>
             <p><strong>Data:</strong> ${formatDate(event.startStr)}</p>
+            <p><strong>Horário:</strong> ${timeText}</p>
             <p><strong>E-mail:</strong> ${clientEmail}</p>
             <p><strong>Telefone:</strong> ${clientPhone}</p>
             <br>
@@ -405,15 +434,26 @@ function handleEventClick(info) {
     });
 }
 
-// Função para excluir agendamento
+// Função para excluir agendamento (apenas administradores)
 async function deleteAppointment(appointmentId, dateStr) {
     try {
+        console.log('=== VERIFICANDO PERMISSÃO PARA EXCLUIR AGENDAMENTO ===');
+        
+        // Verificar se o usuário está autenticado como administrador
+        const isAdmin = await FirebaseAuth.isAdminAuthenticated();
+        
+        if (!isAdmin) {
+            showNotification('🔒 Acesso negado. Apenas administradores podem excluir agendamentos.', 'error');
+            showAdminLoginModal();
+            return;
+        }
+        
         console.log('=== EXCLUINDO AGENDAMENTO ===');
         console.log('ID:', appointmentId);
         console.log('Data:', dateStr);
         
-        // Chamar função do Firebase para excluir
-        const result = await FirebaseAppointment.cancelAppointment(appointmentId, dateStr);
+        // Chamar função do Firebase para excluir (versão protegida)
+        const result = await FirebaseAuth.cancelAppointmentAsAdmin(appointmentId, dateStr);
         
         if (result.success) {
             showNotification('✅ Agendamento excluído com sucesso!', 'success');
@@ -429,7 +469,7 @@ async function deleteAppointment(appointmentId, dateStr) {
         
     } catch (error) {
         console.error('Erro ao excluir agendamento:', error);
-        showNotification('❌ Erro ao excluir agendamento. Tente novamente.', 'error');
+        showNotification(`❌ Erro: ${error.message}`, 'error');
     }
 }
 
@@ -602,9 +642,36 @@ async function handleBookingSubmit(e) {
         return;
     }
     
-    // Verificar disponibilidade novamente antes de enviar
+    // Preparar dados do agendamento
+    const formData = new FormData(e.target);
+    const appointmentData = {
+        clientName: formData.get('name'),
+        clientEmail: formData.get('email'),
+        clientPhone: formData.get('phone'),
+        serviceType: formData.get('service'),
+        date: selectedDate,
+        time: formData.get('time'),
+        message: formData.get('message') || ''
+    };
+    
+    // Verificar se o horário foi selecionado
+    if (!appointmentData.time) {
+        showNotification('Por favor, selecione um horário', 'error');
+        return;
+    }
+    
+    // Mostrar loading
+    const submitBtn = e.target.querySelector('.submit-btn');
+    let originalText = '';
+    
+    if (submitBtn) {
+        originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+        submitBtn.disabled = true;
+    }
+    
     try {
-        // Criar a data corretamente para o timezone local
+        // Verificar disponibilidade do horário específico
         let checkDate;
         if (selectedDate.includes('-')) {
             const [year, month, day] = selectedDate.split('-').map(Number);
@@ -612,33 +679,36 @@ async function handleBookingSubmit(e) {
         } else {
             checkDate = new Date(selectedDate);
         }
-        const isAvailable = await FirebaseAppointment.checkAvailability(checkDate);
         
-        if (!isAvailable) {
-            showNotification('Esta data não está mais disponível. Escolha outra data.', 'error');
+        // Verificar se FirebaseAppointment está disponível
+        if (!FirebaseAppointment || !FirebaseAppointment.checkTimeAvailability) {
+            console.error('FirebaseAppointment não está disponível');
+            showNotification('Erro de configuração. Tente novamente.', 'error');
             return;
         }
         
-        // Preparar dados do agendamento
-        const formData = new FormData(e.target);
-        const appointmentData = {
-            clientName: formData.get('name'),
-            clientEmail: formData.get('email'),
-            clientPhone: formData.get('phone'),
-            serviceType: formData.get('service'),
-            date: selectedDate,
-            message: formData.get('message') || ''
-        };
+        const timeAvailability = await FirebaseAppointment.checkTimeAvailability(checkDate, appointmentData.time);
         
-        // Mostrar loading
-        const submitBtn = e.target.querySelector('.submit-btn');
-        const originalText = submitBtn.innerHTML;
-        
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
-        submitBtn.disabled = true;
+        if (!timeAvailability.available) {
+            showNotification(`Horário não disponível: ${timeAvailability.reason}`, 'error');
+            if (submitBtn) {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+            return;
+        }
         
         // Salvar no Firebase
+        console.log('Enviando dados para Firebase:', appointmentData);
+        
+        if (!FirebaseAppointment.createAppointment) {
+            console.error('FirebaseAppointment.createAppointment não está disponível');
+            showNotification('Erro de configuração. Tente novamente.', 'error');
+            return;
+        }
+        
         const result = await FirebaseAppointment.createAppointment(appointmentData);
+        console.log('Resultado do Firebase:', result);
         
         if (result.success) {
             showNotification('Agendamento enviado com sucesso! Entraremos em contato em breve.', 'success');
@@ -649,19 +719,18 @@ async function handleBookingSubmit(e) {
             // Track do evento
             trackEvent('Agendamento', 'Submit', appointmentData.serviceType);
         } else {
-            showNotification('Erro ao enviar agendamento. Tente novamente.', 'error');
+            console.error('Erro retornado pelo Firebase:', result.error);
+            showNotification(`Erro ao enviar agendamento: ${result.error}`, 'error');
         }
-        
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
         
     } catch (error) {
         console.error('Erro ao processar agendamento:', error);
         showNotification('Erro ao processar agendamento. Tente novamente.', 'error');
-        
-        const submitBtn = e.target.querySelector('.submit-btn');
-        submitBtn.innerHTML = originalText;
-        submitBtn.disabled = false;
+    } finally {
+        if (submitBtn) {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
     }
 }
 
@@ -699,6 +768,8 @@ function initContactForm() {
 }
 
 function formatPhoneNumber(input) {
+    if (!input || !input.value) return;
+    
     let value = input.value.replace(/\D/g, '');
     
     if (value.length <= 11) {
@@ -788,6 +859,167 @@ function showConfirmModal(message, onConfirm) {
     });
 }
 
+// Modal de login para administradores
+function showAdminLoginModal() {
+    const modal = document.createElement('div');
+    modal.className = 'admin-login-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10001;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    `;
+    
+    modal.innerHTML = `
+        <div class="modal-content" style="
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        ">
+            <h3 style="color: #B4457A; margin-bottom: 20px; font-size: 24px;">
+                🔐 Login Administrativo
+            </h3>
+            <p style="color: #666; margin-bottom: 25px; font-size: 14px;">
+                Apenas administradores podem excluir agendamentos.
+            </p>
+            
+            <form id="admin-login-form" style="text-align: left;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 600;">
+                        E-mail:
+                    </label>
+                    <input type="email" id="admin-email" required style="
+                        width: 100%;
+                        padding: 12px;
+                        border: 2px solid #ddd;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        transition: border-color 0.3s ease;
+                    " placeholder="seu@email.com">
+                </div>
+                
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 600;">
+                        Senha:
+                    </label>
+                    <input type="password" id="admin-password" required style="
+                        width: 100%;
+                        padding: 12px;
+                        border: 2px solid #ddd;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        transition: border-color 0.3s ease;
+                    " placeholder="Sua senha">
+                </div>
+                
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button type="button" class="btn-cancel" style="
+                        padding: 12px 25px;
+                        border: 2px solid #ddd;
+                        background: white;
+                        color: #666;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        transition: all 0.3s ease;
+                    ">Cancelar</button>
+                    <button type="submit" class="btn-login" style="
+                        padding: 12px 25px;
+                        border: none;
+                        background: #B4457A;
+                        color: white;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        transition: all 0.3s ease;
+                    ">Entrar</button>
+                </div>
+            </form>
+            
+            <div id="login-status" style="margin-top: 15px; font-size: 14px;"></div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Animar entrada
+    setTimeout(() => {
+        modal.style.opacity = '1';
+        modal.querySelector('.modal-content').style.transform = 'scale(1)';
+    }, 10);
+    
+    // Event listeners
+    const closeModal = () => {
+        modal.style.opacity = '0';
+        modal.querySelector('.modal-content').style.transform = 'scale(0.8)';
+        setTimeout(() => {
+            document.body.removeChild(modal);
+        }, 300);
+    };
+    
+    modal.querySelector('.btn-cancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    // Handle form submission
+    const form = modal.querySelector('#admin-login-form');
+    const statusDiv = modal.querySelector('#login-status');
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('admin-email').value;
+        const password = document.getElementById('admin-password').value;
+        
+        // Disable form during login
+        const submitBtn = form.querySelector('.btn-login');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Entrando...';
+        submitBtn.disabled = true;
+        statusDiv.textContent = '';
+        
+        try {
+            const result = await FirebaseAuth.adminLogin(email, password);
+            
+            if (result.success) {
+                statusDiv.textContent = '✅ Login realizado com sucesso!';
+                statusDiv.style.color = '#28a745';
+                
+                setTimeout(() => {
+                    closeModal();
+                    showNotification('🔓 Login administrativo realizado com sucesso!', 'success');
+                }, 1500);
+            } else {
+                statusDiv.textContent = `❌ ${result.error}`;
+                statusDiv.style.color = '#dc3545';
+            }
+        } catch (error) {
+            statusDiv.textContent = `❌ Erro: ${error.message}`;
+            statusDiv.style.color = '#dc3545';
+        } finally {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+}
+
 // ===== SCROLL SUAVE =====
 function initSmoothScrolling() {
     const links = document.querySelectorAll('a[href^="#"]');
@@ -795,16 +1027,21 @@ function initSmoothScrolling() {
     links.forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
-            const target = document.querySelector(link.getAttribute('href'));
+            const href = link.getAttribute('href');
             
-            if (target) {
-                const headerHeight = document.querySelector('header').offsetHeight;
-                const targetPosition = target.offsetTop - headerHeight;
+            // Verificar se o href é válido (não apenas "#")
+            if (href && href !== '#' && href.length > 1) {
+                const target = document.querySelector(href);
                 
-                window.scrollTo({
-                    top: targetPosition,
-                    behavior: 'smooth'
-                });
+                if (target) {
+                    const headerHeight = document.querySelector('header').offsetHeight;
+                    const targetPosition = target.offsetTop - headerHeight;
+                    
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
             }
         });
     });
@@ -1093,4 +1330,77 @@ window.addEventListener('load', () => {
     
     // Track page view
     trackEvent('engagement', 'page_view', window.location.pathname);
-}); 
+});
+
+// ===== SISTEMA DE AUTENTICAÇÃO DE ADMINISTRADORES =====
+function initAdminAuth() {
+    // Verificar estado de autenticação ao carregar a página
+    checkAdminAuthState();
+    
+    // Configurar listener para mudanças no estado de autenticação
+    firebase.auth().onAuthStateChanged(async (user) => {
+        await checkAdminAuthState();
+    });
+    
+    // Configurar botão de logout
+    const logoutBtn = document.getElementById('admin-logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await handleAdminLogout();
+        });
+    }
+}
+
+// Verificar estado de autenticação e atualizar interface
+async function checkAdminAuthState() {
+    try {
+        const isAdmin = await FirebaseAuth.isAdminAuthenticated();
+        updateAdminUI(isAdmin);
+    } catch (error) {
+        console.error('Erro ao verificar estado de autenticação:', error);
+        updateAdminUI(false);
+    }
+}
+
+// Atualizar interface baseada no estado de autenticação
+function updateAdminUI(isAdmin) {
+    const logoutItem = document.getElementById('admin-logout-item');
+    const logoutBtn = document.getElementById('admin-logout-btn');
+    
+    if (logoutItem && logoutBtn) {
+        if (isAdmin) {
+            logoutItem.style.display = 'block';
+            logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Sair';
+        } else {
+            logoutItem.style.display = 'none';
+        }
+    }
+}
+
+// Função para fazer logout
+async function handleAdminLogout() {
+    try {
+        const result = await FirebaseAuth.adminLogout();
+        
+        if (result.success) {
+            showNotification('🔓 Logout realizado com sucesso!', 'success');
+            updateAdminUI(false);
+        } else {
+            showNotification('❌ Erro ao fazer logout', 'error');
+        }
+    } catch (error) {
+        console.error('Erro no logout:', error);
+        showNotification('❌ Erro ao fazer logout', 'error');
+    }
+}
+
+// Função auxiliar para converter código de horário em texto
+function getTimeText(time) {
+    switch(time) {
+        case 'manha': return 'Manhã';
+        case 'tarde': return 'Tarde';
+        case 'noite': return 'Noite';
+        default: return time;
+    }
+} 

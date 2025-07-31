@@ -1,6 +1,6 @@
 # Cristiane Justino - Site de Fotografia
 
-Site profissional para a fotógrafa Cristiane Justino, com sistema de agendamento em tempo real e portfólio interativo.
+Site profissional para a fotógrafa Cristiane Justino, especializada em aniversários, eventos, casamento civil, gestante, bebê e ensaios pessoais. Sistema de agendamento em tempo real e portfólio interativo.
 
 ## 🎯 Características
 
@@ -63,13 +63,15 @@ Projeto Fotografo/
 
 ### 4. Portfólio
 - Galeria de 43 imagens organizadas
-- Filtros por categoria (Ensaios, Eventos, Retratos)
+- Filtros por categoria (Aniversário, Evento, Casamento Civil, Gestante, Bebê, Ensaio Pessoal)
 - Modal para visualização ampliada
 - Animações de entrada e hover
 
 ### 5. Agendamento
 - Calendário FullCalendar integrado
 - Datas ocupadas marcadas em vermelho
+- Dias não disponíveis (segunda e sexta) marcados em cinza
+- Dias disponíveis (terça a quinta, sábado e domingo) marcados em verde
 - Formulário com validação em tempo real
 - Modal de confirmação
 
