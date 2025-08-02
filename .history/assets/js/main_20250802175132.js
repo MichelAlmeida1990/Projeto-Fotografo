@@ -175,10 +175,13 @@ function renderPortfolio(items) {
 
 function filterPortfolio(category) {
     currentFilter = category;
+    console.log('Filtrando por categoria:', category);
+    
     const filteredItems = category === 'todos' ? 
         portfolioItems : 
         portfolioItems.filter(item => item.category === category);
     
+    console.log('Itens filtrados:', filteredItems.length);
     renderPortfolio(filteredItems);
 }
 

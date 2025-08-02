@@ -32,13 +32,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initTypewriter();
     initHeaderScroll();
     initModernCTAButton();
-    
-    // Inicializar efeitos fotográficos avançados
-    setTimeout(() => {
-        initPhotoEffects();
-        initScrollAnimations();
-        initPhotoParticles();
-    }, 2000);
 });
 
 // ===== MENU MOBILE ELEGANTE =====
@@ -96,47 +89,27 @@ function initPortfolio() {
 }
 
 function loadPortfolioImages() {
-    // Mapeamento correto das imagens com suas descrições detalhadas
-    const portfolioData = [
-        { id: 1, src: 'assets/image/foto_01.jpg', category: 'aniversario', title: 'Aniversário Infantil', description: 'Celebração de aniversário com tema colorido, decoração festiva e momentos de alegria com família e amigos' },
-        { id: 2, src: 'assets/image/foto_02.jpg', category: 'evento', title: 'Evento Corporativo', description: 'Cobertura profissional de evento empresarial com networking, palestras e interação entre participantes' },
-        { id: 3, src: 'assets/image/foto_03.jpg', category: 'casamento-civil', title: 'Casamento Civil', description: 'Cerimônia íntima de casamento civil com momentos especiais, troca de alianças e celebração do amor' },
-        { id: 4, src: 'assets/image/foto_04.jpg', category: 'gestante', title: 'Ensaio Gestante', description: 'Sessão fotográfica para gestantes com iluminação natural, capturando a beleza da maternidade' },
-        { id: 5, src: 'assets/image/foto_05.jpg', category: 'bebe', title: 'Ensaio Bebê', description: 'Fotografia de bebê com técnica macro, cenários delicados e captura de momentos únicos' },
-        { id: 6, src: 'assets/image/foto_06.jpg', category: 'aniversario', title: 'Festa de Aniversário', description: 'Celebração de aniversário com decoração temática, convidados e momentos de diversão' },
-        { id: 7, src: 'assets/image/foto_07.jpg', category: 'ensaio-pessoal', title: 'Ensaio Feminino', description: 'Sessão fotográfica feminina com técnica de retrato profissional e iluminação artística' },
-        { id: 8, src: 'assets/image/foto_08.jpg', category: 'evento', title: 'Evento Social', description: 'Cobertura de evento social com momentos de interação, networking e celebração' },
-        { id: 9, src: 'assets/image/foto_09.jpg', category: 'casamento-civil', title: 'Casamento Íntimo', description: 'Casamento civil com cerimônia simples e elegante, focando na intimidade do casal' },
-        { id: 10, src: 'assets/image/foto_10.jpg', category: 'gestante', title: 'Sessão Gestante', description: 'Ensaio fotográfico para gestantes com cenários naturais e técnica de iluminação suave' },
-        { id: 11, src: 'assets/image/foto_11.jpg', category: 'bebe', title: 'Fotografia de Bebê', description: 'Sessão fotográfica de bebê com técnica macro, detalhes e cenários delicados' },
-        { id: 12, src: 'assets/image/foto_12.jpg', category: 'aniversario', title: 'Aniversário Especial', description: 'Celebração de aniversário com decoração personalizada e momentos especiais' },
-        { id: 13, src: 'assets/image/foto_13.jpg', category: 'ensaio-pessoal', title: 'Ensaio Pessoal', description: 'Sessão fotográfica pessoal com técnica de retrato e iluminação profissional' },
-        { id: 14, src: 'assets/image/foto_14.jpg', category: 'evento', title: 'Evento Comemorativo', description: 'Cobertura de evento comemorativo com momentos especiais e celebração' },
-        { id: 15, src: 'assets/image/foto_15.jpg', category: 'casamento-civil', title: 'Casamento Simples', description: 'Casamento civil com cerimônia descontraída e momentos de alegria' },
-        { id: 16, src: 'assets/image/foto_16.jpg', category: 'gestante', title: 'Ensaio Maternidade', description: 'Fotografia de gestante com técnica de iluminação natural e cenários artísticos' },
-        { id: 17, src: 'assets/image/foto_17.jpg', category: 'bebe', title: 'Sessão Bebê', description: 'Ensaio fotográfico de bebê com cenários delicados e técnica macro' },
-        { id: 18, src: 'assets/image/foto_18.jpg', category: 'aniversario', title: 'Festa Infantil', description: 'Aniversário infantil com decoração temática, diversão e momentos de alegria' },
-        { id: 19, src: 'assets/image/foto_19.jpg', category: 'ensaio-pessoal', title: 'Retrato Profissional', description: 'Sessão de retrato profissional com técnica avançada e iluminação artística' },
-        { id: 20, src: 'assets/image/foto_20.jpg', category: 'evento', title: 'Evento Familiar', description: 'Cobertura de evento familiar com momentos de união e celebração' },
-        { id: 21, src: 'assets/image/foto_21.jpg', category: 'casamento-civil', title: 'Casamento Familiar', description: 'Casamento civil com presença da família e momentos especiais' },
-        { id: 22, src: 'assets/image/foto_22.jpg', category: 'gestante', title: 'Fotografia Gestante', description: 'Ensaio fotográfico para gestantes com técnica artística e iluminação natural' },
-        { id: 23, src: 'assets/image/foto_23.jpg', category: 'bebe', title: 'Fotografia Infantil', description: 'Sessão fotográfica infantil com técnica macro e cenários delicados' },
-        { id: 24, src: 'assets/image/foto_24.jpg', category: 'aniversario', title: 'Celebração Especial', description: 'Aniversário com decoração festiva e momentos especiais de celebração' },
-        { id: 25, src: 'assets/image/foto_25.jpg', category: 'ensaio-pessoal', title: 'Ensaio Artístico', description: 'Sessão fotográfica artística com técnica profissional e iluminação criativa' },
-        { id: 26, src: 'assets/image/foto_26.jpg', category: 'evento', title: 'Evento Especial', description: 'Cobertura de evento especial com momentos únicos e celebração' },
-        { id: 27, src: 'assets/image/foto_27.jpg', category: 'casamento-civil', title: 'Casamento Elegante', description: 'Casamento civil com cerimônia elegante e sofisticada, focando na elegância' },
-        { id: 28, src: 'assets/image/foto_28.jpg', category: 'gestante', title: 'Sessão Maternidade', description: 'Ensaio fotográfico de maternidade com técnica natural e iluminação suave' },
-        { id: 29, src: 'assets/image/foto_29.jpg', category: 'bebe', title: 'Fotografia de Bebê', description: 'Sessão fotográfica de bebê com técnica macro, detalhes e cenários delicados' },
-        { id: 30, src: 'assets/image/foto_30.jpg', category: 'aniversario', title: 'Festa de Aniversário', description: 'Celebração de aniversário com decoração personalizada e momentos especiais' },
-        { id: 31, src: 'assets/image/foto_31.jpg', category: 'ensaio-pessoal', title: 'Ensaio Feminino', description: 'Sessão fotográfica feminina com técnica profissional e iluminação artística' },
-        { id: 32, src: 'assets/image/foto_32.jpg', category: 'evento', title: 'Evento Corporativo', description: 'Cobertura de evento corporativo com networking e momentos profissionais' },
-        { id: 33, src: 'assets/image/foto_33.jpg', category: 'casamento-civil', title: 'Casamento Íntimo', description: 'Casamento civil com cerimônia íntima e especial, focando na intimidade' },
-        { id: 34, src: 'assets/image/foto_34.jpg', category: 'gestante', title: 'Ensaio Gestante', description: 'Fotografia de gestante com técnica de iluminação natural e cenários artísticos' },
-        { id: 35, src: 'assets/image/foto_35.jpg', category: 'bebe', title: 'Sessão Bebê', description: 'Ensaio fotográfico de bebê com cenários delicados e técnica macro' },
-        { id: 36, src: 'assets/image/foto_36.jpg', category: 'ensaio-pessoal', title: 'Retrato Profissional', description: 'Sessão de retrato profissional com técnica avançada e iluminação artística' }
+    // Simular carregamento de imagens do portfólio
+    const categories = [
+        'ensaio-feminino', 'ensaio-feminino', 'ensaio-feminino',
+        'casamento', 'casamento', 'casamento',
+        'retrato', 'retrato', 'retrato',
+        'evento', 'evento', 'evento'
     ];
     
-    portfolioItems = portfolioData;
+    portfolioItems = [];
+    
+    for (let i = 1; i <= 35; i++) {
+        const category = categories[Math.floor(Math.random() * categories.length)];
+        portfolioItems.push({
+            id: i,
+            src: `assets/image/foto_${String(i).padStart(2, '0')}.jpg`,
+            category: category,
+            title: `Fotografia ${i}`,
+            description: `Descrição da fotografia ${i}`
+        });
+    }
+    
     renderPortfolio(portfolioItems);
 }
 
@@ -1241,17 +1214,14 @@ function initPhotoEffects() {
             
             // Efeito de profundidade baseado na posição
             const depth = Math.abs(distanceX) + Math.abs(distanceY);
-            const translateZ = 20 + (depth * 15);
-            const scale = 1 + (depth * 0.05);
+            const translateZ = 40 + (depth * 30);
+            const scale = 1 + (depth * 0.08);
             
-            // Aplica transformação 3D com limites para evitar overflow
-            const limitedRotateX = Math.max(-8, Math.min(8, rotateX));
-            const limitedRotateY = Math.max(-8, Math.min(8, rotateY));
-            
+            // Aplica transformação 3D
             item.style.transform = `
                 translateZ(${translateZ}px) 
-                rotateX(${limitedRotateX}deg) 
-                rotateY(${limitedRotateY}deg) 
+                rotateX(${rotateX}deg) 
+                rotateY(${rotateY}deg) 
                 scale(${scale})
             `;
             
