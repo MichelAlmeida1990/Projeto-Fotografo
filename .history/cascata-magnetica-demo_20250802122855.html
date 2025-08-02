@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cascata Magnética - Demo Portfólio</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #000419, #091326, #6C1847);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #FFC0EA, #B4457A, #6C1847);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        /* ===== CASCATA MAGNÉTICA ===== */
+        .portfolio-waterfall {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            padding: 40px;
+            perspective: 1000px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .photo-item {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            cursor: pointer;
+            transform-style: preserve-3d;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .photo-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, 
+                transparent, 
+                rgba(255, 192, 234, 0.3), 
+                transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 2;
+        }
+
+        .photo-item::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                #FFC0EA, #B4457A, #6C1847, #FFC0EA);
+            border-radius: 20px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            animation: borderGlow 3s ease infinite;
+        }
+
+        @keyframes borderGlow {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .photo-item {
+            transform: translateZ(0px) rotateY(0deg) rotateX(0deg) scale(1);
+            filter: brightness(1) contrast(1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .photo-item:hover {
+            filter: brightness(1.1) contrast(1.1);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .photo-item:hover::before {
+            opacity: 1;
+        }
+
+        .photo-item:hover::after {
+            opacity: 1;
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            transition: all 0.6s ease;
+        }
+
+        .photo-item:hover img {
+            transform: scale(1.1);
+        }
+
+        .photo-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            color: white;
+            padding: 30px 20px 20px;
+            transform: translateY(100%);
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 3;
+        }
+
+        .photo-item:hover .photo-overlay {
+            transform: translateY(0);
+        }
+
+        .photo-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .photo-category {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .photo-description {
+            font-size: 0.9rem;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        /* ===== EFEITO MAGNÉTICO ===== */
+        .magnetic-effect {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .magnetic-effect::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, 
+                rgba(255, 192, 234, 0.3) 0%, 
+                transparent 70%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .photo-item:hover .magnetic-effect::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* ===== FILTROS INTERATIVOS ===== */
+        .portfolio-filters {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 40px 0;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: linear-gradient(135deg, #B4457A, #6C1847);
+            border-color: #FFC0EA;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(180, 69, 122, 0.3);
+        }
+
+        /* ===== ANIMAÇÕES DE ENTRADA ===== */
+        .photo-item {
+            animation: fadeInUp 0.8s ease-out both;
+        }
+
+        .photo-item:nth-child(1) { animation-delay: 0.1s; }
+        .photo-item:nth-child(2) { animation-delay: 0.2s; }
+        .photo-item:nth-child(3) { animation-delay: 0.3s; }
+        .photo-item:nth-child(4) { animation-delay: 0.4s; }
+        .photo-item:nth-child(5) { animation-delay: 0.5s; }
+        .photo-item:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* ===== RESPONSIVIDADE ===== */
+        @media (max-width: 1200px) {
+            .portfolio-waterfall {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 25px;
+                padding: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .portfolio-waterfall {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .photo-item img {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .portfolio-waterfall {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .photo-item img {
+                height: 250px;
+            }
+        }
+
+        /* ===== EFEITO DE PARTÍCULAS ===== */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 192, 234, 0.6);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 20%; animation-delay: 1s; }
+        .particle:nth-child(3) { left: 30%; animation-delay: 2s; }
+        .particle:nth-child(4) { left: 40%; animation-delay: 3s; }
+        .particle:nth-child(5) { left: 50%; animation-delay: 4s; }
+        .particle:nth-child(6) { left: 60%; animation-delay: 5s; }
+        .particle:nth-child(7) { left: 70%; animation-delay: 0.5s; }
+        .particle:nth-child(8) { left: 80%; animation-delay: 1.5s; }
+        .particle:nth-child(9) { left: 90%; animation-delay: 2.5s; }
+
+        @keyframes float {
+            0%, 100% { 
+                transform: translateY(100vh) scale(0);
+                opacity: 0;
+            }
+            50% { 
+                transform: translateY(50vh) scale(1);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Partículas de Fundo -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="header">
+        <h1>Portfólio Magnético</h1>
+        <p>Experiência visual única com efeitos 3D e interatividade</p>
+    </div>
+
+    <!-- Filtros -->
+    <div class="portfolio-filters">
+        <button class="filter-btn active" data-filter="todos">Todos</button>
+        <button class="filter-btn" data-filter="casamento">Casamento</button>
+        <button class="filter-btn" data-filter="ensaio">Ensaio</button>
+        <button class="filter-btn" data-filter="gestante">Gestante</button>
+        <button class="filter-btn" data-filter="bebe">Bebê</button>
+        <button class="filter-btn" data-filter="evento">Evento</button>
+    </div>
+
+    <!-- Cascata Magnética -->
+    <div class="portfolio-waterfall">
+        <div class="photo-item" data-category="casamento">
+            <div class="magnetic-effect">
+                <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=400&h=400&fit=crop" alt="Casamento Elegante">
+                <div class="photo-overlay">
+                    <div class="photo-title">Casamento Elegante</div>
+                    <div class="photo-category">Casamento</div>
+                    <div class="photo-description">Momentos únicos de amor e celebração</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="photo-item" data-category="ensaio">
+            <div class="magnetic-effect">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop" alt="Ensaio Feminino">
+                <div class="photo-overlay">
+                    <div class="photo-title">Ensaio Feminino</div>
+                    <div class="photo-category">Ensaio</div>
+                    <div class="photo-description">Beleza e empoderamento em cada clique</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="photo-item" data-category="gestante">
+            <div class="magnetic-effect">
+                <img src="https://images.unsplash.com/photo-1519689680058-324119c77eba?w=400&h=400&fit=crop" alt="Ensaio Gestante">
+                <div class="photo-overlay">
+                    <div class="photo-title">Ensaio Gestante</div>
+                    <div class="photo-category">Gestante</div>
+                    <div class="photo-description">Capturando a beleza da maternidade</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="photo-item" data-category="bebe">
+            <div class="magnetic-effect">
+                <img src="https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&h=400&fit=crop" alt="Ensaio Bebê">
+                <div class="photo-overlay">
+                    <div class="photo-title">Ensaio Bebê</div>
+                    <div class="photo-category">Bebê</div>
+                    <div class="photo-description">Pequenos momentos, grandes memórias</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="photo-item" data-category="evento">
+            <div class="magnetic-effect">
+                <img src="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&h=400&fit=crop" alt="Evento Corporativo">
+                <div class="photo-overlay">
+                    <div class="photo-title">Evento Corporativo</div>
+                    <div class="photo-category">Evento</div>
+                    <div class="photo-description">Profissionalismo e qualidade</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="photo-item" data-category="casamento">
+            <div class="magnetic-effect">
+                <img src="https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=400&h=400&fit=crop" alt="Casamento Intimo">
+                <div class="photo-overlay">
+                    <div class="photo-title">Casamento Íntimo</div>
+                    <div class="photo-category">Casamento</div>
+                    <div class="photo-description">Celebrações especiais e únicas</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Filtros interativos
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const photoItems = document.querySelectorAll('.photo-item');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Remove active class de todos os botões
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const filter = btn.getAttribute('data-filter');
+
+                photoItems.forEach(item => {
+                    const category = item.getAttribute('data-category');
+                    
+                    if (filter === 'todos' || category === filter) {
+                        item.style.display = 'block';
+                        item.style.animation = 'fadeInUp 0.6s ease-out both';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Efeito magnético no mouse
+        photoItems.forEach(item => {
+            let isMouseOver = false;
+            
+            item.addEventListener('mousemove', (e) => {
+                isMouseOver = true;
+                const rect = item.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                
+                // Calcula a distância do centro para intensificar o efeito
+                const distanceX = (x - centerX) / centerX;
+                const distanceY = (y - centerY) / centerY;
+                
+                const rotateX = distanceY * 15; // Aumentado para 15 graus
+                const rotateY = -distanceX * 15; // Invertido para direção natural
+                
+                // Efeito de profundidade baseado na posição do mouse
+                const depth = Math.abs(distanceX) + Math.abs(distanceY);
+                const translateZ = 30 + (depth * 20);
+                
+                item.style.transform = `
+                    translateZ(${translateZ}px) 
+                    rotateX(${rotateX}deg) 
+                    rotateY(${rotateY}deg) 
+                    scale(${1 + (depth * 0.05)})
+                `;
+                
+                // Efeito de brilho dinâmico
+                const brightness = 1 + (depth * 0.1);
+                item.style.filter = `brightness(${brightness}) contrast(1.1)`;
+            });
+
+            item.addEventListener('mouseleave', () => {
+                isMouseOver = false;
+                item.style.transform = 'translateZ(0px) rotateX(0deg) rotateY(0deg) scale(1)';
+                item.style.filter = 'brightness(1) contrast(1)';
+            });
+        });
+
+        // Animação de entrada com scroll (sem conflitar com o efeito magnético)
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    // Não sobrescreve o transform se o mouse estiver sobre o item
+                    if (!entry.target.matches(':hover')) {
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                }
+            });
+        }, observerOptions);
+
+        photoItems.forEach(item => {
+            observer.observe(item);
+        });
+    </script>
+</body>
+</html> 

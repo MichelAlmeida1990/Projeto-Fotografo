@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', function() {
     initFloatingElements();
     initTypewriter();
     initHeaderScroll();
-    initModernCTAButton();
 });
 
 // ===== MENU MOBILE ELEGANTE =====
@@ -997,82 +996,6 @@ function debounce(func, wait) {
 }
 
 
-// ===== BOTÃO CTA MODERNO =====
-function initModernCTAButton() {
-    const ctaButton = document.querySelector('.cta-button');
-    
-    if (!ctaButton) return;
-    
-    // Efeito de ripple no clique
-    ctaButton.addEventListener('click', function(e) {
-        // Criar efeito de ripple
-        const ripple = document.createElement('span');
-        const rect = this.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        const x = e.clientX - rect.left - size / 2;
-        const y = e.clientY - rect.top - size / 2;
-        
-        ripple.style.cssText = `
-            position: absolute;
-            width: ${size}px;
-            height: ${size}px;
-            left: ${x}px;
-            top: ${y}px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            transform: scale(0);
-            animation: ripple 0.6s linear;
-            pointer-events: none;
-            z-index: 1001;
-        `;
-        
-        this.appendChild(ripple);
-        
-        setTimeout(() => {
-            if (ripple.parentNode) {
-                ripple.remove();
-            }
-        }, 600);
-        
-        // Feedback visual simples
-        this.classList.add('loading');
-        
-        setTimeout(() => {
-            this.classList.remove('loading');
-            this.classList.add('success');
-            
-            setTimeout(() => {
-                this.classList.remove('success');
-            }, 2000);
-        }, 1000);
-    });
-    
-    // Garantir que o botão sempre fique visível
-    function ensureButtonVisibility() {
-        if (ctaButton && (ctaButton.style.display === 'none' || 
-                          ctaButton.style.opacity === '0' || 
-                          ctaButton.style.visibility === 'hidden')) {
-            ctaButton.style.display = 'inline-flex';
-            ctaButton.style.opacity = '1';
-            ctaButton.style.visibility = 'visible';
-        }
-    }
-    
-    // Verificar a cada 5 segundos
-    setInterval(ensureButtonVisibility, 5000);
-}
-
-// Adicionar keyframes para ripple
-const rippleStyle = document.createElement('style');
-rippleStyle.textContent = `
-    @keyframes ripple {
-        to {
-            transform: scale(4);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(rippleStyle);
 
 // ===== SERVICE WORKER (OPCIONAL) =====
 if ('serviceWorker' in navigator) {

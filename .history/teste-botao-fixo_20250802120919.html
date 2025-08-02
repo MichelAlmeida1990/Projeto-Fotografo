@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste - Botão Sempre Visível</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f0f23, #1a1a2e);
+            color: white;
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .test-container {
+            text-align: center;
+            max-width: 600px;
+        }
+
+        h1 {
+            margin-bottom: 2rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .status {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            backdrop-filter: blur(10px);
+        }
+
+        .status.success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.5);
+        }
+
+        .status.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+        }
+
+        /* Importar estilos do botão do site principal */
+        .cta-button {
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: 0.8rem;
+            padding: 1.2rem 3rem;
+            background: linear-gradient(135deg, 
+                rgba(108, 24, 71, 0.9), 
+                rgba(180, 69, 122, 0.9), 
+                rgba(255, 192, 234, 0.8));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 10px 30px rgba(108, 24, 71, 0.3),
+                0 0 0 1px rgba(255, 192, 234, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            opacity: 1 !important;
+            visibility: visible !important;
+            z-index: 1000;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 
+                0 20px 50px rgba(108, 24, 71, 0.4),
+                0 0 0 2px rgba(255, 192, 234, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        /* Garantir que o botão nunca desapareça */
+        .cta-button,
+        .cta-button *,
+        .cta-button:hover,
+        .cta-button:focus,
+        .cta-button:active,
+        .cta-button.loading,
+        .cta-button.success,
+        .cta-button.error {
+            display: inline-flex !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            position: relative !important;
+            z-index: 1000 !important;
+        }
+
+        .test-buttons {
+            margin: 2rem 0;
+        }
+
+        .test-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            margin: 0.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .test-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Teste - Botão Sempre Visível</h1>
+        
+        <div class="status success">
+            <h3>✅ Status: Botão Configurado para Sempre Visível</h3>
+            <p>O botão agora tem múltiplas camadas de proteção para garantir que nunca desapareça.</p>
+        </div>
+
+        <div class="test-buttons">
+            <button class="test-btn" onclick="testButtonVisibility()">🔍 Verificar Visibilidade</button>
+            <button class="test-btn" onclick="simulateLoading()">⏳ Simular Loading</button>
+            <button class="test-btn" onclick="simulateSuccess()">✅ Simular Sucesso</button>
+            <button class="test-btn" onclick="simulateError()">❌ Simular Erro</button>
+            <button class="test-btn" onclick="forceHide()">👻 Tentar Esconder (Deve Falhar)</button>
+        </div>
+
+        <div id="status-log"></div>
+
+        <div style="margin: 3rem 0;">
+            <a href="#test" class="cta-button" style="display: inline-flex !important; opacity: 1 !important; visibility: visible !important;">
+                <i class="fas fa-camera icon"></i>
+                <span>Agende sua Sessão</span>
+            </a>
+        </div>
+
+        <div class="status">
+            <h3>📋 Proteções Implementadas:</h3>
+            <ul style="text-align: left; margin: 1rem 0;">
+                <li>✅ CSS com !important para display, opacity e visibility</li>
+                <li>✅ JavaScript que verifica a cada segundo</li>
+                <li>✅ Z-index alto (1000) para ficar sempre no topo</li>
+                <li>✅ Estilos inline no HTML como backup</li>
+                <li>✅ CSS de emergência para todos os estados</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const ctaButton = document.querySelector('.cta-button');
+        const statusLog = document.getElementById('status-log');
+
+        function logStatus(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.style.cssText = `
+                background: ${type === 'error' ? 'rgba(239, 68, 68, 0.2)' : 'rgba(34, 197, 94, 0.2)'};
+                padding: 0.5rem;
+                margin: 0.5rem 0;
+                border-radius: 5px;
+                font-size: 0.9rem;
+            `;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            statusLog.appendChild(logEntry);
+            
+            // Manter apenas os últimos 10 logs
+            if (statusLog.children.length > 10) {
+                statusLog.removeChild(statusLog.firstChild);
+            }
+        }
+
+        function testButtonVisibility() {
+            const isVisible = ctaButton && 
+                ctaButton.style.display !== 'none' && 
+                ctaButton.style.opacity !== '0' && 
+                ctaButton.style.visibility !== 'hidden' &&
+                window.getComputedStyle(ctaButton).display !== 'none' &&
+                window.getComputedStyle(ctaButton).opacity !== '0' &&
+                window.getComputedStyle(ctaButton).visibility !== 'hidden';
+
+            if (isVisible) {
+                logStatus('✅ Botão está visível e funcionando corretamente', 'success');
+            } else {
+                logStatus('❌ Botão não está visível - aplicando correção...', 'error');
+                ensureButtonVisibility();
+            }
+        }
+
+        function ensureButtonVisibility() {
+            if (ctaButton) {
+                ctaButton.style.display = 'inline-flex';
+                ctaButton.style.opacity = '1';
+                ctaButton.style.visibility = 'visible';
+                ctaButton.style.zIndex = '1000';
+                logStatus('🔧 Visibilidade do botão corrigida', 'success');
+            }
+        }
+
+        function simulateLoading() {
+            ctaButton.classList.add('loading');
+            logStatus('⏳ Estado de loading aplicado', 'info');
+            setTimeout(() => {
+                ctaButton.classList.remove('loading');
+                logStatus('✅ Loading removido - botão deve permanecer visível', 'success');
+            }, 2000);
+        }
+
+        function simulateSuccess() {
+            ctaButton.classList.add('success');
+            logStatus('✅ Estado de sucesso aplicado', 'info');
+            setTimeout(() => {
+                ctaButton.classList.remove('success');
+                logStatus('✅ Sucesso removido - botão deve permanecer visível', 'success');
+            }, 2000);
+        }
+
+        function simulateError() {
+            ctaButton.classList.add('error');
+            logStatus('❌ Estado de erro aplicado', 'info');
+            setTimeout(() => {
+                ctaButton.classList.remove('error');
+                logStatus('✅ Erro removido - botão deve permanecer visível', 'success');
+            }, 2000);
+        }
+
+        function forceHide() {
+            ctaButton.style.display = 'none';
+            ctaButton.style.opacity = '0';
+            ctaButton.style.visibility = 'hidden';
+            logStatus('👻 Tentativa de esconder o botão...', 'error');
+            
+            setTimeout(() => {
+                testButtonVisibility();
+            }, 100);
+        }
+
+        // Verificar a cada 2 segundos se o botão está visível
+        setInterval(testButtonVisibility, 2000);
+
+        // Verificação inicial
+        testButtonVisibility();
+
+        // Garantir visibilidade imediatamente
+        ensureButtonVisibility();
+    </script>
+</body>
+</html> 

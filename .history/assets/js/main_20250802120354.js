@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initFloatingElements();
     initTypewriter();
     initHeaderScroll();
-    initModernCTAButton();
+    initCTAButton();
 });
 
 // ===== MENU MOBILE ELEGANTE =====
@@ -996,9 +996,8 @@ function debounce(func, wait) {
     };
 }
 
-
-// ===== BOTÃO CTA MODERNO =====
-function initModernCTAButton() {
+// ===== BOTÃO CTA INTERATIVO =====
+function initCTAButton() {
     const ctaButton = document.querySelector('.cta-button');
     
     if (!ctaButton) return;
@@ -1023,20 +1022,18 @@ function initModernCTAButton() {
             transform: scale(0);
             animation: ripple 0.6s linear;
             pointer-events: none;
-            z-index: 1001;
         `;
         
         this.appendChild(ripple);
         
         setTimeout(() => {
-            if (ripple.parentNode) {
-                ripple.remove();
-            }
+            ripple.remove();
         }, 600);
         
-        // Feedback visual simples
+        // Adicionar classe de loading temporariamente
         this.classList.add('loading');
         
+        // Simular processamento
         setTimeout(() => {
             this.classList.remove('loading');
             this.classList.add('success');
@@ -1044,35 +1041,78 @@ function initModernCTAButton() {
             setTimeout(() => {
                 this.classList.remove('success');
             }, 2000);
-        }, 1000);
+        }, 1500);
     });
     
-    // Garantir que o botão sempre fique visível
-    function ensureButtonVisibility() {
-        if (ctaButton && (ctaButton.style.display === 'none' || 
-                          ctaButton.style.opacity === '0' || 
-                          ctaButton.style.visibility === 'hidden')) {
-            ctaButton.style.display = 'inline-flex';
-            ctaButton.style.opacity = '1';
-            ctaButton.style.visibility = 'visible';
-        }
-    }
+    // Efeito de hover com som
+    ctaButton.addEventListener('mouseenter', function() {
+        // Criar partículas extras no hover
+        createHoverParticles(this);
+    });
     
-    // Verificar a cada 5 segundos
-    setInterval(ensureButtonVisibility, 5000);
+    // Efeito de focus para acessibilidade
+    ctaButton.addEventListener('focus', function() {
+        this.style.transform = 'translateY(-5px) scale(1.02)';
+    });
+    
+    ctaButton.addEventListener('blur', function() {
+        this.style.transform = '';
+    });
 }
 
-// Adicionar keyframes para ripple
-const rippleStyle = document.createElement('style');
-rippleStyle.textContent = `
+function createHoverParticles(button) {
+    const particles = [];
+    
+    for (let i = 0; i < 5; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'hover-particle';
+        particle.style.cssText = `
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: rgba(255, 192, 234, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: hoverParticle 1s ease-out forwards;
+        `;
+        
+        // Posição aleatória
+        const x = Math.random() * 100;
+        const y = Math.random() * 100;
+        particle.style.left = x + '%';
+        particle.style.top = y + '%';
+        
+        button.appendChild(particle);
+        particles.push(particle);
+        
+        setTimeout(() => {
+            particle.remove();
+        }, 1000);
+    }
+}
+
+// Adicionar keyframes para animações
+const style = document.createElement('style');
+style.textContent = `
     @keyframes ripple {
         to {
             transform: scale(4);
             opacity: 0;
         }
     }
+    
+    @keyframes hoverParticle {
+        0% {
+            transform: scale(0) translateY(0);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(1) translateY(-50px);
+            opacity: 0;
+        }
+    }
 `;
-document.head.appendChild(rippleStyle);
+document.head.appendChild(style);
 
 // ===== SERVICE WORKER (OPCIONAL) =====
 if ('serviceWorker' in navigator) {
