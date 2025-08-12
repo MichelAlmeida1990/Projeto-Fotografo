@@ -641,11 +641,11 @@ header.scrolled {
     }
     
     .portfolio-item {
-        min-height: 220px;
+        min-height: 260px;
     }
     
     .portfolio-item img {
-        height: 200px;
+        height: 240px;
     }
     
     /* ===== ELEMENTOS DE TEXTO REMOVIDOS NO TABLET ===== */
@@ -934,6 +934,7 @@ section {
     /* Garantir que não cause overflow */
     max-width: 100%;
     box-sizing: border-box;
+    min-height: 320px;
 }
 
 .portfolio-item:nth-child(1) { animation-delay: 0.1s; }
@@ -1022,7 +1023,7 @@ section {
 
 .portfolio-item img {
     width: 100%;
-    height: 250px;
+    height: 320px;
     object-fit: cover;
     transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     filter: contrast(1.1) saturate(1.2);
@@ -1878,11 +1879,11 @@ html {
     .portfolio-item {
         transform-style: flat;
         border-radius: 15px;
-        min-height: 200px;
+        min-height: 240px;
     }
     
     .portfolio-item img {
-        height: 180px;
+        height: 220px;
         object-fit: cover;
     }
     
@@ -1989,11 +1990,11 @@ html {
     }
     
     .portfolio-item {
-        min-height: 180px;
+        min-height: 220px;
     }
     
     .portfolio-item img {
-        height: 160px;
+        height: 200px;
     }
     
     /* ===== ELEMENTOS DE TEXTO REMOVIDOS NO MOBILE PEQUENO ===== */
@@ -2292,4 +2293,389 @@ body.loaded {
         grid-template-columns: repeat(3, 1fr) !important;
         gap: 1rem !important;
     }
+} 
+
+/* ===== GALERIA MOBILE ESPECIAL ===== */
+.mobile-gallery-section {
+    margin-top: 3rem;
+    padding: 1rem 0;
+    background: linear-gradient(135deg, rgba(255, 192, 234, 0.1), rgba(180, 69, 122, 0.1));
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.mobile-gallery-container {
+    position: relative;
+    max-width: 100%;
+    overflow: hidden;
+    padding: 1rem 0;
+}
+
+.mobile-gallery-track {
+    display: flex;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    gap: 1rem;
+    padding: 0 1rem;
+}
+
+.mobile-gallery-card {
+    flex: 0 0 280px;
+    height: 380px;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transform-style: preserve-3d;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+}
+
+.mobile-gallery-card:hover {
+    transform: translateY(-10px) scale(1.05) rotateY(5deg);
+    box-shadow: 
+        0 30px 80px rgba(0, 0, 0, 0.4),
+        0 0 0 2px rgba(255, 192, 234, 0.3);
+}
+
+.mobile-card-image {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+}
+
+.mobile-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-gallery-card:hover .mobile-card-image img {
+    transform: scale(1.1);
+}
+
+.mobile-card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    padding: 2rem 1.5rem 1.5rem;
+    color: white;
+    transform: translateY(100%);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-gallery-card:hover .mobile-card-overlay {
+    transform: translateY(0);
+}
+
+.mobile-card-category {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--light-pink);
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.mobile-card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.mobile-card-effects {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.mobile-card-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0;
+    height: 0;
+    background: radial-gradient(circle, rgba(255, 192, 234, 0.6) 0%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0;
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-gallery-card:hover .mobile-card-glow {
+    width: 200px;
+    height: 200px;
+    opacity: 1;
+}
+
+.mobile-card-particles {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+}
+
+.mobile-card-particles::before,
+.mobile-card-particles::after {
+    content: '';
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 192, 234, 0.8);
+    border-radius: 50%;
+    animation: mobileParticleFloat 3s ease-in-out infinite;
+}
+
+.mobile-card-particles::before {
+    top: 20%;
+    left: 20%;
+    animation-delay: 0s;
+}
+
+.mobile-card-particles::after {
+    top: 60%;
+    right: 20%;
+    animation-delay: 1.5s;
+}
+
+@keyframes mobileParticleFloat {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+        opacity: 0;
+    }
+    50% {
+        transform: translateY(-20px) scale(1.5);
+        opacity: 1;
+    }
+}
+
+/* ===== INDICADORES DA GALERIA MOBILE ===== */
+.mobile-gallery-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    padding: 0 1rem;
+}
+
+.mobile-gallery-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.mobile-gallery-indicator.active {
+    background: var(--light-pink);
+    transform: scale(1.3);
+    box-shadow: 0 0 10px rgba(255, 192, 234, 0.6);
+}
+
+.mobile-gallery-indicator::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255, 192, 234, 0.3) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.mobile-gallery-indicator.active::before {
+    opacity: 1;
+}
+
+/* ===== CONTROLES DA GALERIA MOBILE ===== */
+.mobile-gallery-controls {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    padding: 0 0.5rem;
+    pointer-events: none;
+}
+
+.mobile-gallery-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: var(--dark-primary);
+    transition: all 0.3s ease;
+    pointer-events: auto;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.mobile-gallery-btn:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+.mobile-gallery-btn:active {
+    transform: scale(0.95);
+}
+
+.mobile-gallery-btn i {
+    transition: transform 0.3s ease;
+}
+
+.mobile-gallery-btn:hover i {
+    transform: scale(1.2);
+}
+
+/* ===== ANIMAÇÕES DE ENTRADA ===== */
+.mobile-gallery-card {
+    animation: mobileCardReveal 0.8s ease-out both;
+}
+
+.mobile-gallery-card:nth-child(1) { animation-delay: 0.1s; }
+.mobile-gallery-card:nth-child(2) { animation-delay: 0.2s; }
+.mobile-gallery-card:nth-child(3) { animation-delay: 0.3s; }
+.mobile-gallery-card:nth-child(4) { animation-delay: 0.4s; }
+.mobile-gallery-card:nth-child(5) { animation-delay: 0.5s; }
+.mobile-gallery-card:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes mobileCardReveal {
+    from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.8) rotateX(15deg);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotateX(0deg);
+    }
+}
+
+/* ===== RESPONSIVIDADE DA GALERIA MOBILE ===== */
+@media (max-width: 480px) {
+    .mobile-gallery-card {
+        flex: 0 0 260px;
+        height: 350px;
+    }
+    
+    .mobile-gallery-track {
+        gap: 0.8rem;
+        padding: 0 0.8rem;
+    }
+    
+    .mobile-card-overlay {
+        padding: 1.5rem 1rem 1rem;
+    }
+    
+    .mobile-card-title {
+        font-size: 1rem;
+    }
+    
+    .mobile-gallery-controls {
+        padding: 0 0.3rem;
+    }
+    
+    .mobile-gallery-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+}
+
+/* ===== OTIMIZAÇÕES DE TOUCH ===== */
+.mobile-gallery-card {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+.mobile-gallery-card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s ease;
+}
+
+/* ===== EFEITO DE PARALLAX ===== */
+.mobile-gallery-card {
+    transform-style: preserve-3d;
+}
+
+.mobile-card-image {
+    transform: translateZ(0);
+    transition: transform 0.3s ease;
+}
+
+.mobile-gallery-card:hover .mobile-card-image {
+    transform: translateZ(20px);
+}
+
+/* ===== EFEITO DE GLASSMORPHISM ===== */
+.mobile-gallery-section {
+    background: linear-gradient(135deg, 
+        rgba(255, 192, 234, 0.1) 0%, 
+        rgba(180, 69, 122, 0.05) 50%, 
+        rgba(255, 192, 234, 0.1) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ===== MICRO-INTERACTIONS ===== */
+.mobile-gallery-indicator {
+    position: relative;
+    overflow: hidden;
+}
+
+.mobile-gallery-indicator::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+    transition: left 0.5s ease;
+}
+
+.mobile-gallery-indicator:hover::after {
+    left: 100%;
+}
+
+/* ===== EFEITO DE PULSO NOS INDICADORES ATIVOS ===== */
+@keyframes mobileIndicatorPulse {
+    0%, 100% {
+        transform: scale(1.3);
+        box-shadow: 0 0 10px rgba(255, 192, 234, 0.6);
+    }
+    50% {
+        transform: scale(1.5);
+        box-shadow: 0 0 20px rgba(255, 192, 234, 0.8);
+    }
+}
+
+.mobile-gallery-indicator.active {
+    animation: mobileIndicatorPulse 2s ease-in-out infinite;
 } 

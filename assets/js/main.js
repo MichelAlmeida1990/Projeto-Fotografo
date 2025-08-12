@@ -57,6 +57,11 @@ document.addEventListener('DOMContentLoaded', function() {
             initMasonryLayout();
         }
         
+        // Inicializar galeria mobile se estiver em mobile
+        if (window.innerWidth <= 768 && portfolioItems && portfolioItems.length > 0) {
+            initMobileGallery();
+        }
+        
         // Remover initAdvancedFeatures temporariamente para evitar conflitos
         // initAdvancedFeatures();
     }, 2000);
@@ -95,16 +100,31 @@ function initMobileMenu() {
     updateMobileMenu();
     window.addEventListener('resize', updateMobileMenu);
     
-    // Gerenciar galeria masonry no redimensionamento
+    // Gerenciar galerias no redimensionamento
     window.addEventListener('resize', debounce(() => {
         const masonrySection = document.querySelector('.masonry-section');
+        const mobileGallery = document.querySelector('.mobile-gallery-section');
+        
         if (window.innerWidth <= 768) {
             // Remover masonry em mobile
             if (masonrySection) {
                 masonrySection.remove();
                 console.log('Masonry layout removido para mobile');
             }
+            
+            // Adicionar galeria mobile se não existir
+            if (!mobileGallery && portfolioItems && portfolioItems.length > 0) {
+                setTimeout(() => {
+                    initMobileGallery();
+                }, 300);
+            }
         } else {
+            // Remover galeria mobile em desktop
+            if (mobileGallery) {
+                mobileGallery.remove();
+                console.log('Galeria mobile removida para desktop');
+            }
+            
             // Adicionar masonry em desktop se não existir
             if (!masonrySection && portfolioItems && portfolioItems.length > 0) {
                 setTimeout(() => {
@@ -2101,3 +2121,230 @@ window.AuthSystem = {
     handleAdminLogout,
     initAuthSystem
 };
+
+// ===== GALERIA MOBILE ESPECIAL =====
+function initMobileGallery() {
+    // Verificar se estamos em mobile
+    if (window.innerWidth > 768) {
+        return;
+    }
+    
+    // Verificar se já existe a galeria mobile
+    const existingMobileGallery = document.querySelector('.mobile-gallery-section');
+    if (existingMobileGallery) {
+        existingMobileGallery.remove();
+    }
+    
+    const portfolioSection = document.getElementById('portfolio');
+    if (!portfolioSection || !portfolioItems || portfolioItems.length === 0) return;
+    
+    // Criar seção da galeria mobile
+    const mobileGallerySection = document.createElement('div');
+    mobileGallerySection.className = 'mobile-gallery-section';
+    mobileGallerySection.innerHTML = `
+        <div class="section-title">
+            <h2>📱 Galeria Mobile</h2>
+            <p>Deslize para navegar • Toque para ampliar</p>
+        </div>
+        <div class="mobile-gallery-container">
+            <div class="mobile-gallery-track" id="mobile-gallery-track"></div>
+            <div class="mobile-gallery-indicators" id="mobile-gallery-indicators"></div>
+            <div class="mobile-gallery-controls">
+                <button class="mobile-gallery-btn prev" id="mobile-prev">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="mobile-gallery-btn next" id="mobile-next">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    portfolioSection.appendChild(mobileGallerySection);
+    
+    // Criar cards da galeria mobile
+    const track = document.getElementById('mobile-gallery-track');
+    const indicators = document.getElementById('mobile-gallery-indicators');
+    
+    portfolioItems.forEach((item, index) => {
+        // Card principal
+        const card = document.createElement('div');
+        card.className = 'mobile-gallery-card';
+        card.setAttribute('data-index', index);
+        
+        // Corrigir caminho da imagem
+        let imagePath = item.src;
+        if (!imagePath.startsWith('assets/')) {
+            imagePath = `assets/image/${item.src.split('/').pop()}`;
+        }
+        
+        card.innerHTML = `
+            <div class="mobile-card-image">
+                <img src="${imagePath}" alt="${item.title}" loading="lazy">
+                <div class="mobile-card-overlay">
+                    <div class="mobile-card-category">${item.category}</div>
+                    <div class="mobile-card-title">${item.title}</div>
+                </div>
+            </div>
+            <div class="mobile-card-effects">
+                <div class="mobile-card-glow"></div>
+                <div class="mobile-card-particles"></div>
+            </div>
+        `;
+        
+        // Indicador
+        const indicator = document.createElement('div');
+        indicator.className = 'mobile-gallery-indicator';
+        indicator.setAttribute('data-index', index);
+        
+        track.appendChild(card);
+        indicators.appendChild(indicator);
+        
+        // Event listeners
+        card.addEventListener('click', () => openPortfolioModal(item));
+        indicator.addEventListener('click', () => goToSlide(index));
+    });
+    
+    // Configurar navegação
+    setupMobileGalleryNavigation();
+    
+    console.log('Galeria mobile criada com', portfolioItems.length, 'cards');
+}
+
+// ===== NAVEGAÇÃO DA GALERIA MOBILE =====
+function setupMobileGalleryNavigation() {
+    const track = document.getElementById('mobile-gallery-track');
+    const indicators = document.querySelectorAll('.mobile-gallery-indicator');
+    const prevBtn = document.getElementById('mobile-prev');
+    const nextBtn = document.getElementById('mobile-next');
+    
+    if (!track) return;
+    
+    let currentIndex = 0;
+    const totalSlides = indicators.length;
+    
+    function updateGallery() {
+        // Atualizar posição do track
+        const cardWidth = track.querySelector('.mobile-gallery-card').offsetWidth;
+        track.style.transform = `translateX(-${currentIndex * cardWidth}px)`;
+        
+        // Atualizar indicadores
+        indicators.forEach((indicator, index) => {
+            indicator.classList.toggle('active', index === currentIndex);
+        });
+        
+        // Atualizar botões
+        prevBtn.style.opacity = currentIndex === 0 ? '0.5' : '1';
+        nextBtn.style.opacity = currentIndex === totalSlides - 1 ? '0.5' : '1';
+        
+        // Adicionar haptic feedback (se disponível)
+        if ('vibrate' in navigator) {
+            navigator.vibrate(50);
+        }
+    }
+    
+    function goToSlide(index) {
+        currentIndex = Math.max(0, Math.min(index, totalSlides - 1));
+        updateGallery();
+    }
+    
+    function nextSlide() {
+        if (currentIndex < totalSlides - 1) {
+            currentIndex++;
+            updateGallery();
+        }
+    }
+    
+    function prevSlide() {
+        if (currentIndex > 0) {
+            currentIndex--;
+            updateGallery();
+        }
+    }
+    
+    // Event listeners
+    prevBtn.addEventListener('click', prevSlide);
+    nextBtn.addEventListener('click', nextSlide);
+    
+    // Swipe gestures
+    let startX = 0;
+    let currentX = 0;
+    
+    track.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+    });
+    
+    track.addEventListener('touchmove', (e) => {
+        currentX = e.touches[0].clientX;
+        const diff = startX - currentX;
+        
+        // Adicionar resistência visual
+        if (Math.abs(diff) > 50) {
+            track.style.transform = `translateX(-${currentIndex * track.querySelector('.mobile-gallery-card').offsetWidth - diff * 0.3}px)`;
+        }
+    });
+    
+    track.addEventListener('touchend', (e) => {
+        const diff = startX - currentX;
+        const threshold = 100;
+        
+        if (Math.abs(diff) > threshold) {
+            if (diff > 0) {
+                nextSlide();
+            } else {
+                prevSlide();
+            }
+        } else {
+            updateGallery(); // Voltar à posição original
+        }
+    });
+    
+    // Inicializar
+    updateGallery();
+    
+    // Auto-play (opcional)
+    let autoPlayInterval;
+    
+    function startAutoPlay() {
+        autoPlayInterval = setInterval(() => {
+            if (currentIndex < totalSlides - 1) {
+                nextSlide();
+            } else {
+                currentIndex = 0;
+                updateGallery();
+            }
+        }, 5000);
+    }
+    
+    function stopAutoPlay() {
+        clearInterval(autoPlayInterval);
+    }
+    
+    // Pausar auto-play quando o usuário interage
+    track.addEventListener('touchstart', stopAutoPlay);
+    track.addEventListener('mouseenter', stopAutoPlay);
+    track.addEventListener('mouseleave', startAutoPlay);
+    
+    // Iniciar auto-play
+    startAutoPlay();
+}
+
+// ===== GESTÃO DA GALERIA MOBILE NO REDIMENSIONAMENTO =====
+function manageMobileGallery() {
+    const mobileGallery = document.querySelector('.mobile-gallery-section');
+    
+    if (window.innerWidth <= 768) {
+        // Criar galeria mobile se não existir
+        if (!mobileGallery && portfolioItems && portfolioItems.length > 0) {
+            setTimeout(() => {
+                initMobileGallery();
+            }, 300);
+        }
+    } else {
+        // Remover galeria mobile em desktop
+        if (mobileGallery) {
+            mobileGallery.remove();
+            console.log('Galeria mobile removida para desktop');
+        }
+    }
+}
