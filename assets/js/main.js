@@ -51,6 +51,12 @@ document.addEventListener('DOMContentLoaded', function() {
         initPhotoEffects();
         initScrollAnimations();
         initPhotoParticles();
+        
+        // Inicializar masonry layout apenas em desktop após carregamento
+        if (window.innerWidth > 768 && portfolioItems && portfolioItems.length > 0) {
+            initMasonryLayout();
+        }
+        
         // Remover initAdvancedFeatures temporariamente para evitar conflitos
         // initAdvancedFeatures();
     }, 2000);
@@ -100,7 +106,7 @@ function initMobileMenu() {
             }
         } else {
             // Adicionar masonry em desktop se não existir
-            if (!masonrySection && portfolioItems.length > 0) {
+            if (!masonrySection && portfolioItems && portfolioItems.length > 0) {
                 setTimeout(() => {
                     initMasonryLayout();
                 }, 300);
@@ -242,16 +248,8 @@ function loadPortfolioImages() {
     portfolioItems = portfolioData;
     renderPortfolio(portfolioItems);
     
-    // Inicializar masonry layout apenas em desktop
-    if (window.innerWidth > 768) {
-        setTimeout(() => {
-            // Verificar se já existe masonry antes de criar
-            const existingMasonry = document.querySelector('.masonry-section');
-            if (!existingMasonry) {
-                initMasonryLayout();
-            }
-        }, 500);
-    }
+    // Inicializar masonry layout apenas em desktop (removido para evitar duplicação)
+    // A galeria masonry será criada apenas através do listener de resize
 }
 
 function renderPortfolio(items) {
@@ -1561,6 +1559,12 @@ function initMasonryLayout() {
     // Adicionar seção de masonry layout apenas em desktop
     if (window.innerWidth <= 768) {
         console.log('Masonry layout não será criado em mobile');
+        return;
+    }
+    
+    // Verificar se portfolioItems está disponível
+    if (!portfolioItems || portfolioItems.length === 0) {
+        console.log('Portfolio items não disponíveis para masonry');
         return;
     }
     
