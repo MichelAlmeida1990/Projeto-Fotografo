@@ -309,9 +309,9 @@ function loadPortfolioImages() {
         { id: 67, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.09.jpeg', category: 'ensaio-pessoal', title: 'Ensaio Feminino', description: 'Sessão fotográfica feminina com técnica profissional e iluminação artística' },
         { id: 68, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.09 (1).jpeg', category: 'ensaio-pessoal', title: 'Retrato Profissional', description: 'Sessão de retrato profissional com técnica avançada e iluminação artística' },
         { id: 69, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.10.jpeg', category: 'ensaio-pessoal', title: 'Ensaio Artístico', description: 'Sessão fotográfica artística com técnica profissional e iluminação criativa' },
-        { id: 70, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.10 (1).jpeg', category: 'ensaio-pessoal', title: 'Ensaio Pessoal', description: 'Sessão fotográfica pessoal com técnica de retrato e iluminação profissional' },
+        // REMOVIDO - DUPLICATA: { id: 70, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.10 (1).jpeg', category: 'ensaio-pessoal', title: 'Ensaio Pessoal', description: 'Sessão fotográfica pessoal com técnica de retrato e iluminação profissional' },
         { id: 71, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.10 (2).jpeg', category: 'ensaio-pessoal', title: 'Retrato Editorial', description: 'Retrato editorial com conceito artístico e iluminação profissional' },
-        { id: 72, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.10 (3).jpeg', category: 'ensaio-pessoal', title: 'Ensaio Contemporâneo', description: 'Sessão fotográfica contemporânea com estilo moderno e urbano' },
+        // REMOVIDO - DUPLICATA: { id: 72, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.10 (3).jpeg', category: 'ensaio-pessoal', title: 'Ensaio Contemporâneo', description: 'Sessão fotográfica contemporânea com estilo moderno e urbano' },
         { id: 73, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.11.jpeg', category: 'ensaio-pessoal', title: 'Fotografia Artística', description: 'Fotografia artística com técnica criativa e iluminação dramática' },
         
         // Sessão 2025-08-05 - 22:11 (continuação)
@@ -383,7 +383,18 @@ function renderPortfolio(items) {
             <img src="${imagePath}" alt="${item.title}" loading="lazy" onerror="this.style.display='none'; console.error('Erro ao carregar:', this.src);">
         `;
         
-        portfolioItem.addEventListener('click', () => openPortfolioModal(item));
+        portfolioItem.addEventListener('click', () => {
+            // Debug: Mostrar informações da foto clicada
+            console.log('🖼️ FOTO CLICADA (GALERIA PRINCIPAL):');
+            console.log('📁 Arquivo:', item.src);
+            console.log('📝 Título:', item.title);
+            console.log('🏷️ Categoria:', item.category);
+            console.log('🆔 ID:', item.id);
+            console.log('📄 Descrição:', item.description);
+            console.log('---');
+            
+            openPortfolioModal(item);
+        });
         grid.appendChild(portfolioItem);
     });
     
@@ -1714,7 +1725,18 @@ function initMasonryLayout() {
             </div>
         `;
         
-        masonryItem.addEventListener('click', () => openPortfolioModal(item));
+        masonryItem.addEventListener('click', () => {
+            // Debug: Mostrar informações da foto clicada
+            console.log('🖼️ FOTO CLICADA (GALERIA MASONRY):');
+            console.log('📁 Arquivo:', item.src);
+            console.log('📝 Título:', item.title);
+            console.log('🏷️ Categoria:', item.category);
+            console.log('🆔 ID:', item.id);
+            console.log('📄 Descrição:', item.description);
+            console.log('---');
+            
+            openPortfolioModal(item);
+        });
         masonryGrid.appendChild(masonryItem);
     });
     
@@ -2309,7 +2331,18 @@ function initMobileGallery() {
         indicators.appendChild(indicator);
         
         // Event listeners
-        card.addEventListener('click', () => openPortfolioModal(item));
+        card.addEventListener('click', () => {
+            // Debug: Mostrar informações da foto clicada
+            console.log('🖼️ FOTO CLICADA (GALERIA MOBILE):');
+            console.log('📁 Arquivo:', item.src);
+            console.log('📝 Título:', item.title);
+            console.log('🏷️ Categoria:', item.category);
+            console.log('🆔 ID:', item.id);
+            console.log('📄 Descrição:', item.description);
+            console.log('---');
+            
+            openPortfolioModal(item);
+        });
         indicator.addEventListener('click', () => {
             // Verificar se goToSlide está disponível
             if (typeof goToSlide === 'function') {
