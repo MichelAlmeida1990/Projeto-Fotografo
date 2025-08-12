@@ -52,14 +52,25 @@ document.addEventListener('DOMContentLoaded', function() {
         initScrollAnimations();
         initPhotoParticles();
         
+        console.log('Inicializando galerias...');
+        console.log('Window width:', window.innerWidth);
+        console.log('Portfolio items:', portfolioItems ? portfolioItems.length : 'undefined');
+        
         // Inicializar masonry layout apenas em desktop após carregamento
         if (window.innerWidth > 768 && portfolioItems && portfolioItems.length > 0) {
+            console.log('Inicializando masonry layout...');
             initMasonryLayout();
         }
         
         // Inicializar galeria mobile se estiver em mobile
         if (window.innerWidth <= 768 && portfolioItems && portfolioItems.length > 0) {
+            console.log('Inicializando galeria mobile...');
             initMobileGallery();
+        } else {
+            console.log('Condições não atendidas para galeria mobile:');
+            console.log('- Width <= 768:', window.innerWidth <= 768);
+            console.log('- Portfolio items exist:', !!portfolioItems);
+            console.log('- Portfolio items length > 0:', portfolioItems ? portfolioItems.length > 0 : false);
         }
         
         // Remover initAdvancedFeatures temporariamente para evitar conflitos
@@ -70,6 +81,17 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(() => {
         initAuthSystem();
     }, 500);
+    
+    // Verificação final para galeria mobile (backup)
+    setTimeout(() => {
+        if (window.innerWidth <= 768 && portfolioItems && portfolioItems.length > 0) {
+            const mobileGallery = document.querySelector('.mobile-gallery-section');
+            if (!mobileGallery) {
+                console.log('🔄 Verificação final: Criando galeria mobile...');
+                initMobileGallery();
+            }
+        }
+    }, 3000);
 });
 
 // ===== MENU MOBILE ELEGANTE =====
@@ -267,6 +289,16 @@ function loadPortfolioImages() {
     
     portfolioItems = portfolioData;
     renderPortfolio(portfolioItems);
+    
+    console.log('Portfolio items carregados:', portfolioItems.length);
+    
+    // Inicializar galeria mobile imediatamente se estiver em mobile
+    if (window.innerWidth <= 768) {
+        console.log('Inicializando galeria mobile após carregamento...');
+        setTimeout(() => {
+            initMobileGallery();
+        }, 500);
+    }
     
     // Inicializar masonry layout apenas em desktop (removido para evitar duplicação)
     // A galeria masonry será criada apenas através do listener de resize
@@ -2124,19 +2156,33 @@ window.AuthSystem = {
 
 // ===== GALERIA MOBILE ESPECIAL =====
 function initMobileGallery() {
+    console.log('Função initMobileGallery chamada');
+    console.log('Window width:', window.innerWidth);
+    console.log('Portfolio items:', portfolioItems ? portfolioItems.length : 'undefined');
+    
     // Verificar se estamos em mobile
     if (window.innerWidth > 768) {
+        console.log('Não é mobile, saindo...');
         return;
     }
     
     // Verificar se já existe a galeria mobile
     const existingMobileGallery = document.querySelector('.mobile-gallery-section');
     if (existingMobileGallery) {
+        console.log('Removendo galeria mobile existente...');
         existingMobileGallery.remove();
     }
     
     const portfolioSection = document.getElementById('portfolio');
-    if (!portfolioSection || !portfolioItems || portfolioItems.length === 0) return;
+    if (!portfolioSection) {
+        console.log('Seção portfolio não encontrada');
+        return;
+    }
+    
+    if (!portfolioItems || portfolioItems.length === 0) {
+        console.log('Portfolio items não disponíveis');
+        return;
+    }
     
     // Criar seção da galeria mobile
     const mobileGallerySection = document.createElement('div');
@@ -2208,7 +2254,8 @@ function initMobileGallery() {
     // Configurar navegação
     setupMobileGalleryNavigation();
     
-    console.log('Galeria mobile criada com', portfolioItems.length, 'cards');
+    console.log('✅ Galeria mobile criada com', portfolioItems.length, 'cards');
+    console.log('Elemento criado:', document.querySelector('.mobile-gallery-section'));
 }
 
 // ===== NAVEGAÇÃO DA GALERIA MOBILE =====
