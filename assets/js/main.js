@@ -19,6 +19,27 @@ function debounce(func, wait) {
     };
 }
 
+// Função para encontrar duplicatas no portfolio
+function findDuplicates(items) {
+    const seen = new Set();
+    const duplicates = [];
+    
+    items.forEach((item, index) => {
+        const key = `${item.src}-${item.title}`;
+        if (seen.has(key)) {
+            duplicates.push({
+                index,
+                item,
+                key
+            });
+        } else {
+            seen.add(key);
+        }
+    });
+    
+    return duplicates;
+}
+
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
     // Esconder loading screen após carregamento
@@ -286,6 +307,12 @@ function loadPortfolioImages() {
         { id: 79, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.09.49 (2).jpeg', category: 'aniversario', title: 'Celebração Familiar', description: 'Celebração de aniversário em família com momentos de união' },
         { id: 80, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.09.49 (3).jpeg', category: 'aniversario', title: 'Festa Infantil', description: 'Aniversário infantil com decoração temática e diversão' }
     ];
+    
+    // Verificar duplicatas no portfolioData
+    const duplicates = findDuplicates(portfolioData);
+    if (duplicates.length > 0) {
+        console.log('⚠️ Duplicatas encontradas no portfolioData:', duplicates);
+    }
     
     portfolioItems = portfolioData;
     renderPortfolio(portfolioItems);
@@ -2212,7 +2239,18 @@ function initMobileGallery() {
     const track = document.getElementById('mobile-gallery-track');
     const indicators = document.getElementById('mobile-gallery-indicators');
     
+    console.log('Criando cards da galeria mobile...');
+    const uniqueItems = new Set();
+    
     portfolioItems.forEach((item, index) => {
+        // Verificar se o item já foi processado
+        const itemKey = `${item.src}-${item.title}`;
+        if (uniqueItems.has(itemKey)) {
+            console.log('⚠️ Item duplicado encontrado:', item.title, item.src);
+            return; // Pular item duplicado
+        }
+        uniqueItems.add(itemKey);
+        
         // Card principal
         const card = document.createElement('div');
         card.className = 'mobile-gallery-card';
@@ -2248,8 +2286,17 @@ function initMobileGallery() {
         
         // Event listeners
         card.addEventListener('click', () => openPortfolioModal(item));
-        indicator.addEventListener('click', () => goToSlide(index));
+        indicator.addEventListener('click', () => {
+            // Verificar se goToSlide está disponível
+            if (typeof goToSlide === 'function') {
+                goToSlide(index);
+            } else {
+                console.log('Função goToSlide não disponível ainda');
+            }
+        });
     });
+    
+    console.log('Cards únicos criados:', uniqueItems.size);
     
     // Configurar navegação
     setupMobileGalleryNavigation();
