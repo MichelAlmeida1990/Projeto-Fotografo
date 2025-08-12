@@ -38,6 +38,8 @@ document.addEventListener('DOMContentLoaded', function() {
         initPhotoEffects();
         initScrollAnimations();
         initPhotoParticles();
+        // Remover initAdvancedFeatures temporariamente para evitar conflitos
+        // initAdvancedFeatures();
     }, 2000);
 });
 
@@ -96,8 +98,9 @@ function initPortfolio() {
 }
 
 function loadPortfolioImages() {
-    // Mapeamento correto das imagens com suas descrições detalhadas
+    // Mapeamento expandido das imagens com todas as fotos disponíveis
     const portfolioData = [
+        // Fotos originais (1-36)
         { id: 1, src: 'assets/image/foto_01.jpg', category: 'aniversario', title: 'Aniversário Infantil', description: 'Celebração de aniversário com tema colorido, decoração festiva e momentos de alegria com família e amigos' },
         { id: 2, src: 'assets/image/foto_02.jpg', category: 'evento', title: 'Evento Corporativo', description: 'Cobertura profissional de evento empresarial com networking, palestras e interação entre participantes' },
         { id: 3, src: 'assets/image/foto_03.jpg', category: 'casamento-civil', title: 'Casamento Civil', description: 'Cerimônia íntima de casamento civil com momentos especiais, troca de alianças e celebração do amor' },
@@ -133,11 +136,79 @@ function loadPortfolioImages() {
         { id: 33, src: 'assets/image/foto_33.jpg', category: 'casamento-civil', title: 'Casamento Íntimo', description: 'Casamento civil com cerimônia íntima e especial, focando na intimidade' },
         { id: 34, src: 'assets/image/foto_34.jpg', category: 'gestante', title: 'Ensaio Gestante', description: 'Fotografia de gestante com técnica de iluminação natural e cenários artísticos' },
         { id: 35, src: 'assets/image/foto_35.jpg', category: 'bebe', title: 'Sessão Bebê', description: 'Ensaio fotográfico de bebê com cenários delicados e técnica macro' },
-        { id: 36, src: 'assets/image/foto_36.jpg', category: 'ensaio-pessoal', title: 'Retrato Profissional', description: 'Sessão de retrato profissional com técnica avançada e iluminação artística' }
+        { id: 36, src: 'assets/image/foto_36.jpg', category: 'ensaio-pessoal', title: 'Retrato Profissional', description: 'Sessão de retrato profissional com técnica avançada e iluminação artística' },
+        
+        // Fotos do WhatsApp - Categorizadas por data e conteúdo
+        // Sessão 2025-08-06
+        { id: 37, src: 'assets/image/WhatsApp Image 2025-08-06 at 15.27.15.jpeg', category: 'ensaio-pessoal', title: 'Ensaio Feminino Elegante', description: 'Sessão fotográfica feminina com iluminação natural e cenários sofisticados' },
+        { id: 38, src: 'assets/image/WhatsApp Image 2025-08-06 at 15.27.15 (1).jpeg', category: 'ensaio-pessoal', title: 'Retrato Artístico', description: 'Retrato artístico com técnica de iluminação dramática e composição criativa' },
+        { id: 39, src: 'assets/image/WhatsApp Image 2025-08-06 at 15.27.15 (2).jpeg', category: 'ensaio-pessoal', title: 'Ensaio Contemporâneo', description: 'Sessão fotográfica contemporânea com estilo moderno e urbano' },
+        { id: 40, src: 'assets/image/WhatsApp Image 2025-08-06 at 15.27.15 (3).jpeg', category: 'ensaio-pessoal', title: 'Fotografia Editorial', description: 'Fotografia editorial com conceito artístico e iluminação profissional' },
+        
+        // Sessão 2025-08-05 - 22:16
+        { id: 41, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.16.48.jpeg', category: 'evento', title: 'Evento Corporativo', description: 'Cobertura de evento corporativo com networking e momentos profissionais' },
+        { id: 42, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.16.48 (1).jpeg', category: 'evento', title: 'Conferência Empresarial', description: 'Fotografia de conferência empresarial com palestras e interação' },
+        { id: 43, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.16.48 (2).jpeg', category: 'evento', title: 'Networking Profissional', description: 'Momentos de networking e conexões profissionais em evento' },
+        { id: 44, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.16.48 (3).jpeg', category: 'evento', title: 'Apresentação Corporativa', description: 'Apresentação corporativa com foco em comunicação e engajamento' },
+        
+        // Sessão 2025-08-05 - 22:15
+        { id: 45, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.15.39.jpeg', category: 'aniversario', title: 'Festa de Aniversário', description: 'Celebração de aniversário com decoração festiva e momentos de alegria' },
+        { id: 46, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.15.39 (1).jpeg', category: 'aniversario', title: 'Aniversário Especial', description: 'Aniversário com decoração personalizada e momentos especiais' },
+        { id: 47, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.15.40.jpeg', category: 'aniversario', title: 'Celebração Familiar', description: 'Celebração de aniversário em família com momentos de união' },
+        { id: 48, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.15.40 (1).jpeg', category: 'aniversario', title: 'Festa Infantil', description: 'Aniversário infantil com decoração temática e diversão' },
+        { id: 49, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.15.41.jpeg', category: 'aniversario', title: 'Momento Especial', description: 'Momento especial de aniversário com família e amigos' },
+        
+        // Sessão 2025-08-05 - 22:14
+        { id: 50, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.14.40.jpeg', category: 'gestante', title: 'Ensaio Gestante Natural', description: 'Sessão fotográfica para gestantes com iluminação natural e cenários suaves' },
+        { id: 51, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.14.41.jpeg', category: 'gestante', title: 'Maternidade Artística', description: 'Fotografia de maternidade com técnica artística e iluminação criativa' },
+        { id: 52, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.14.42.jpeg', category: 'gestante', title: 'Sessão Maternidade', description: 'Ensaio fotográfico de maternidade com técnica natural e iluminação suave' },
+        { id: 53, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.14.42 (1).jpeg', category: 'gestante', title: 'Fotografia Gestante', description: 'Fotografia de gestante com técnica de iluminação natural e cenários artísticos' },
+        
+        // Sessão 2025-08-05 - 22:13
+        { id: 54, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.13.38.jpeg', category: 'casamento-civil', title: 'Casamento Íntimo', description: 'Casamento civil com cerimônia íntima e momentos especiais' },
+        { id: 55, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.13.38 (1).jpeg', category: 'casamento-civil', title: 'Casamento Simples', description: 'Casamento civil com cerimônia simples e elegante' },
+        { id: 56, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.13.39.jpeg', category: 'casamento-civil', title: 'Casamento Familiar', description: 'Casamento civil com presença da família e momentos especiais' },
+        { id: 57, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.13.39 (1).jpeg', category: 'casamento-civil', title: 'Casamento Elegante', description: 'Casamento civil com cerimônia elegante e sofisticada' },
+        { id: 58, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.13.39 (2).jpeg', category: 'casamento-civil', title: 'Casamento Civil', description: 'Cerimônia íntima de casamento civil com momentos especiais' },
+        { id: 59, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.13.39 (3).jpeg', category: 'casamento-civil', title: 'Casamento Simples', description: 'Casamento civil com cerimônia descontraída e momentos de alegria' },
+        { id: 60, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.13.39 (4).jpeg', category: 'casamento-civil', title: 'Casamento Íntimo', description: 'Casamento civil com cerimônia íntima e especial' },
+        { id: 61, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.13.39 (5).jpeg', category: 'casamento-civil', title: 'Casamento Familiar', description: 'Casamento civil com presença da família e momentos especiais' },
+        { id: 62, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.13.39 (6).jpeg', category: 'casamento-civil', title: 'Casamento Elegante', description: 'Casamento civil com cerimônia elegante e sofisticada' },
+        
+        // Sessão 2025-08-05 - 22:12
+        { id: 63, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.12.47.jpeg', category: 'bebe', title: 'Fotografia de Bebê', description: 'Sessão fotográfica de bebê com técnica macro, detalhes e cenários delicados' },
+        { id: 64, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.12.47 (1).jpeg', category: 'bebe', title: 'Sessão Bebê', description: 'Ensaio fotográfico de bebê com cenários delicados e técnica macro' },
+        { id: 65, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.12.48.jpeg', category: 'bebe', title: 'Fotografia Infantil', description: 'Sessão fotográfica infantil com técnica macro e cenários delicados' },
+        { id: 66, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.12.48 (1).jpeg', category: 'bebe', title: 'Ensaio Bebê', description: 'Fotografia de bebê com técnica macro, cenários delicados e captura de momentos únicos' },
+        
+        // Sessão 2025-08-05 - 22:11
+        { id: 67, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.09.jpeg', category: 'ensaio-pessoal', title: 'Ensaio Feminino', description: 'Sessão fotográfica feminina com técnica profissional e iluminação artística' },
+        { id: 68, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.09 (1).jpeg', category: 'ensaio-pessoal', title: 'Retrato Profissional', description: 'Sessão de retrato profissional com técnica avançada e iluminação artística' },
+        { id: 69, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.10.jpeg', category: 'ensaio-pessoal', title: 'Ensaio Artístico', description: 'Sessão fotográfica artística com técnica profissional e iluminação criativa' },
+        { id: 70, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.10 (1).jpeg', category: 'ensaio-pessoal', title: 'Ensaio Pessoal', description: 'Sessão fotográfica pessoal com técnica de retrato e iluminação profissional' },
+        { id: 71, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.10 (2).jpeg', category: 'ensaio-pessoal', title: 'Retrato Editorial', description: 'Retrato editorial com conceito artístico e iluminação profissional' },
+        { id: 72, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.10 (3).jpeg', category: 'ensaio-pessoal', title: 'Ensaio Contemporâneo', description: 'Sessão fotográfica contemporânea com estilo moderno e urbano' },
+        { id: 73, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.11.jpeg', category: 'ensaio-pessoal', title: 'Fotografia Artística', description: 'Fotografia artística com técnica criativa e iluminação dramática' },
+        
+        // Sessão 2025-08-05 - 22:11 (continuação)
+        { id: 74, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.58.jpeg', category: 'evento', title: 'Evento Social', description: 'Cobertura de evento social com momentos de interação e celebração' },
+        { id: 75, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.58 (1).jpeg', category: 'evento', title: 'Evento Comemorativo', description: 'Cobertura de evento comemorativo com momentos especiais e celebração' },
+        { id: 76, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.58 (2).jpeg', category: 'evento', title: 'Evento Especial', description: 'Cobertura de evento especial com momentos únicos e celebração' },
+        
+        // Sessão 2025-08-05 - 22:09
+        { id: 77, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.09.49.jpeg', category: 'aniversario', title: 'Festa de Aniversário', description: 'Celebração de aniversário com decoração festiva e momentos de alegria' },
+        { id: 78, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.09.49 (1).jpeg', category: 'aniversario', title: 'Aniversário Especial', description: 'Aniversário com decoração personalizada e momentos especiais' },
+        { id: 79, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.09.49 (2).jpeg', category: 'aniversario', title: 'Celebração Familiar', description: 'Celebração de aniversário em família com momentos de união' },
+        { id: 80, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.09.49 (3).jpeg', category: 'aniversario', title: 'Festa Infantil', description: 'Aniversário infantil com decoração temática e diversão' }
     ];
     
     portfolioItems = portfolioData;
     renderPortfolio(portfolioItems);
+    
+    // Inicializar masonry layout com delay para garantir carregamento
+    setTimeout(() => {
+        initMasonryLayout();
+    }, 500);
 }
 
 function renderPortfolio(items) {
@@ -150,11 +221,17 @@ function renderPortfolio(items) {
         portfolioItem.style.animationDelay = `${index * 0.1}s`;
         
         // Adicionar elementos de efeito
+        // Verificar e corrigir caminho da imagem
+        let imagePath = item.src;
+        if (!imagePath.startsWith('assets/')) {
+            imagePath = `assets/image/${item.src.split('/').pop()}`;
+        }
+        
         portfolioItem.innerHTML = `
             <div class="lens-effect"></div>
             <div class="focus-ring"></div>
             <div class="aperture-effect"></div>
-            <img src="${item.src}" alt="${item.title}" loading="lazy">
+            <img src="${imagePath}" alt="${item.title}" loading="lazy" onerror="this.style.display='none'; console.error('Erro ao carregar:', this.src);">
             <div class="portfolio-overlay">
                 <div class="photo-title">${item.title}</div>
                 <div class="photo-category">${item.category}</div>
@@ -250,10 +327,10 @@ async function initCalendar() {
         // Configurações para dias disponíveis/indisponíveis
         dayCellDidMount: function(arg) {
             const date = arg.date;
-            const dayOfWeek = date.getDay(); // 0 = Domingo, 3 = Quarta, 6 = Sábado
+            const dayOfWeek = date.getDay(); // 0 = Domingo, 1 = Segunda, 2 = Terça, 3 = Quarta, 4 = Quinta, 5 = Sexta, 6 = Sábado
             
-            // Verificar se é um dia de atendimento (Quarta, Sábado, Domingo)
-            const isAvailableDay = dayOfWeek === 3 || dayOfWeek === 6 || dayOfWeek === 0;
+            // Verificar se é um dia de atendimento (Terça, Quarta, Quinta, Sábado, Domingo)
+            const isAvailableDay = dayOfWeek === 2 || dayOfWeek === 3 || dayOfWeek === 4 || dayOfWeek === 6 || dayOfWeek === 0;
             
             if (!isAvailableDay) {
                 // Dias não disponíveis ficam com fundo cinza
@@ -278,14 +355,14 @@ async function initCalendar() {
             const [year, month, day] = dateStr.split('-').map(Number);
             const clickedDate = new Date(year, month - 1, day);
             const dayOfWeek = clickedDate.getDay();
-            const isAvailableDay = dayOfWeek === 3 || dayOfWeek === 6 || dayOfWeek === 0;
+            const isAvailableDay = dayOfWeek === 2 || dayOfWeek === 3 || dayOfWeek === 4 || dayOfWeek === 6 || dayOfWeek === 0;
             
             console.log('Dia da semana:', dayOfWeek);
             console.log('É dia de atendimento:', isAvailableDay);
             
             if (!isAvailableDay) {
                 console.log('Dia não disponível - mostrando aviso');
-                showNotification('Atendimento apenas às quartas-feiras, sábados e domingos', 'warning');
+                showNotification('Atendimento apenas às terças, quartas, quintas, sábados e domingos', 'warning');
                 return;
             }
             
@@ -298,7 +375,31 @@ async function initCalendar() {
     
     // Configurar listener em tempo real (que também carrega eventos existentes)
     try {
+        console.log('=== INICIALIZANDO CALENDÁRIO ===');
+        console.log('Chamando setupRealtimeListener...');
         FirebaseAppointment.setupRealtimeListener(calendar);
+        
+        // Verificar se os agendamentos foram carregados após 3 segundos
+        setTimeout(async () => {
+            console.log('=== VERIFICANDO CARREGAMENTO DE AGENDAMENTOS ===');
+            const events = calendar.getEvents();
+            console.log('Eventos no calendário:', events.length);
+            
+            if (events.length === 0) {
+                console.log('⚠️ Nenhum evento carregado - tentando carregar manualmente');
+                try {
+                    const appointments = await FirebaseAppointment.loadAppointments();
+                    if (appointments && appointments.length > 0) {
+                        calendar.addEventSource(appointments);
+                        console.log('✅ Agendamentos carregados manualmente:', appointments.length);
+                    }
+                } catch (error) {
+                    console.error('❌ Erro ao carregar agendamentos manualmente:', error);
+                }
+            } else {
+                console.log('✅ Agendamentos carregados com sucesso:', events.length);
+            }
+        }, 3000);
         showNotification('Calendário carregado com sucesso!', 'success');
     } catch (error) {
         console.error('Erro ao carregar agendamentos:', error);
@@ -357,15 +458,15 @@ async function handleDateClick(dateStr) {
         return;
     }
     
-    // Verificar se é um dia de atendimento
+    // Verificar se é um dia de atendimento (Terça, Quarta, Quinta, Sábado, Domingo)
     const dayOfWeek = clickedDate.getDay();
-    const isAvailableDay = dayOfWeek === 3 || dayOfWeek === 6 || dayOfWeek === 0;
+    const isAvailableDay = dayOfWeek === 2 || dayOfWeek === 3 || dayOfWeek === 4 || dayOfWeek === 6 || dayOfWeek === 0;
     
     console.log('Dia da semana:', dayOfWeek);
     console.log('É dia de atendimento:', isAvailableDay);
     
     if (!isAvailableDay) {
-        showNotification('Atendimento apenas às quartas-feiras, sábados e domingos', 'warning');
+        showNotification('Atendimento apenas às terças, quartas, quintas, sábados e domingos', 'warning');
         return;
     }
     
@@ -417,12 +518,23 @@ async function handleDateClick(dateStr) {
     }
 }
 
-function handleEventClick(info) {
+async function handleEventClick(info) {
     const event = info.event;
     const clientName = event.extendedProps.clientName;
     const serviceType = event.extendedProps.serviceType;
     const clientEmail = event.extendedProps.clientEmail;
     const clientPhone = event.extendedProps.clientPhone;
+    
+    console.log('=== VERIFICANDO PERMISSÃO PARA EXCLUIR AGENDAMENTO ===');
+    
+    // Verificar se o usuário está autenticado como administrador
+    const isAdmin = await FirebaseAuth.isAdminAuthenticated();
+    
+    if (!isAdmin) {
+        showNotification('🔒 Acesso negado. Apenas administradores podem excluir agendamentos.', 'error');
+        showAdminLoginModal();
+        return;
+    }
     
     // Criar modal de confirmação para exclusão
     const confirmMessage = `
@@ -445,15 +557,15 @@ function handleEventClick(info) {
     });
 }
 
-// Função para excluir agendamento
+// Função para excluir agendamento (versão protegida)
 async function deleteAppointment(appointmentId, dateStr) {
     try {
         console.log('=== EXCLUINDO AGENDAMENTO ===');
         console.log('ID:', appointmentId);
         console.log('Data:', dateStr);
         
-        // Chamar função do Firebase para excluir
-        const result = await FirebaseAppointment.cancelAppointment(appointmentId, dateStr);
+        // Chamar função do Firebase para excluir (versão protegida)
+        const result = await FirebaseAuth.cancelAppointmentAsAdmin(appointmentId, dateStr);
         
         if (result.success) {
             showNotification('✅ Agendamento excluído com sucesso!', 'success');
@@ -469,7 +581,7 @@ async function deleteAppointment(appointmentId, dateStr) {
         
     } catch (error) {
         console.error('Erro ao excluir agendamento:', error);
-        showNotification('❌ Erro ao excluir agendamento. Tente novamente.', 'error');
+        showNotification(`❌ Erro: ${error.message}`, 'error');
     }
 }
 
@@ -1373,3 +1485,411 @@ window.addEventListener('load', () => {
         initPhotoParticles();
     }, 1000);
 }); 
+
+// ===== MASONRY LAYOUT =====
+function initMasonryLayout() {
+    // Adicionar seção de masonry layout
+    const portfolioSection = document.getElementById('portfolio');
+    if (!portfolioSection) return;
+    
+    const masonrySection = document.createElement('div');
+    masonrySection.className = 'masonry-section';
+    masonrySection.innerHTML = `
+        <div class="section-title">
+            <h2>Galeria Masonry</h2>
+            <p>Layout dinâmico com diferentes tamanhos de imagens</p>
+        </div>
+        <div class="masonry-grid" id="masonry-grid"></div>
+    `;
+    
+    portfolioSection.appendChild(masonrySection);
+    
+    // Criar masonry grid
+    const masonryGrid = document.getElementById('masonry-grid');
+    if (!masonryGrid) return;
+    
+    // Selecionar algumas imagens para o masonry (diferentes tamanhos)
+    const masonryItems = portfolioItems.filter((_, index) => index % 3 === 0 || index % 5 === 0);
+    
+    masonryItems.forEach((item, index) => {
+        const masonryItem = document.createElement('div');
+        masonryItem.className = 'masonry-item';
+        
+        // Definir diferentes tamanhos para criar efeito masonry
+        const sizes = ['small', 'medium', 'large'];
+        const size = sizes[index % sizes.length];
+        masonryItem.classList.add(`masonry-${size}`);
+        
+        // Corrigir caminho da imagem quando necessário
+        let imagePath = item.src;
+        if (!imagePath.startsWith('assets/')) {
+            imagePath = `assets/image/${item.src.split('/').pop()}`;
+        }
+        
+        masonryItem.innerHTML = `
+            <div class="masonry-image">
+                <img src="${imagePath}" alt="${item.title}" onerror="this.style.display='none'">
+                <div class="masonry-overlay">
+                    <h4>${item.title}</h4>
+                    <span class="masonry-category">${item.category}</span>
+                </div>
+            </div>
+        `;
+        
+        masonryItem.addEventListener('click', () => openPortfolioModal(item));
+        masonryGrid.appendChild(masonryItem);
+    });
+    
+    // Layout masonry já foi inicializado
+    console.log('Masonry layout inicializado com', masonryItems.length, 'itens');
+}
+
+// ===== FILTROS AVANÇADOS =====
+function initAdvancedFilters() {
+    const filtersContainer = document.querySelector('.portfolio-filters');
+    if (!filtersContainer) return;
+    
+    // Adicionar filtros avançados
+    const advancedFilters = document.createElement('div');
+    advancedFilters.className = 'advanced-filters';
+    advancedFilters.innerHTML = `
+        <div class="filter-group">
+            <label>Ordenar por:</label>
+            <select id="sort-filter">
+                <option value="date">Data</option>
+                <option value="category">Categoria</option>
+                <option value="title">Título</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Visualização:</label>
+            <select id="view-filter">
+                <option value="grid">Grid</option>
+                <option value="masonry">Masonry</option>
+                <option value="carousel">Carrossel</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>Itens por página:</label>
+            <select id="items-per-page">
+                <option value="12">12</option>
+                <option value="24">24</option>
+                <option value="48">48</option>
+                <option value="all">Todos</option>
+            </select>
+        </div>
+    `;
+    
+    filtersContainer.appendChild(advancedFilters);
+    
+    // Adicionar event listeners
+    document.getElementById('sort-filter').addEventListener('change', handleSortChange);
+    document.getElementById('view-filter').addEventListener('change', handleViewChange);
+    document.getElementById('items-per-page').addEventListener('change', handleItemsPerPageChange);
+}
+
+function handleSortChange(e) {
+    const sortBy = e.target.value;
+    let sortedItems = [...portfolioItems];
+    
+    switch (sortBy) {
+        case 'date':
+            sortedItems.sort((a, b) => a.id - b.id);
+            break;
+        case 'category':
+            sortedItems.sort((a, b) => a.category.localeCompare(b.category));
+            break;
+        case 'title':
+            sortedItems.sort((a, b) => a.title.localeCompare(b.title));
+            break;
+    }
+    
+    renderPortfolio(sortedItems);
+}
+
+function handleViewChange(e) {
+    const viewType = e.target.value;
+    const portfolioGrid = document.getElementById('portfolio-grid');
+    
+    portfolioGrid.className = `portfolio-grid portfolio-${viewType}`;
+    
+    // Re-renderizar com o novo layout
+    renderPortfolio(portfolioItems);
+}
+
+function handleItemsPerPageChange(e) {
+    const itemsPerPage = e.target.value;
+    let itemsToShow = portfolioItems;
+    
+    if (itemsPerPage !== 'all') {
+        itemsToShow = portfolioItems.slice(0, parseInt(itemsPerPage));
+    }
+    
+    renderPortfolio(itemsToShow);
+}
+
+// ===== LAZY LOADING AVANÇADO =====
+function initAdvancedLazyLoading() {
+    const images = document.querySelectorAll('img[loading="lazy"]');
+    
+    if ('IntersectionObserver' in window) {
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    
+                    // Adicionar efeito de fade-in
+                    img.style.opacity = '0';
+                    img.style.transform = 'scale(0.8)';
+                    
+                    img.onload = () => {
+                        img.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                        img.style.opacity = '1';
+                        img.style.transform = 'scale(1)';
+                    };
+                    
+                    // Carregar imagem
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                    }
+                    
+                    imageObserver.unobserve(img);
+                }
+            });
+        }, {
+            rootMargin: '50px 0px',
+            threshold: 0.1
+        });
+        
+        images.forEach(img => imageObserver.observe(img));
+    }
+}
+
+// ===== EFEITOS 3D AVANÇADOS =====
+function initAdvanced3DEffects() {
+    const portfolioItems = document.querySelectorAll('.portfolio-item');
+    
+    portfolioItems.forEach(item => {
+        // Adicionar efeito de profundidade 3D
+        item.addEventListener('mousemove', (e) => {
+            const rect = item.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = (y - centerY) / 10;
+            const rotateY = (centerX - x) / 10;
+            
+            item.style.transform = `
+                perspective(1000px) 
+                rotateX(${rotateX}deg) 
+                rotateY(${rotateY}deg) 
+                scale3d(1.05, 1.05, 1.05)
+            `;
+        });
+        
+        item.addEventListener('mouseleave', () => {
+            item.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+        });
+    });
+}
+
+// ===== RESPONSIVIDADE AVANÇADA =====
+function initAdvancedResponsiveness() {
+    function updateLayout() {
+        const width = window.innerWidth;
+        const portfolioGrid = document.getElementById('portfolio-grid');
+        
+        if (!portfolioGrid) return;
+        
+        if (width < 768) {
+            portfolioGrid.style.gridTemplateColumns = '1fr';
+            portfolioGrid.style.gap = '1rem';
+        } else if (width < 1024) {
+            portfolioGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            portfolioGrid.style.gap = '1.5rem';
+        } else if (width < 1440) {
+            portfolioGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+            portfolioGrid.style.gap = '2rem';
+        } else {
+            portfolioGrid.style.gridTemplateColumns = 'repeat(4, 1fr)';
+            portfolioGrid.style.gap = '2rem';
+        }
+    }
+    
+    updateLayout();
+    window.addEventListener('resize', debounce(updateLayout, 250));
+}
+
+
+
+// ===== INICIALIZAÇÃO AVANÇADA =====
+function initAdvancedFeatures() {
+    initAdvancedFilters();
+    initAdvancedLazyLoading();
+    initAdvanced3DEffects();
+    initAdvancedResponsiveness();
+}
+
+// ===== MODAL DE LOGIN ADMINISTRATIVO =====
+function showAdminLoginModal() {
+    const modal = document.createElement('div');
+    modal.className = 'admin-login-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10001;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    `;
+    
+    modal.innerHTML = `
+        <div class="modal-content" style="
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        ">
+            <h3 style="color: #B4457A; margin-bottom: 20px; font-size: 24px;">
+                🔐 Login Administrativo
+            </h3>
+            <p style="color: #666; margin-bottom: 25px; font-size: 14px;">
+                Apenas administradores podem excluir agendamentos.
+            </p>
+            
+            <form id="admin-login-form" style="text-align: left;">
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 600;">
+                        E-mail:
+                    </label>
+                    <input type="email" id="admin-email" required style="
+                        width: 100%;
+                        padding: 12px;
+                        border: 2px solid #ddd;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        transition: border-color 0.3s ease;
+                    " placeholder="seu@email.com">
+                </div>
+                
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; margin-bottom: 8px; color: #333; font-weight: 600;">
+                        Senha:
+                    </label>
+                    <input type="password" id="admin-password" required style="
+                        width: 100%;
+                        padding: 12px;
+                        border: 2px solid #ddd;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        transition: border-color 0.3s ease;
+                    " placeholder="Sua senha">
+                </div>
+                
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button type="button" class="btn-cancel" style="
+                        padding: 12px 25px;
+                        border: 2px solid #ddd;
+                        background: white;
+                        color: #666;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        transition: all 0.3s ease;
+                    ">Cancelar</button>
+                    <button type="submit" class="btn-login" style="
+                        padding: 12px 25px;
+                        border: none;
+                        background: #B4457A;
+                        color: white;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: 600;
+                        transition: all 0.3s ease;
+                    ">Entrar</button>
+                </div>
+            </form>
+            
+            <div id="login-status" style="margin-top: 15px; font-size: 14px;"></div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Animar entrada
+    setTimeout(() => {
+        modal.style.opacity = '1';
+        modal.querySelector('.modal-content').style.transform = 'scale(1)';
+    }, 10);
+    
+    // Event listeners
+    const closeModal = () => {
+        modal.style.opacity = '0';
+        modal.querySelector('.modal-content').style.transform = 'scale(0.8)';
+        setTimeout(() => {
+            document.body.removeChild(modal);
+        }, 300);
+    };
+    
+    modal.querySelector('.btn-cancel').addEventListener('click', closeModal);
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+    
+    // Handle form submission
+    const form = modal.querySelector('#admin-login-form');
+    const statusDiv = modal.querySelector('#login-status');
+    
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('admin-email').value;
+        const password = document.getElementById('admin-password').value;
+        
+        // Disable form during login
+        const submitBtn = form.querySelector('.btn-login');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Entrando...';
+        submitBtn.disabled = true;
+        statusDiv.textContent = '';
+        
+        try {
+            const result = await FirebaseAuth.adminLogin(email, password);
+            
+            if (result.success) {
+                statusDiv.textContent = '✅ Login realizado com sucesso!';
+                statusDiv.style.color = '#28a745';
+                
+                setTimeout(() => {
+                    closeModal();
+                    showNotification('🔓 Login administrativo realizado com sucesso!', 'success');
+                }, 1500);
+            } else {
+                statusDiv.textContent = `❌ ${result.error}`;
+                statusDiv.style.color = '#dc3545';
+            }
+        } catch (error) {
+            statusDiv.textContent = `❌ Erro: ${error.message}`;
+            statusDiv.style.color = '#dc3545';
+        } finally {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+} 

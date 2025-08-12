@@ -42,24 +42,44 @@ if (typeof firebase.analytics !== 'undefined') {
 async function sendEmailNotification(appointmentData) {
     try {
         console.log('=== ENVIANDO E-MAIL DE NOTIFICAÇÃO ===');
+        console.log('EmailJS disponível:', typeof emailjs !== 'undefined');
+        console.log('EmailJS objeto:', emailjs);
         
         // Verificar se o EmailJS está disponível
         if (typeof emailjs === 'undefined') {
-            console.log('EmailJS não está disponível');
+            console.log('❌ EmailJS não está disponível');
             return;
         }
         
+        console.log('✅ EmailJS está disponível');
+        
+        // Verificar se o método send existe
+        if (typeof emailjs.send !== 'function') {
+            console.log('❌ emailjs.send não é uma função');
+            console.log('Métodos disponíveis:', Object.keys(emailjs));
+            return;
+        }
+        
+        console.log('✅ emailjs.send está disponível');
+        
         const templateParams = {
-            clientName: appointmentData.clientName,
-            clientEmail: appointmentData.clientEmail,
-            clientPhone: appointmentData.clientPhone,
-            serviceType: appointmentData.serviceType,
-            date: appointmentData.date,
-            time: appointmentData.time ? getTimeText(appointmentData.time) : '',
-            message: appointmentData.message,
+            clientName: appointmentData.clientName || 'Cliente',
+            clientEmail: appointmentData.clientEmail || 'cliente@email.com',
+            clientPhone: appointmentData.clientPhone || '(11) 99999-9999',
+            serviceType: appointmentData.serviceType || 'Sessão Fotográfica',
+            date: appointmentData.date || 'Data não informada',
+            time: appointmentData.time ? getTimeText(appointmentData.time) : 'Horário não informado',
+            message: appointmentData.message || 'Sem mensagem adicional',
             createdAt: new Date().toLocaleString('pt-BR')
         };
 
+        console.log('📧 Parâmetros do template:', templateParams);
+        console.log('🔧 Service ID:', 'service_g2cr22t');
+        console.log('📝 Template ID:', 'template_71hujhc');
+
+        // Tentar enviar o e-mail
+        console.log('🚀 Iniciando envio do e-mail...');
+        
         const result = await emailjs.send(
             'service_g2cr22t',
             'template_71hujhc',
@@ -67,10 +87,21 @@ async function sendEmailNotification(appointmentData) {
         );
 
         console.log('✅ E-mail enviado com sucesso!');
-        console.log('Resultado:', result);
+        console.log('📨 Resultado:', result);
+        
+        // Verificar se o resultado indica sucesso
+        if (result && result.status === 200) {
+            console.log('🎉 E-mail confirmado como enviado!');
+        } else {
+            console.log('⚠️ E-mail enviado mas status não confirmado:', result);
+        }
         
     } catch (error) {
         console.error('❌ Erro ao enviar e-mail:', error);
+        console.log('=== DETALHES DO ERRO ===');
+        console.log('Tipo do erro:', error.constructor.name);
+        console.log('Mensagem:', error.message);
+        console.log('Stack:', error.stack);
         console.log('=== DETALHES DO AGENDAMENTO ===');
         console.log('Cliente:', appointmentData.clientName);
         console.log('E-mail:', appointmentData.clientEmail);
@@ -216,6 +247,9 @@ async function checkAvailability(date) {
 // Criar novo agendamento
 async function createAppointment(appointmentData) {
     try {
+        console.log('=== CRIANDO AGENDAMENTO ===');
+        console.log('Dados:', appointmentData);
+        
         // Verificar disponibilidade do horário específico
         let checkDate;
         if (appointmentData.date.includes('-')) {
@@ -225,17 +259,26 @@ async function createAppointment(appointmentData) {
             checkDate = new Date(appointmentData.date);
         }
         
+        console.log('Data para verificação:', checkDate);
+        
         const timeAvailability = await checkTimeAvailability(checkDate, appointmentData.time);
+        console.log('Disponibilidade:', timeAvailability);
+        
         if (!timeAvailability.available) {
             return { success: false, error: timeAvailability.reason };
         }
 
         // Salvar agendamento
-        const docRef = await appointmentsCollection.add({
+        const appointmentDoc = {
             ...appointmentData,
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             status: 'pending'
-        });
+        };
+        
+        console.log('Documento a ser salvo:', appointmentDoc);
+        
+        const docRef = await appointmentsCollection.add(appointmentDoc);
+        console.log('Agendamento salvo com ID:', docRef.id);
         
         // Tentar enviar notificação por e-mail (não bloquear se falhar)
         try {
@@ -267,6 +310,15 @@ async function checkTimeAvailability(date, time) {
             return { available: false, reason: 'Dia não disponível' };
         }
         
+        // Verificar se já tem 3 agendamentos para esta data
+        const allAppointments = await appointmentsCollection
+            .where('date', '==', dateStr)
+            .get();
+        
+        if (allAppointments.size >= 3) {
+            return { available: false, reason: 'Dia lotado (máximo 3 agendamentos)' };
+        }
+        
         // Verificar agendamentos para esta data e horário
         const appointments = await appointmentsCollection
             .where('date', '==', dateStr)
@@ -277,19 +329,10 @@ async function checkTimeAvailability(date, time) {
             return { available: false, reason: 'Horário já ocupado' };
         }
         
-        // Verificar se já tem 3 agendamentos para esta data
-        const allAppointments = await appointmentsCollection
-            .where('date', '==', dateStr)
-            .get();
-        
-        if (allAppointments.size >= 3) {
-            return { available: false, reason: 'Dia lotado (máximo 3 agendamentos)' };
-        }
-        
         return { available: true };
     } catch (error) {
         console.error('Erro ao verificar disponibilidade de horário:', error);
-        return { available: false, reason: 'Erro ao verificar disponibilidade' };
+        return { available: true }; // Permitir agendamento mesmo com erro
     }
 }
 
@@ -347,12 +390,21 @@ async function cancelAppointment(appointmentId, date) {
 function setupRealtimeListener(calendar) {
     let isInitialLoad = true;
     
+    console.log('=== CONFIGURANDO LISTENER EM TEMPO REAL ===');
+    console.log('Calendar objeto:', calendar);
+    
     appointmentsCollection.onSnapshot(snapshot => {
+        console.log('=== SNAPSHOT RECEBIDO ===');
+        console.log('É carregamento inicial:', isInitialLoad);
+        console.log('Número de documentos:', snapshot.size);
+        console.log('Documentos vazios:', snapshot.empty);
+        
         // Se for o carregamento inicial, adicionar todos os eventos de uma vez
         if (isInitialLoad) {
             const events = [];
             snapshot.forEach(doc => {
                 const data = doc.data();
+                console.log('Documento carregado:', doc.id, data);
                 events.push({
                     id: doc.id,
                     title: 'Agendado',
@@ -371,8 +423,12 @@ function setupRealtimeListener(calendar) {
                 });
             });
             
+            console.log('Eventos criados:', events.length);
             if (events.length > 0) {
                 calendar.addEventSource(events);
+                console.log('✅ Eventos adicionados ao calendário');
+            } else {
+                console.log('⚠️ Nenhum evento para adicionar');
             }
             
             isInitialLoad = false;
@@ -381,6 +437,7 @@ function setupRealtimeListener(calendar) {
         
         // Para mudanças subsequentes, processar apenas as mudanças
         snapshot.docChanges().forEach(change => {
+            console.log('Mudança detectada:', change.type, change.doc.id);
             if (change.type === 'added') {
                 const data = change.doc.data();
                 calendar.addEvent({
@@ -399,11 +456,152 @@ function setupRealtimeListener(calendar) {
                         status: data.status
                     }
                 });
+                console.log('✅ Novo evento adicionado:', change.doc.id);
             } else if (change.type === 'removed') {
-                calendar.getEventById(change.doc.id)?.remove();
+                const event = calendar.getEventById(change.doc.id);
+                if (event) {
+                    event.remove();
+                    console.log('✅ Evento removido:', change.doc.id);
+                } else {
+                    console.log('⚠️ Evento não encontrado para remoção:', change.doc.id);
+                }
             }
         });
+    }, error => {
+        console.error('❌ Erro no listener em tempo real:', error);
     });
+}
+
+// Função de teste para verificar agendamentos
+async function testLoadAppointments() {
+    try {
+        console.log('=== TESTE DE CARREGAMENTO DE AGENDAMENTOS ===');
+        
+        const snapshot = await appointmentsCollection.get();
+        console.log('Total de agendamentos no Firebase:', snapshot.size);
+        
+        if (snapshot.empty) {
+            console.log('⚠️ Nenhum agendamento encontrado no Firebase');
+            return;
+        }
+        
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            console.log('Agendamento:', {
+                id: doc.id,
+                clientName: data.clientName,
+                date: data.date,
+                time: data.time,
+                serviceType: data.serviceType
+            });
+        });
+        
+        console.log('✅ Teste de carregamento concluído');
+        
+    } catch (error) {
+        console.error('❌ Erro no teste de carregamento:', error);
+    }
+}
+
+// Função de teste para login de administrador
+async function testAdminLogin() {
+    try {
+        console.log('=== TESTE DE LOGIN DE ADMINISTRADOR ===');
+        
+        const email = 'krika.justino@gmail.com';
+        const password = 'Cris2025@1';
+        
+        console.log('Testando login com:', email);
+        
+        const result = await adminLogin(email, password);
+        
+        if (result.success) {
+            console.log('✅ Login de administrador bem-sucedido!');
+            console.log('Usuário:', result.user.email);
+            
+            // Verificar se pode excluir agendamentos
+            const isAdmin = await isAdminAuthenticated();
+            console.log('Pode excluir agendamentos:', isAdmin);
+            
+            return true;
+        } else {
+            console.log('❌ Falha no login:', result.error);
+            return false;
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro no teste de login:', error);
+        return false;
+    }
+}
+
+// Função de teste para EmailJS
+async function testEmailJS() {
+    try {
+        console.log('=== TESTE EMAILJS ===');
+        console.log('EmailJS disponível:', typeof emailjs !== 'undefined');
+        console.log('EmailJS objeto:', emailjs);
+        
+        if (typeof emailjs === 'undefined') {
+            console.log('❌ EmailJS não está disponível');
+            return false;
+        }
+        
+        console.log('✅ EmailJS está disponível');
+        
+        // Verificar se o método send existe
+        if (typeof emailjs.send !== 'function') {
+            console.log('❌ emailjs.send não é uma função');
+            console.log('Métodos disponíveis:', Object.keys(emailjs));
+            return false;
+        }
+        
+        console.log('✅ emailjs.send está disponível');
+        
+        // Teste simples
+        const testParams = {
+            clientName: 'Teste Automático',
+            clientEmail: 'teste@teste.com',
+            clientPhone: '(11) 99999-9999',
+            serviceType: 'Sessão de Teste',
+            date: '2025-01-01',
+            time: 'Manhã (8h às 12h)',
+            message: 'Este é um teste automático do sistema',
+            createdAt: new Date().toLocaleString('pt-BR')
+        };
+        
+        console.log('📧 Parâmetros de teste:', testParams);
+        console.log('🔧 Service ID:', 'service_g2cr22t');
+        console.log('📝 Template ID:', 'template_71hujhc');
+        
+        console.log('🚀 Iniciando teste de envio...');
+        
+        const result = await emailjs.send(
+            'service_g2cr22t',
+            'template_71hujhc',
+            testParams
+        );
+        
+        console.log('✅ Teste de e-mail bem-sucedido!');
+        console.log('📨 Resultado:', result);
+        
+        // Verificar se o resultado indica sucesso
+        if (result && result.status === 200) {
+            console.log('🎉 Teste confirmado como enviado!');
+            return true;
+        } else {
+            console.log('⚠️ Teste enviado mas status não confirmado:', result);
+            return true; // Ainda consideramos sucesso se não houver erro
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro no teste de e-mail:', error);
+        console.log('=== DETALHES DO ERRO ===');
+        console.log('Tipo do erro:', error.constructor.name);
+        console.log('Mensagem:', error.message);
+        console.log('Stack:', error.stack);
+        return false;
+    }
 }
 
 // ===== EXPORTAR FUNÇÕES =====
@@ -416,7 +614,10 @@ window.FirebaseAppointment = {
     markDateAsAvailable,
     cancelAppointment,
     setupRealtimeListener,
-    sendEmailNotification
+    sendEmailNotification,
+    testEmailJS,
+    testLoadAppointments,
+    testAdminLogin
 };
 
 console.log('✅ FirebaseAppointment exportado:', window.FirebaseAppointment);
@@ -450,21 +651,46 @@ async function isAdminAuthenticated() {
 // Fazer login como administrador
 async function adminLogin(email, password) {
     try {
+        console.log('=== TENTANDO LOGIN DE ADMINISTRADOR ===');
+        console.log('E-mail:', email);
+        console.log('Senha fornecida:', password ? '***' : 'não fornecida');
+        
         const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
         const user = userCredential.user;
         
+        console.log('✅ Login do Firebase realizado com sucesso');
+        console.log('Usuário autenticado:', user.email);
+        
         // Verificar se é um administrador
         const isAdmin = await isAdminAuthenticated();
+        console.log('É administrador:', isAdmin);
+        
         if (!isAdmin) {
+            console.log('❌ Usuário não é administrador - fazendo logout');
             await firebase.auth().signOut();
             throw new Error('Acesso negado. Apenas administradores podem fazer login.');
         }
         
-        console.log('Login de administrador realizado com sucesso:', user.email);
+        console.log('✅ Login de administrador realizado com sucesso:', user.email);
         return { success: true, user: user };
     } catch (error) {
-        console.error('Erro no login de administrador:', error);
-        return { success: false, error: error.message };
+        console.error('❌ Erro no login de administrador:', error);
+        console.log('Tipo do erro:', error.code);
+        console.log('Mensagem do erro:', error.message);
+        
+        // Traduzir erros comuns
+        let errorMessage = error.message;
+        if (error.code === 'auth/user-not-found') {
+            errorMessage = 'E-mail não encontrado. Verifique se o e-mail está correto.';
+        } else if (error.code === 'auth/wrong-password') {
+            errorMessage = 'Senha incorreta. Verifique a senha.';
+        } else if (error.code === 'auth/invalid-email') {
+            errorMessage = 'E-mail inválido. Verifique o formato do e-mail.';
+        } else if (error.code === 'auth/too-many-requests') {
+            errorMessage = 'Muitas tentativas de login. Tente novamente em alguns minutos.';
+        }
+        
+        return { success: false, error: errorMessage };
     }
 }
 
@@ -514,4 +740,8 @@ window.FirebaseAuth = {
     adminLogout,
     isAdminAuthenticated,
     cancelAppointmentAsAdmin
-}; 
+};
+
+// Adicionar função de teste ao FirebaseAppointment
+window.FirebaseAppointment.testLoadAppointments = testLoadAppointments;
+window.FirebaseAppointment.testAdminLogin = testAdminLogin; 

@@ -1798,3 +1798,238 @@ body.loaded {
         display: none !important;
     }
 } 
+
+
+
+/* ===== MASONRY LAYOUT ===== */
+.masonry-section {
+    margin-top: 4rem;
+    padding: 2rem 0;
+}
+
+.masonry-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.masonry-item {
+    border-radius: 15px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.masonry-item:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.masonry-small {
+    grid-row: span 1;
+}
+
+.masonry-medium {
+    grid-row: span 2;
+}
+
+.masonry-large {
+    grid-row: span 3;
+}
+
+.masonry-image {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.masonry-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.masonry-item:hover .masonry-image img {
+    transform: scale(1.1);
+}
+
+.masonry-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    color: white;
+    padding: 1.5rem 1rem 1rem;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.masonry-item:hover .masonry-overlay {
+    transform: translateY(0);
+}
+
+.masonry-overlay h4 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.masonry-category {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ===== FILTROS AVANÇADOS ===== */
+.advanced-filters {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 150px;
+}
+
+.filter-group label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.filter-group select {
+    padding: 0.8rem;
+    background: var(--dark-primary);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.filter-group select:focus {
+    outline: none;
+    border-color: var(--light-pink);
+    box-shadow: 0 0 0 3px rgba(255, 192, 234, 0.1);
+}
+
+.filter-group select:hover {
+    border-color: var(--medium-rose);
+}
+
+/* ===== LAYOUTS ALTERNATIVOS ===== */
+.portfolio-grid.portfolio-masonry {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.portfolio-grid.portfolio-carousel {
+    display: flex;
+    overflow-x: auto;
+    gap: 1rem;
+    padding: 1rem 0;
+    scroll-snap-type: x mandatory;
+}
+
+.portfolio-grid.portfolio-carousel .portfolio-item {
+    flex: 0 0 300px;
+    scroll-snap-align: start;
+}
+
+/* ===== RESPONSIVIDADE ===== */
+@media (max-width: 768px) {
+    .advanced-filters {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .filter-group {
+        min-width: 100%;
+    }
+    
+    .masonry-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .masonry-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+
+
+/* ===== EFEITOS DE HOVER AVANÇADOS ===== */
+
+.masonry-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255, 192, 234, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.masonry-item:hover::before {
+    opacity: 1;
+}
+
+
+
+
+
+/* ===== ACESSIBILIDADE ===== */
+.masonry-item:focus {
+    outline: 2px solid var(--light-pink);
+    outline-offset: 2px;
+}
+
+/* ===== PERFORMANCE OPTIMIZATIONS ===== */
+.masonry-item {
+    will-change: transform;
+}
+
+.portfolio-item {
+    will-change: transform;
+}
+
+
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .masonry-section,
+    .advanced-filters {
+        display: none !important;
+    }
+    
+    .portfolio-grid {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 1rem !important;
+    }
+} 
