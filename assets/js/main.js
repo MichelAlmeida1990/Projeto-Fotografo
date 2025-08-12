@@ -6,6 +6,19 @@ let portfolioItems = [];
 let currentFilter = 'todos';
 let calendar = null; // Variável global para o calendário
 
+// ===== UTILITÁRIOS =====
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
     // Esconder loading screen após carregamento
@@ -75,6 +88,25 @@ function initMobileMenu() {
     
     updateMobileMenu();
     window.addEventListener('resize', updateMobileMenu);
+    
+    // Gerenciar galeria masonry no redimensionamento
+    window.addEventListener('resize', debounce(() => {
+        const masonrySection = document.querySelector('.masonry-section');
+        if (window.innerWidth <= 768) {
+            // Remover masonry em mobile
+            if (masonrySection) {
+                masonrySection.remove();
+                console.log('Masonry layout removido para mobile');
+            }
+        } else {
+            // Adicionar masonry em desktop se não existir
+            if (!masonrySection && portfolioItems.length > 0) {
+                setTimeout(() => {
+                    initMasonryLayout();
+                }, 300);
+            }
+        }
+    }, 300));
     
     mobileMenuBtn.addEventListener('click', () => {
         navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
@@ -210,15 +242,26 @@ function loadPortfolioImages() {
     portfolioItems = portfolioData;
     renderPortfolio(portfolioItems);
     
-    // Inicializar masonry layout com delay para garantir carregamento
-    setTimeout(() => {
-        initMasonryLayout();
-    }, 500);
+    // Inicializar masonry layout apenas em desktop
+    if (window.innerWidth > 768) {
+        setTimeout(() => {
+            // Verificar se já existe masonry antes de criar
+            const existingMasonry = document.querySelector('.masonry-section');
+            if (!existingMasonry) {
+                initMasonryLayout();
+            }
+        }, 500);
+    }
 }
 
 function renderPortfolio(items) {
     const grid = document.getElementById('portfolio-grid');
+    if (!grid) return;
+    
+    // Limpar grid antes de renderizar
     grid.innerHTML = '';
+    
+    console.log('Renderizando', items.length, 'itens do portfólio');
     
     items.forEach((item, index) => {
         const portfolioItem = document.createElement('div');
@@ -1509,7 +1552,18 @@ window.addEventListener('load', () => {
 
 // ===== MASONRY LAYOUT =====
 function initMasonryLayout() {
-    // Adicionar seção de masonry layout
+    // Verificar se já existe uma seção masonry
+    const existingMasonry = document.querySelector('.masonry-section');
+    if (existingMasonry) {
+        existingMasonry.remove();
+    }
+    
+    // Adicionar seção de masonry layout apenas em desktop
+    if (window.innerWidth <= 768) {
+        console.log('Masonry layout não será criado em mobile');
+        return;
+    }
+    
     const portfolioSection = document.getElementById('portfolio');
     if (!portfolioSection) return;
     

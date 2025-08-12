@@ -2087,6 +2087,13 @@ body.loaded {
     padding: 2rem 0;
 }
 
+/* ===== MASONRY MOBILE - OCULTAR ===== */
+@media (max-width: 768px) {
+    .masonry-section {
+        display: none !important;
+    }
+}
+
 .masonry-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
