@@ -1958,46 +1958,6 @@ function showAdminLoginModal() {
         }
     });
     
-    // Após login bem-sucedido, atualizar status
-    const originalSubmitHandler = form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const email = document.getElementById('admin-email').value;
-        const password = document.getElementById('admin-password').value;
-        
-        // Disable form during login
-        const submitBtn = form.querySelector('.btn-login');
-        const originalText = submitBtn.textContent;
-        submitBtn.textContent = 'Entrando...';
-        submitBtn.disabled = true;
-        statusDiv.textContent = '';
-        
-        try {
-            const result = await FirebaseAuth.adminLogin(email, password);
-            
-            if (result.success) {
-                statusDiv.textContent = '✅ Login realizado com sucesso!';
-                statusDiv.style.color = '#28a745';
-                
-                setTimeout(() => {
-                    closeModal();
-                    showNotification('🔓 Login administrativo realizado com sucesso!', 'success');
-                    // Atualizar status de autenticação
-                    updateAuthStatus();
-                }, 1500);
-            } else {
-                statusDiv.textContent = `❌ ${result.error}`;
-                statusDiv.style.color = '#dc3545';
-            }
-        } catch (error) {
-            statusDiv.textContent = `❌ Erro: ${error.message}`;
-            statusDiv.style.color = '#dc3545';
-        } finally {
-            submitBtn.textContent = originalText;
-            submitBtn.disabled = false;
-        }
-    });
-    
     // Handle form submission
     const form = modal.querySelector('#admin-login-form');
     const statusDiv = modal.querySelector('#login-status');
@@ -2016,7 +1976,11 @@ function showAdminLoginModal() {
         statusDiv.textContent = '';
         
         try {
+            console.log('=== TENTANDO LOGIN ADMIN ===');
+            console.log('E-mail:', email);
+            
             const result = await FirebaseAuth.adminLogin(email, password);
+            console.log('Resultado do login:', result);
             
             if (result.success) {
                 statusDiv.textContent = '✅ Login realizado com sucesso!';
@@ -2025,12 +1989,20 @@ function showAdminLoginModal() {
                 setTimeout(() => {
                     closeModal();
                     showNotification('🔓 Login administrativo realizado com sucesso!', 'success');
+                    // Atualizar status de autenticação
+                    updateAuthStatus();
+                    // Recarregar página para atualizar interface
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
                 }, 1500);
             } else {
                 statusDiv.textContent = `❌ ${result.error}`;
                 statusDiv.style.color = '#dc3545';
+                console.error('Erro no login:', result.error);
             }
         } catch (error) {
+            console.error('Erro no login:', error);
             statusDiv.textContent = `❌ Erro: ${error.message}`;
             statusDiv.style.color = '#dc3545';
         } finally {

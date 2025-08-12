@@ -21,6 +21,34 @@ const firebaseConfig = {
 try {
     firebase.initializeApp(firebaseConfig);
     console.log('✅ Firebase inicializado com sucesso');
+    
+    // Configurar listener de estado de autenticação
+firebase.auth().onAuthStateChanged(async (user) => {
+    if (user) {
+        console.log('🔐 Usuário autenticado:', user.email);
+        
+        // Verificar se é admin e atualizar interface
+        setTimeout(async () => {
+            const isAdmin = await isAdminAuthenticated();
+            console.log('Status de admin após autenticação:', isAdmin);
+            
+            // Atualizar interface se estiver disponível
+            if (typeof updateAuthStatus === 'function') {
+                await updateAuthStatus();
+            }
+        }, 1000);
+    } else {
+        console.log('🔓 Usuário desautenticado');
+        
+        // Atualizar interface se estiver disponível
+        if (typeof updateAuthStatus === 'function') {
+            setTimeout(async () => {
+                await updateAuthStatus();
+            }, 500);
+        }
+    }
+});
+    
 } catch (error) {
     console.error('❌ Erro ao inicializar Firebase:', error);
 }
@@ -141,9 +169,8 @@ async function loadAppointments() {
             });
         });
         
-        // Adicionar eventos para segundas e sextas (dias não disponíveis)
-        const unavailableDays = generateUnavailableDays();
-        appointments.push(...unavailableDays);
+        // Não adicionamos mais eventos visuais para dias não disponíveis
+        // O bloqueio é feito apenas através do CSS e validação
         
         return appointments;
     } catch (error) {
@@ -162,41 +189,8 @@ function getTimeText(time) {
     }
 }
 
-// Gerar eventos para dias não disponíveis (segundas e sextas)
-function generateUnavailableDays() {
-    const events = [];
-    const currentDate = new Date();
-    const endDate = new Date();
-    endDate.setFullYear(currentDate.getFullYear() + 1); // Próximo ano
-    
-    const current = new Date(currentDate);
-    
-    while (current <= endDate) {
-        const dayOfWeek = current.getDay();
-        
-        // Segunda-feira (1) ou Sexta-feira (5)
-        if (dayOfWeek === 1 || dayOfWeek === 5) {
-            const dateStr = current.toISOString().split('T')[0];
-            events.push({
-                id: `unavailable-${dateStr}`,
-                title: 'Não Atendemos',
-                start: dateStr,
-                backgroundColor: '#666666',
-                borderColor: '#666666',
-                textColor: '#FFFFFF',
-                allDay: true,
-                extendedProps: {
-                    unavailable: true,
-                    reason: dayOfWeek === 1 ? 'Segunda-feira' : 'Sexta-feira'
-                }
-            });
-        }
-        
-        current.setDate(current.getDate() + 1);
-    }
-    
-    return events;
-}
+// Função removida - não criamos mais eventos visuais para dias não disponíveis
+// O bloqueio é feito apenas através do CSS e validação no dateClick
 
 // Verificar disponibilidade de uma data
 async function checkAvailability(date) {
@@ -389,87 +383,108 @@ async function cancelAppointment(appointmentId, date) {
 // Configurar listener em tempo real
 function setupRealtimeListener(calendar) {
     let isInitialLoad = true;
+    let listener = null;
     
     console.log('=== CONFIGURANDO LISTENER EM TEMPO REAL ===');
     console.log('Calendar objeto:', calendar);
     
-    appointmentsCollection.onSnapshot(snapshot => {
-        console.log('=== SNAPSHOT RECEBIDO ===');
-        console.log('É carregamento inicial:', isInitialLoad);
-        console.log('Número de documentos:', snapshot.size);
-        console.log('Documentos vazios:', snapshot.empty);
-        
-        // Se for o carregamento inicial, adicionar todos os eventos de uma vez
-        if (isInitialLoad) {
-            const events = [];
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                console.log('Documento carregado:', doc.id, data);
-                events.push({
-                    id: doc.id,
-                    title: 'Agendado',
-                    start: data.date,
-                    backgroundColor: '#FF0000',
-                    borderColor: '#FF0000',
-                    textColor: '#FFFFFF',
-                    extendedProps: {
-                        clientName: data.clientName,
-                        clientEmail: data.clientEmail,
-                        clientPhone: data.clientPhone,
-                        serviceType: data.serviceType,
-                        message: data.message,
-                        status: data.status
-                    }
-                });
-            });
+    // Verificar se já existe um listener ativo e removê-lo
+    if (window.currentAppointmentListener) {
+        window.currentAppointmentListener();
+        console.log('🔄 Listener anterior removido');
+    }
+    
+    try {
+        listener = appointmentsCollection.onSnapshot(snapshot => {
+            console.log('=== SNAPSHOT RECEBIDO ===');
+            console.log('É carregamento inicial:', isInitialLoad);
+            console.log('Número de documentos:', snapshot.size);
+            console.log('Documentos vazios:', snapshot.empty);
             
-            console.log('Eventos criados:', events.length);
-            if (events.length > 0) {
-                calendar.addEventSource(events);
-                console.log('✅ Eventos adicionados ao calendário');
-            } else {
-                console.log('⚠️ Nenhum evento para adicionar');
-            }
-            
-            isInitialLoad = false;
-            return;
-        }
-        
-        // Para mudanças subsequentes, processar apenas as mudanças
-        snapshot.docChanges().forEach(change => {
-            console.log('Mudança detectada:', change.type, change.doc.id);
-            if (change.type === 'added') {
-                const data = change.doc.data();
-                calendar.addEvent({
-                    id: change.doc.id,
-                    title: 'Agendado',
-                    start: data.date,
-                    backgroundColor: '#FF0000',
-                    borderColor: '#FF0000',
-                    textColor: '#FFFFFF',
-                    extendedProps: {
-                        clientName: data.clientName,
-                        clientEmail: data.clientEmail,
-                        clientPhone: data.clientPhone,
-                        serviceType: data.serviceType,
-                        message: data.message,
-                        status: data.status
-                    }
+            // Se for o carregamento inicial, adicionar todos os eventos de uma vez
+            if (isInitialLoad) {
+                const events = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    console.log('Documento carregado:', doc.id, data);
+                    events.push({
+                        id: doc.id,
+                        title: 'Agendado',
+                        start: data.date,
+                        backgroundColor: '#FF0000',
+                        borderColor: '#FF0000',
+                        textColor: '#FFFFFF',
+                        extendedProps: {
+                            clientName: data.clientName,
+                            clientEmail: data.clientEmail,
+                            clientPhone: data.clientPhone,
+                            serviceType: data.serviceType,
+                            message: data.message,
+                            status: data.status
+                        }
+                    });
                 });
-                console.log('✅ Novo evento adicionado:', change.doc.id);
-            } else if (change.type === 'removed') {
-                const event = calendar.getEventById(change.doc.id);
-                if (event) {
-                    event.remove();
-                    console.log('✅ Evento removido:', change.doc.id);
+                
+                console.log('Eventos criados:', events.length);
+                if (events.length > 0) {
+                    calendar.addEventSource(events);
+                    console.log('✅ Eventos adicionados ao calendário');
                 } else {
-                    console.log('⚠️ Evento não encontrado para remoção:', change.doc.id);
+                    console.log('⚠️ Nenhum evento para adicionar');
                 }
+                
+                isInitialLoad = false;
+                return;
             }
+            
+            // Para mudanças subsequentes, processar apenas as mudanças
+            snapshot.docChanges().forEach(change => {
+                console.log('Mudança detectada:', change.type, change.doc.id);
+                if (change.type === 'added') {
+                    const data = change.doc.data();
+                    calendar.addEvent({
+                        id: change.doc.id,
+                        title: 'Agendado',
+                        start: data.date,
+                        backgroundColor: '#FF0000',
+                        borderColor: '#FF0000',
+                        textColor: '#FFFFFF',
+                        extendedProps: {
+                            clientName: data.clientName,
+                            clientEmail: data.clientEmail,
+                            clientPhone: data.clientPhone,
+                            serviceType: data.serviceType,
+                            message: data.message,
+                            status: data.status
+                        }
+                    });
+                    console.log('✅ Novo evento adicionado:', change.doc.id);
+                } else if (change.type === 'removed') {
+                    const event = calendar.getEventById(change.doc.id);
+                    if (event) {
+                        event.remove();
+                        console.log('✅ Evento removido:', change.doc.id);
+                    } else {
+                        console.log('⚠️ Evento não encontrado para remoção:', change.doc.id);
+                    }
+                }
+            });
+        }, error => {
+            console.error('❌ Erro no listener em tempo real:', error);
+            // Tentar reconectar após 5 segundos
+            setTimeout(() => {
+                console.log('🔄 Tentando reconectar listener...');
+                setupRealtimeListener(calendar);
+            }, 5000);
         });
-    }, error => {
-        console.error('❌ Erro no listener em tempo real:', error);
-    });
+        
+        // Salvar referência do listener para poder removê-lo depois
+        window.currentAppointmentListener = listener;
+        console.log('✅ Listener configurado com sucesso');
+        
+    } catch (error) {
+        console.error('❌ Erro ao configurar listener:', error);
+    }
 }
 
 // Função de teste para verificar agendamentos
@@ -628,8 +643,25 @@ console.log('✅ checkTimeAvailability disponível:', typeof window.FirebaseAppo
 // Verificar se o usuário está autenticado como administrador
 async function isAdminAuthenticated() {
     try {
+        console.log('=== VERIFICANDO AUTENTICAÇÃO DE ADMIN ===');
+        
+        // Verificar se o Firebase está disponível
+        if (typeof firebase === 'undefined') {
+            console.log('❌ Firebase não está carregado');
+            return false;
+        }
+        
+        // Verificar se o auth está disponível
+        if (!firebase.auth) {
+            console.log('❌ Firebase Auth não está disponível');
+            return false;
+        }
+        
         const user = firebase.auth().currentUser;
+        console.log('Usuário atual:', user ? user.email : 'Nenhum usuário autenticado');
+        
         if (!user) {
+            console.log('❌ Nenhum usuário autenticado');
             return false;
         }
         
@@ -641,9 +673,24 @@ async function isAdminAuthenticated() {
             // Adicione mais e-mails de administradores aqui
         ];
         
-        return adminEmails.includes(user.email);
+        // Normalizar e-mails para comparação (remover espaços e converter para minúsculas)
+        const normalizedUserEmail = user.email.toLowerCase().trim();
+        const normalizedAdminEmails = adminEmails.map(email => email.toLowerCase().trim());
+        
+        const isAdmin = normalizedAdminEmails.includes(normalizedUserEmail);
+        console.log('E-mail do usuário (normalizado):', normalizedUserEmail);
+        console.log('É administrador:', isAdmin);
+        console.log('Lista de admins (normalizada):', normalizedAdminEmails);
+        console.log('Comparação exata:', normalizedAdminEmails.includes(normalizedUserEmail));
+        
+        // Debug adicional
+        console.log('Tipo do e-mail do usuário:', typeof user.email);
+        console.log('Comprimento do e-mail do usuário:', user.email.length);
+        console.log('E-mail do usuário contém espaços:', user.email.includes(' '));
+        
+        return isAdmin;
     } catch (error) {
-        console.error('Erro ao verificar autenticação de admin:', error);
+        console.error('❌ Erro ao verificar autenticação de admin:', error);
         return false;
     }
 }
@@ -655,19 +702,48 @@ async function adminLogin(email, password) {
         console.log('E-mail:', email);
         console.log('Senha fornecida:', password ? '***' : 'não fornecida');
         
+        // Verificar se o Firebase está disponível
+        if (typeof firebase === 'undefined') {
+            throw new Error('Firebase não está carregado. Recarregue a página.');
+        }
+        
+        // Verificar se o auth está disponível
+        if (!firebase.auth) {
+            throw new Error('Firebase Auth não está disponível. Recarregue a página.');
+        }
+        
         const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
         const user = userCredential.user;
         
         console.log('✅ Login do Firebase realizado com sucesso');
         console.log('Usuário autenticado:', user.email);
         
+        // Aguardar um pouco para garantir que a autenticação foi processada
+        console.log('Aguardando processamento da autenticação...');
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
         // Verificar se é um administrador
+        console.log('Verificando se é administrador...');
         const isAdmin = await isAdminAuthenticated();
-        console.log('É administrador:', isAdmin);
+        console.log('Resultado da verificação de admin:', isAdmin);
         
         if (!isAdmin) {
-            console.log('❌ Usuário não é administrador - fazendo logout');
+            console.log('❌ Usuário não é administrador');
+            console.log('E-mail do usuário que tentou fazer login:', user.email);
+            
+            // Debug adicional
+            const adminEmails = [
+                'krika.justino@gmail.com',
+                'cristiane@cristianejustino.com',
+                'admin@cristianejustino.com'
+            ];
+            console.log('Lista de e-mails de admin:', adminEmails);
+            console.log('E-mail do usuário está na lista?', adminEmails.includes(user.email));
+            
+            // Fazer logout do usuário não autorizado
             await firebase.auth().signOut();
+            console.log('Usuário não autorizado foi desconectado');
+            
             throw new Error('Acesso negado. Apenas administradores podem fazer login.');
         }
         
@@ -688,6 +764,8 @@ async function adminLogin(email, password) {
             errorMessage = 'E-mail inválido. Verifique o formato do e-mail.';
         } else if (error.code === 'auth/too-many-requests') {
             errorMessage = 'Muitas tentativas de login. Tente novamente em alguns minutos.';
+        } else if (error.code === 'auth/network-request-failed') {
+            errorMessage = 'Erro de conexão. Verifique sua internet e tente novamente.';
         }
         
         return { success: false, error: errorMessage };
@@ -709,27 +787,40 @@ async function adminLogout() {
 // Função modificada para cancelar agendamento (apenas administradores)
 async function cancelAppointmentAsAdmin(appointmentId, date) {
     try {
+        console.log('=== CANCELANDO AGENDAMENTO COMO ADMIN ===');
+        console.log('ID do agendamento:', appointmentId);
+        console.log('Data:', date);
+        
         // Verificar se o usuário está autenticado como administrador
+        console.log('Verificando autenticação...');
         const isAdmin = await isAdminAuthenticated();
+        console.log('Resultado da verificação:', isAdmin);
+        
         if (!isAdmin) {
+            console.log('❌ Acesso negado - não é administrador');
             throw new Error('Acesso negado. Apenas administradores podem excluir agendamentos.');
         }
         
+        console.log('✅ Usuário autenticado como administrador');
+        
+        // Verificar se o agendamento existe antes de tentar excluir
+        console.log('Verificando se o agendamento existe...');
+        const appointmentDoc = await appointmentsCollection.doc(appointmentId).get();
+        
+        if (!appointmentDoc.exists) {
+            console.log('❌ Agendamento não encontrado');
+            throw new Error('Agendamento não encontrado.');
+        }
+        
+        console.log('✅ Agendamento encontrado, procedendo com exclusão...');
+        
         // Se chegou até aqui, é um administrador autenticado
         await appointmentsCollection.doc(appointmentId).delete();
+        console.log('✅ Agendamento excluído com sucesso');
         
-        // Criar a data corretamente para o timezone local
-        let checkDate;
-        if (date.includes('-')) {
-            const [year, month, day] = date.split('-').map(Number);
-            checkDate = new Date(year, month - 1, day);
-        } else {
-            checkDate = new Date(date);
-        }
-
         return { success: true };
     } catch (error) {
-        console.error('Erro ao cancelar agendamento:', error);
+        console.error('❌ Erro ao cancelar agendamento:', error);
         throw error;
     }
 }
@@ -744,4 +835,274 @@ window.FirebaseAuth = {
 
 // Adicionar função de teste ao FirebaseAppointment
 window.FirebaseAppointment.testLoadAppointments = testLoadAppointments;
-window.FirebaseAppointment.testAdminLogin = testAdminLogin; 
+window.FirebaseAppointment.testAdminLogin = testAdminLogin;
+
+// Função de diagnóstico para verificar status do sistema
+async function diagnoseSystem() {
+    try {
+        console.log('=== DIAGNÓSTICO DO SISTEMA ===');
+        
+        // Verificar Firebase
+        console.log('1. Verificando Firebase...');
+        if (typeof firebase === 'undefined') {
+            console.log('❌ Firebase não está carregado');
+            return false;
+        }
+        console.log('✅ Firebase está carregado');
+        
+        // Verificar autenticação
+        console.log('2. Verificando autenticação...');
+        const user = firebase.auth().currentUser;
+        if (user) {
+            console.log('✅ Usuário autenticado:', user.email);
+            const isAdmin = await isAdminAuthenticated();
+            console.log('É administrador:', isAdmin);
+        } else {
+            console.log('⚠️ Nenhum usuário autenticado');
+        }
+        
+        // Verificar Firestore
+        console.log('3. Verificando Firestore...');
+        const testSnapshot = await appointmentsCollection.limit(1).get();
+        console.log('✅ Firestore funcionando, agendamentos encontrados:', testSnapshot.size);
+        
+        // Verificar EmailJS
+        console.log('4. Verificando EmailJS...');
+        if (typeof emailjs === 'undefined') {
+            console.log('❌ EmailJS não está carregado');
+        } else {
+            console.log('✅ EmailJS está carregado');
+        }
+        
+        console.log('=== DIAGNÓSTICO CONCLUÍDO ===');
+        return true;
+        
+    } catch (error) {
+        console.error('❌ Erro no diagnóstico:', error);
+        return false;
+    }
+}
+
+// Adicionar função de diagnóstico
+window.FirebaseAppointment.diagnoseSystem = diagnoseSystem;
+
+// Função de teste específica para autenticação
+async function testAuthentication() {
+    try {
+        console.log('=== TESTE DE AUTENTICAÇÃO ===');
+        
+        // Verificar Firebase
+        if (typeof firebase === 'undefined') {
+            console.log('❌ Firebase não está carregado');
+            return false;
+        }
+        console.log('✅ Firebase está carregado');
+        
+        // Verificar Auth
+        if (!firebase.auth) {
+            console.log('❌ Firebase Auth não está disponível');
+            return false;
+        }
+        console.log('✅ Firebase Auth está disponível');
+        
+        // Verificar usuário atual
+        const user = firebase.auth().currentUser;
+        console.log('Usuário atual:', user ? user.email : 'Nenhum usuário');
+        
+        // Testar isAdminAuthenticated
+        console.log('Testando isAdminAuthenticated...');
+        const isAdmin = await isAdminAuthenticated();
+        console.log('Resultado isAdminAuthenticated:', isAdmin);
+        
+        // Testar FirebaseAuth.isAdminAuthenticated
+        console.log('Testando FirebaseAuth.isAdminAuthenticated...');
+        const isAdminGlobal = await window.FirebaseAuth.isAdminAuthenticated();
+        console.log('Resultado FirebaseAuth.isAdminAuthenticated:', isAdminGlobal);
+        
+        return isAdmin;
+        
+    } catch (error) {
+        console.error('❌ Erro no teste de autenticação:', error);
+        return false;
+    }
+}
+
+// Adicionar função de teste de autenticação
+window.FirebaseAppointment.testAuthentication = testAuthentication;
+
+// Função de teste específica para verificar login com credenciais específicas
+async function testSpecificLogin() {
+    try {
+        console.log('=== TESTE DE LOGIN COM CREDENCIAIS ESPECÍFICAS ===');
+        
+        const email = 'krika.justino@gmail.com';
+        const password = 'Cris2025@1';
+        
+        console.log('📧 E-mail:', email);
+        console.log('🔑 Senha:', password ? '***' : 'não fornecida');
+        
+        // Verificar se o e-mail está na lista de admins
+        const adminEmails = [
+            'krika.justino@gmail.com',
+            'cristiane@cristianejustino.com',
+            'admin@cristianejustino.com'
+        ];
+        
+        console.log('📋 Lista de e-mails de admin:', adminEmails);
+        console.log('✅ E-mail está na lista de admins:', adminEmails.includes(email));
+        
+        // Tentar fazer login
+        console.log('🚀 Tentando fazer login...');
+        const result = await adminLogin(email, password);
+        
+        if (result.success) {
+            console.log('✅ Login bem-sucedido!');
+            console.log('👤 Usuário:', result.user.email);
+            
+            // Verificar se é reconhecido como admin
+            const isAdmin = await isAdminAuthenticated();
+            console.log('🔐 É reconhecido como admin:', isAdmin);
+            
+            if (isAdmin) {
+                console.log('🎉 SISTEMA FUNCIONANDO PERFEITAMENTE!');
+                return { success: true, message: 'Login e verificação de admin funcionando!' };
+            } else {
+                console.log('⚠️ Login funcionou mas não é reconhecido como admin');
+                return { success: false, message: 'Login funcionou mas verificação de admin falhou' };
+            }
+        } else {
+            console.log('❌ Falha no login:', result.error);
+            return { success: false, message: result.error };
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro no teste:', error);
+        return { success: false, message: error.message };
+    }
+}
+
+// Adicionar função de teste específica
+window.FirebaseAppointment.testSpecificLogin = testSpecificLogin;
+
+// Função de debug específica para investigar o problema de acesso negado
+async function debugAccessDenied() {
+    try {
+        console.log('=== DEBUG: INVESTIGANDO ACESSO NEGADO ===');
+        
+        const email = 'krika.justino@gmail.com';
+        const password = 'Cris2025@1';
+        
+        console.log('1. Verificando Firebase...');
+        if (typeof firebase === 'undefined') {
+            console.log('❌ Firebase não está carregado');
+            return;
+        }
+        console.log('✅ Firebase está carregado');
+        
+        console.log('2. Verificando Auth...');
+        if (!firebase.auth) {
+            console.log('❌ Firebase Auth não está disponível');
+            return;
+        }
+        console.log('✅ Firebase Auth está disponível');
+        
+        console.log('3. Verificando usuário atual...');
+        const currentUser = firebase.auth().currentUser;
+        console.log('Usuário atual:', currentUser ? currentUser.email : 'Nenhum usuário');
+        
+        console.log('4. Tentando fazer login...');
+        const loginResult = await firebase.auth().signInWithEmailAndPassword(email, password);
+        console.log('✅ Login do Firebase realizado:', loginResult.user.email);
+        
+        console.log('5. Aguardando processamento...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        console.log('6. Verificando usuário após login...');
+        const userAfterLogin = firebase.auth().currentUser;
+        console.log('Usuário após login:', userAfterLogin ? userAfterLogin.email : 'Nenhum usuário');
+        
+        console.log('7. Testando isAdminAuthenticated...');
+        const isAdmin = await isAdminAuthenticated();
+        console.log('Resultado isAdminAuthenticated:', isAdmin);
+        
+        console.log('8. Verificando lista de admins...');
+        const adminEmails = [
+            'krika.justino@gmail.com',
+            'cristiane@cristianejustino.com',
+            'admin@cristianejustino.com'
+        ];
+        
+        const normalizedUserEmail = userAfterLogin.email.toLowerCase().trim();
+        const normalizedAdminEmails = adminEmails.map(email => email.toLowerCase().trim());
+        
+        console.log('E-mail do usuário:', userAfterLogin.email);
+        console.log('E-mail normalizado:', normalizedUserEmail);
+        console.log('Lista de admins:', adminEmails);
+        console.log('Lista normalizada:', normalizedAdminEmails);
+        console.log('Está na lista?', normalizedAdminEmails.includes(normalizedUserEmail));
+        
+        console.log('9. Comparação caractere por caractere...');
+        for (let i = 0; i < Math.max(normalizedUserEmail.length, normalizedAdminEmails[0].length); i++) {
+            const userChar = normalizedUserEmail[i] || '';
+            const adminChar = normalizedAdminEmails[0][i] || '';
+            console.log(`Posição ${i}: Usuário='${userChar}' (${userChar.charCodeAt(0)}) Admin='${adminChar}' (${adminChar.charCodeAt(0)})`);
+        }
+        
+        console.log('=== DEBUG CONCLUÍDO ===');
+        
+    } catch (error) {
+        console.error('❌ Erro no debug:', error);
+    }
+}
+
+// Adicionar função de debug
+window.FirebaseAppointment.debugAccessDenied = debugAccessDenied;
+
+// Função para verificar se já está logado como admin
+async function checkIfAlreadyLoggedInAsAdmin() {
+    try {
+        console.log('=== VERIFICANDO SE JÁ ESTÁ LOGADO COMO ADMIN ===');
+        
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            console.log('❌ Nenhum usuário logado');
+            return { isLoggedIn: false, isAdmin: false };
+        }
+        
+        console.log('✅ Usuário logado:', user.email);
+        
+        // Aguardar um pouco para garantir que a autenticação está processada
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const isAdmin = await isAdminAuthenticated();
+        console.log('É admin:', isAdmin);
+        
+        return { isLoggedIn: true, isAdmin: isAdmin, email: user.email };
+        
+    } catch (error) {
+        console.error('❌ Erro ao verificar login:', error);
+        return { isLoggedIn: false, isAdmin: false, error: error.message };
+    }
+}
+
+// Função para fazer login sem verificação imediata de admin
+async function simpleLogin(email, password) {
+    try {
+        console.log('=== LOGIN SIMPLES ===');
+        console.log('E-mail:', email);
+        
+        const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+        const user = userCredential.user;
+        
+        console.log('✅ Login realizado:', user.email);
+        return { success: true, user: user };
+        
+    } catch (error) {
+        console.error('❌ Erro no login:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Adicionar funções ao escopo global
+window.FirebaseAppointment.checkIfAlreadyLoggedInAsAdmin = checkIfAlreadyLoggedInAsAdmin;
+window.FirebaseAppointment.simpleLogin = simpleLogin; 
