@@ -2284,10 +2284,8 @@ function setupMobileGalleryNavigation() {
         prevBtn.style.opacity = currentIndex === 0 ? '0.5' : '1';
         nextBtn.style.opacity = currentIndex === totalSlides - 1 ? '0.5' : '1';
         
-        // Adicionar haptic feedback (se disponível)
-        if ('vibrate' in navigator) {
-            navigator.vibrate(50);
-        }
+        // Adicionar haptic feedback apenas após interação do usuário
+        // Removido para evitar erros de intervenção do navegador
     }
     
     function goToSlide(index) {
@@ -2310,8 +2308,21 @@ function setupMobileGalleryNavigation() {
     }
     
     // Event listeners
-    prevBtn.addEventListener('click', prevSlide);
-    nextBtn.addEventListener('click', nextSlide);
+    prevBtn.addEventListener('click', () => {
+        prevSlide();
+        // Haptic feedback apenas após interação do usuário
+        if ('vibrate' in navigator) {
+            navigator.vibrate(50);
+        }
+    });
+    
+    nextBtn.addEventListener('click', () => {
+        nextSlide();
+        // Haptic feedback apenas após interação do usuário
+        if ('vibrate' in navigator) {
+            navigator.vibrate(50);
+        }
+    });
     
     // Swipe gestures
     let startX = 0;
@@ -2338,8 +2349,16 @@ function setupMobileGalleryNavigation() {
         if (Math.abs(diff) > threshold) {
             if (diff > 0) {
                 nextSlide();
+                // Haptic feedback apenas após interação do usuário
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(50);
+                }
             } else {
                 prevSlide();
+                // Haptic feedback apenas após interação do usuário
+                if ('vibrate' in navigator) {
+                    navigator.vibrate(50);
+                }
             }
         } else {
             updateGallery(); // Voltar à posição original
