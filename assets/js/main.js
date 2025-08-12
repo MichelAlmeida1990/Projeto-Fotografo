@@ -40,6 +40,24 @@ function findDuplicates(items) {
     return duplicates;
 }
 
+// Função para remover duplicatas do portfolio
+function removeDuplicates(items) {
+    const seen = new Set();
+    const uniqueItems = [];
+    
+    items.forEach((item) => {
+        const key = `${item.src}-${item.title}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            uniqueItems.push(item);
+        } else {
+            console.log('Removendo duplicata:', item.title, item.src);
+        }
+    });
+    
+    return uniqueItems;
+}
+
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
     // Esconder loading screen após carregamento
@@ -312,9 +330,15 @@ function loadPortfolioImages() {
     const duplicates = findDuplicates(portfolioData);
     if (duplicates.length > 0) {
         console.log('⚠️ Duplicatas encontradas no portfolioData:', duplicates);
+        console.log('Removendo duplicatas...');
     }
     
-    portfolioItems = portfolioData;
+    // Remover duplicatas do portfolioData
+    const uniquePortfolioData = removeDuplicates(portfolioData);
+    console.log('Portfolio original:', portfolioData.length, 'itens');
+    console.log('Portfolio sem duplicatas:', uniquePortfolioData.length, 'itens');
+    
+    portfolioItems = uniquePortfolioData;
     renderPortfolio(portfolioItems);
     
     console.log('Portfolio items carregados:', portfolioItems.length);
