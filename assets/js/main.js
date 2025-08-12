@@ -41,6 +41,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Remover initAdvancedFeatures temporariamente para evitar conflitos
         // initAdvancedFeatures();
     }, 2000);
+
+    // Inicializar sistema de autenticação após um pequeno delay
+    setTimeout(() => {
+        initAuthSystem();
+    }, 500);
 });
 
 // ===== MENU MOBILE ELEGANTE =====
@@ -232,11 +237,6 @@ function renderPortfolio(items) {
             <div class="focus-ring"></div>
             <div class="aperture-effect"></div>
             <img src="${imagePath}" alt="${item.title}" loading="lazy" onerror="this.style.display='none'; console.error('Erro ao carregar:', this.src);">
-            <div class="portfolio-overlay">
-                <div class="photo-title">${item.title}</div>
-                <div class="photo-category">${item.category}</div>
-                <div class="photo-description">${item.description || 'Fotografia profissional capturada com técnica e sensibilidade artística'}</div>
-            </div>
         `;
         
         portfolioItem.addEventListener('click', () => openPortfolioModal(item));
@@ -333,14 +333,23 @@ async function initCalendar() {
             const isAvailableDay = dayOfWeek === 2 || dayOfWeek === 3 || dayOfWeek === 4 || dayOfWeek === 6 || dayOfWeek === 0;
             
             if (!isAvailableDay) {
-                // Dias não disponíveis ficam com fundo cinza
-                arg.el.style.backgroundColor = '#f5f5f5';
-                arg.el.style.color = '#999';
+                // Dias não disponíveis (Segunda e Sexta) - bloqueio visual
+                arg.el.style.backgroundColor = '#f8f9fa';
+                arg.el.style.color = '#6c757d';
                 arg.el.style.cursor = 'not-allowed';
+                arg.el.style.opacity = '0.6';
+                
+                // Adicionar texto indicativo
+                const dayNumber = arg.el.querySelector('.fc-daygrid-day-number');
+                if (dayNumber) {
+                    dayNumber.style.fontSize = '0.8em';
+                    dayNumber.style.color = '#6c757d';
+                }
             } else {
-                // Dias disponíveis ficam com fundo verde claro
+                // Dias disponíveis (Terça, Quarta, Quinta, Sábado, Domingo)
                 arg.el.style.backgroundColor = '#e8f5e8';
                 arg.el.style.cursor = 'pointer';
+                arg.el.style.opacity = '1';
             }
         },
         // Impedir seleção de dias não disponíveis
@@ -362,7 +371,8 @@ async function initCalendar() {
             
             if (!isAvailableDay) {
                 console.log('Dia não disponível - mostrando aviso');
-                showNotification('Atendimento apenas às terças, quartas, quintas, sábados e domingos', 'warning');
+                const dayName = dayOfWeek === 1 ? 'Segunda-feira' : 'Sexta-feira';
+                showNotification(`Não atendemos às ${dayName.toLowerCase()}s. Atendimento: Terça a Quinta, Sábado e Domingo.`, 'warning');
                 return;
             }
             
@@ -526,15 +536,31 @@ async function handleEventClick(info) {
     const clientPhone = event.extendedProps.clientPhone;
     
     console.log('=== VERIFICANDO PERMISSÃO PARA EXCLUIR AGENDAMENTO ===');
+    console.log('Evento clicado:', event.id);
+    console.log('Cliente:', clientName);
+    
+    // Verificar se FirebaseAuth está disponível
+    if (typeof FirebaseAuth === 'undefined') {
+        console.log('❌ FirebaseAuth não está disponível');
+        showNotification('❌ Erro: Sistema de autenticação não disponível', 'error');
+        return;
+    }
+    
+    console.log('✅ FirebaseAuth está disponível');
+    console.log('Verificando autenticação...');
     
     // Verificar se o usuário está autenticado como administrador
     const isAdmin = await FirebaseAuth.isAdminAuthenticated();
+    console.log('Resultado da verificação de admin:', isAdmin);
     
     if (!isAdmin) {
+        console.log('❌ Usuário não é administrador - mostrando modal de login');
         showNotification('🔒 Acesso negado. Apenas administradores podem excluir agendamentos.', 'error');
         showAdminLoginModal();
         return;
     }
+    
+    console.log('✅ Usuário autenticado como administrador - prosseguindo com exclusão');
     
     // Criar modal de confirmação para exclusão
     const confirmMessage = `
@@ -1450,11 +1476,6 @@ function renderPortfolioWithEffects(items) {
             <div class="focus-ring"></div>
             <div class="aperture-effect"></div>
             <img src="${item.image}" alt="${item.title}" loading="lazy">
-            <div class="portfolio-overlay">
-                <div class="photo-title">${item.title}</div>
-                <div class="photo-category">${item.category}</div>
-                <div class="photo-description">${item.description}</div>
-            </div>
         `;
         
         // Adicionar evento de clique para modal
@@ -1529,10 +1550,6 @@ function initMasonryLayout() {
         masonryItem.innerHTML = `
             <div class="masonry-image">
                 <img src="${imagePath}" alt="${item.title}" onerror="this.style.display='none'">
-                <div class="masonry-overlay">
-                    <h4>${item.title}</h4>
-                    <span class="masonry-category">${item.category}</span>
-                </div>
             </div>
         `;
         
@@ -1733,6 +1750,95 @@ function initAdvancedFeatures() {
     initAdvancedResponsiveness();
 }
 
+// ===== SISTEMA DE AUTENTICAÇÃO ADMINISTRATIVA =====
+
+// Função para atualizar o status de autenticação na interface
+async function updateAuthStatus() {
+    try {
+        console.log('=== ATUALIZANDO STATUS DE AUTENTICAÇÃO ===');
+        
+        const logoutItem = document.getElementById('admin-logout-item');
+        const logoutBtn = document.getElementById('admin-logout-btn');
+        
+        if (!logoutItem || !logoutBtn) {
+            console.log('❌ Elementos de logout não encontrados');
+            return;
+        }
+        
+        // Verificar se o usuário está autenticado como administrador
+        const isAdmin = await FirebaseAuth.isAdminAuthenticated();
+        console.log('Status de autenticação:', isAdmin);
+        
+        if (isAdmin) {
+            // Usuário está logado como admin
+            logoutItem.style.display = 'block';
+            logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Sair (Admin)';
+            logoutBtn.style.color = '#B4457A';
+            console.log('✅ Mostrando botão de logout para admin');
+        } else {
+            // Usuário não está logado como admin
+            logoutItem.style.display = 'none';
+            console.log('❌ Ocultando botão de logout');
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao atualizar status de autenticação:', error);
+    }
+}
+
+// Função para fazer logout
+async function handleAdminLogout() {
+    try {
+        console.log('=== FAZENDO LOGOUT DE ADMINISTRADOR ===');
+        
+        const result = await FirebaseAuth.adminLogout();
+        
+        if (result.success) {
+            console.log('✅ Logout realizado com sucesso');
+            showNotification('🔓 Logout realizado com sucesso!', 'success');
+            
+            // Atualizar interface
+            updateAuthStatus();
+            
+            // Recarregar página para limpar qualquer estado
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            console.log('❌ Erro no logout:', result.error);
+            showNotification(`❌ Erro no logout: ${result.error}`, 'error');
+        }
+        
+    } catch (error) {
+        console.error('❌ Erro ao fazer logout:', error);
+        showNotification(`❌ Erro: ${error.message}`, 'error');
+    }
+}
+
+// Função para verificar status atual de autenticação
+async function checkCurrentAuthStatus() {
+    try {
+        console.log('=== VERIFICANDO STATUS ATUAL DE AUTENTICAÇÃO ===');
+        
+        const isAdmin = await FirebaseAuth.isAdminAuthenticated();
+        console.log('Usuário atual é admin:', isAdmin);
+        
+        if (isAdmin) {
+            const user = firebase.auth().currentUser;
+            console.log('E-mail do usuário logado:', user.email);
+            showNotification(`🔐 Logado como administrador: ${user.email}`, 'success');
+        } else {
+            console.log('Nenhum administrador logado');
+        }
+        
+        return isAdmin;
+        
+    } catch (error) {
+        console.error('❌ Erro ao verificar status de autenticação:', error);
+        return false;
+    }
+}
+
 // ===== MODAL DE LOGIN ADMINISTRATIVO =====
 function showAdminLoginModal() {
     const modal = document.createElement('div');
@@ -1852,6 +1958,46 @@ function showAdminLoginModal() {
         }
     });
     
+    // Após login bem-sucedido, atualizar status
+    const originalSubmitHandler = form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('admin-email').value;
+        const password = document.getElementById('admin-password').value;
+        
+        // Disable form during login
+        const submitBtn = form.querySelector('.btn-login');
+        const originalText = submitBtn.textContent;
+        submitBtn.textContent = 'Entrando...';
+        submitBtn.disabled = true;
+        statusDiv.textContent = '';
+        
+        try {
+            const result = await FirebaseAuth.adminLogin(email, password);
+            
+            if (result.success) {
+                statusDiv.textContent = '✅ Login realizado com sucesso!';
+                statusDiv.style.color = '#28a745';
+                
+                setTimeout(() => {
+                    closeModal();
+                    showNotification('🔓 Login administrativo realizado com sucesso!', 'success');
+                    // Atualizar status de autenticação
+                    updateAuthStatus();
+                }, 1500);
+            } else {
+                statusDiv.textContent = `❌ ${result.error}`;
+                statusDiv.style.color = '#dc3545';
+            }
+        } catch (error) {
+            statusDiv.textContent = `❌ Erro: ${error.message}`;
+            statusDiv.style.color = '#dc3545';
+        } finally {
+            submitBtn.textContent = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+    
     // Handle form submission
     const form = modal.querySelector('#admin-login-form');
     const statusDiv = modal.querySelector('#login-status');
@@ -1892,4 +2038,36 @@ function showAdminLoginModal() {
             submitBtn.disabled = false;
         }
     });
-} 
+}
+
+// Função para inicializar o sistema de autenticação
+function initAuthSystem() {
+    console.log('=== INICIALIZANDO SISTEMA DE AUTENTICAÇÃO ===');
+    
+    // Adicionar event listener para o botão de logout
+    const logoutBtn = document.getElementById('admin-logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            console.log('Botão de logout clicado');
+            await handleAdminLogout();
+        });
+        console.log('✅ Event listener do botão de logout adicionado');
+    } else {
+        console.log('❌ Botão de logout não encontrado');
+    }
+    
+    // Verificar status inicial de autenticação
+    setTimeout(async () => {
+        await updateAuthStatus();
+        console.log('✅ Status de autenticação atualizado');
+    }, 1000);
+}
+
+// Adicionar funções de autenticação ao escopo global
+window.AuthSystem = {
+    checkCurrentAuthStatus,
+    updateAuthStatus,
+    handleAdminLogout,
+    initAuthSystem
+};
