@@ -290,7 +290,7 @@ function loadPortfolioImages() {
         
         // Sessão 2025-08-05 - 22:13
         { id: 54, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.13.38.jpeg', category: 'casamento-civil', title: 'Casamento Íntimo', description: 'Casamento civil com cerimônia íntima e momentos especiais' },
-        { id: 55, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.13.38 (1).jpeg', category: 'casamento-civil', title: 'Casamento Simples', description: 'Casamento civil com cerimônia simples e elegante' },
+        // REMOVIDO - DUPLICATA: { id: 55, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.13.38 (1).jpeg', category: 'casamento-civil', title: 'Casamento Simples', description: 'Casamento civil com cerimônia simples e elegante' },
         { id: 56, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.13.39.jpeg', category: 'casamento-civil', title: 'Casamento Familiar', description: 'Casamento civil com presença da família e momentos especiais' },
         { id: 57, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.13.39 (1).jpeg', category: 'casamento-civil', title: 'Casamento Elegante', description: 'Casamento civil com cerimônia elegante e sofisticada' },
         { id: 58, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.13.39 (2).jpeg', category: 'casamento-civil', title: 'Casamento Civil', description: 'Cerimônia íntima de casamento civil com momentos especiais' },
@@ -310,7 +310,7 @@ function loadPortfolioImages() {
         { id: 68, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.09 (1).jpeg', category: 'ensaio-pessoal', title: 'Retrato Profissional', description: 'Sessão de retrato profissional com técnica avançada e iluminação artística' },
         { id: 69, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.10.jpeg', category: 'ensaio-pessoal', title: 'Ensaio Artístico', description: 'Sessão fotográfica artística com técnica profissional e iluminação criativa' },
         // REMOVIDO - DUPLICATA: { id: 70, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.10 (1).jpeg', category: 'ensaio-pessoal', title: 'Ensaio Pessoal', description: 'Sessão fotográfica pessoal com técnica de retrato e iluminação profissional' },
-        { id: 71, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.10 (2).jpeg', category: 'ensaio-pessoal', title: 'Retrato Editorial', description: 'Retrato editorial com conceito artístico e iluminação profissional' },
+        // REMOVIDO - DUPLICATA: { id: 71, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.10 (2).jpeg', category: 'ensaio-pessoal', title: 'Retrato Editorial', description: 'Retrato editorial com conceito artístico e iluminação profissional' },
         // REMOVIDO - DUPLICATA: { id: 72, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.10 (3).jpeg', category: 'ensaio-pessoal', title: 'Ensaio Contemporâneo', description: 'Sessão fotográfica contemporânea com estilo moderno e urbano' },
         { id: 73, src: 'assets/image/WhatsApp Image 2025-08-05 at 22.11.11.jpeg', category: 'ensaio-pessoal', title: 'Fotografia Artística', description: 'Fotografia artística com técnica criativa e iluminação dramática' },
         
