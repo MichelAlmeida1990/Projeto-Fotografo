@@ -35,8 +35,24 @@ body {
     color: var(--text-primary);
     line-height: 1.6;
     min-height: 100vh;
-    overflow-x: auto;
+    overflow-x: hidden; /* Prevenir scroll horizontal */
     overflow-y: auto;
+    -webkit-font-smoothing: antialiased; /* Melhor renderização de texto */
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== IMAGENS RESPONSIVAS ===== */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+}
+
+/* Garantir que imagens não ultrapassem o container */
+img[loading="lazy"] {
+    width: 100%;
+    height: auto;
 }
 
 /* ===== TIPOGRAFIA MAXIMALISTA ===== */
@@ -1863,49 +1879,94 @@ html {
     }
 }
 
-/* ===== RESPONSIVIDADE ELEGANTE ===== */
+/* ===== RESPONSIVIDADE ELEGANTE - DESIGN MOBILE MODERNO 2024/2025 ===== */
 @media (max-width: 768px) {
-    /* ===== SEÇÕES MOBILE ===== */
+    /* ===== BASE MOBILE - GRADES FLUIDAS ===== */
+    * {
+        /* Usar unidades relativas para melhor responsividade */
+        box-sizing: border-box;
+    }
+    
+    html {
+        font-size: 16px; /* Base para rem */
+    }
+    
+    body {
+        font-size: clamp(0.875rem, 2.5vw, 1rem); /* Tipografia escalável */
+        line-height: 1.6;
+    }
+    
+    /* ===== SEÇÕES MOBILE - ESPAÇAMENTO ADAPTÁVEL ===== */
     section {
-        padding: 2rem 1rem; /* Reduzido de 3.5rem 2rem */
+        padding: clamp(1.5rem, 4vw, 2rem) clamp(1rem, 3vw, 1.5rem); /* Responsivo com clamp */
+        width: 100%;
+        max-width: 100%;
     }
     
     .section-title {
-        margin-bottom: 1.5rem; /* Reduzido de 2rem */
+        margin-bottom: clamp(1rem, 3vw, 1.5rem);
+        padding: 0 clamp(0.75rem, 2vw, 1rem);
     }
     
     .section-title h2 {
-        font-size: 1.75rem; /* Reduzido de padrão */
+        font-size: clamp(1.5rem, 5vw, 1.75rem); /* Escalável */
+        line-height: 1.3;
+    }
+    
+    .section-title::after {
+        width: clamp(40px, 8vw, 60px);
+    }
+    
+    /* ===== HEADER MOBILE - TOUCH-FRIENDLY ===== */
+    header {
+        padding: clamp(0.5rem, 2vw, 0.75rem) 0;
     }
     
     .navbar {
-        padding: 0.75rem 1rem; /* Reduzido */
+        padding: 0 clamp(0.75rem, 2vw, 1rem);
+        max-width: 100%;
+    }
+    
+    .logo {
+        font-size: clamp(1.25rem, 4vw, 1.5rem);
+    }
+    
+    .logo-icon {
+        width: clamp(32px, 6vw, 40px);
+        height: clamp(32px, 6vw, 40px);
     }
     
     .nav-links {
         display: none;
     }
     
-    /* ===== HERO MOBILE ===== */
+    /* ===== HERO MOBILE - LAYOUT CENTRALIZADO ===== */
     .hero {
-        padding-top: 60px; /* Reduzido de 70px */
-        min-height: calc(100vh - 60px);
+        padding-top: clamp(55px, 10vw, 60px);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
     .hero-content {
-        padding: 1rem 0.75rem; /* Reduzido padding lateral */
+        padding: clamp(1rem, 4vw, 1.5rem) clamp(0.75rem, 3vw, 1rem);
         z-index: 1001;
+        width: 100%;
+        max-width: 100%;
     }
     
     .hero h1 {
-        font-size: clamp(1.75rem, 6vw, 2.5rem); /* Reduzido */
-        margin-bottom: 1rem; /* Reduzido */
+        font-size: clamp(1.5rem, 6vw, 2rem);
+        margin-bottom: clamp(0.75rem, 2vw, 1rem);
+        line-height: 1.2;
     }
     
     .hero p {
-        font-size: 0.9rem; /* Reduzido de 1.2rem */
-        margin-bottom: 1.5rem; /* Reduzido */
+        font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+        margin-bottom: clamp(1rem, 3vw, 1.5rem);
         line-height: 1.6;
+        max-width: 100%;
     }
     
     .typewriter-text {
@@ -1913,127 +1974,171 @@ html {
         overflow: visible;
         word-wrap: break-word;
         word-break: keep-all;
-        font-size: clamp(1.25rem, 5vw, 1.75rem); /* Reduzido */
+        font-size: clamp(1.1rem, 4.5vw, 1.5rem);
+        line-height: 1.3;
     }
     
     .hero-buttons {
-        margin-top: 1.5rem; /* Reduzido de 2rem */
-        gap: 1rem;
+        margin-top: clamp(1rem, 3vw, 1.5rem);
+        gap: clamp(0.75rem, 2vw, 1rem);
+        width: 100%;
     }
     
     .cta-button {
-        padding: 0.9rem 1.8rem; /* Reduzido */
-        font-size: 0.95rem; /* Reduzido */
+        padding: clamp(0.85rem, 3vw, 1rem) clamp(1.5rem, 6vw, 2rem);
+        font-size: clamp(0.9rem, 2.5vw, 1rem);
+        min-height: 44px; /* Touch-friendly mínimo */
+        width: 100%;
+        max-width: 100%;
     }
     
-    /* ===== SOBRE MOBILE ===== */
+    /* ===== SOBRE MOBILE - LAYOUT VERTICAL ===== */
     .about-content {
         grid-template-columns: 1fr;
-        gap: 1.5rem; /* Reduzido de 2rem */
-        padding: 0 0.5rem;
+        gap: clamp(1.25rem, 4vw, 1.5rem);
+        padding: 0 clamp(0.5rem, 2vw, 1rem);
+        max-width: 100%;
     }
     
     .about-text h2 {
-        font-size: 1.5rem; /* Reduzido */
-        margin-bottom: 1rem; /* Reduzido */
+        font-size: clamp(1.25rem, 5vw, 1.5rem);
+        margin-bottom: clamp(0.75rem, 2vw, 1rem);
+        line-height: 1.3;
     }
     
     .about-text p {
-        font-size: 0.9rem; /* Reduzido de 1.1rem */
-        margin-bottom: 1rem; /* Reduzido */
+        font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+        margin-bottom: clamp(0.75rem, 2vw, 1rem);
         line-height: 1.6;
     }
     
     .flip-card {
-        width: 280px; /* Reduzido de 300px */
-        height: 350px; /* Reduzido de 375px */
+        width: clamp(250px, 70vw, 280px);
+        height: clamp(312px, 87vw, 350px);
+        max-width: 100%;
+        margin: 0 auto;
     }
     
-    /* ===== AGENDAMENTO MOBILE ===== */
+    /* ===== AGENDAMENTO MOBILE - FULL WIDTH ===== */
     .scheduling-content {
         grid-template-columns: 1fr;
-        gap: 1.5rem; /* Reduzido de 2rem */
+        gap: clamp(1.25rem, 4vw, 1.5rem);
+        width: 100%;
+        max-width: 100%;
     }
     
     .calendar-container,
     .form-container {
-        padding: 1.5rem; /* Reduzido de 2rem */
-        border-radius: 15px; /* Reduzido de 20px */
+        padding: clamp(1.25rem, 4vw, 1.5rem);
+        border-radius: clamp(12px, 3vw, 15px);
+        width: 100%;
+        max-width: 100%;
     }
     
     .booking-info {
-        padding: 0.75rem; /* Reduzido de 1rem */
-        margin-bottom: 1rem; /* Reduzido */
-        font-size: 0.85rem; /* Reduzido */
+        padding: clamp(0.65rem, 2vw, 0.75rem);
+        margin-bottom: clamp(0.75rem, 2vw, 1rem);
+        font-size: clamp(0.8rem, 2.2vw, 0.85rem);
+        line-height: 1.5;
     }
     
     .form-group {
-        margin-bottom: 1rem; /* Reduzido de 1.5rem */
+        margin-bottom: clamp(0.75rem, 2vw, 1rem);
+    }
+    
+    .form-group label {
+        font-size: clamp(0.85rem, 2.2vw, 0.9rem);
+        margin-bottom: clamp(0.4rem, 1vw, 0.5rem);
     }
     
     .form-group input,
     .form-group textarea,
     .form-group select {
-        padding: 0.85rem; /* Reduzido de 1rem */
-        font-size: 0.9rem; /* Reduzido */
+        padding: clamp(0.75rem, 2.5vw, 0.85rem);
+        font-size: clamp(0.85rem, 2.5vw, 0.9rem);
+        min-height: 44px; /* Touch-friendly */
+        width: 100%;
+        max-width: 100%;
     }
     
-    /* ===== CONTATO MOBILE ===== */
+    .submit-btn {
+        min-height: 48px; /* Touch-friendly */
+        font-size: clamp(0.9rem, 2.5vw, 1rem);
+        width: 100%;
+    }
+    
+    /* ===== CONTATO MOBILE - LAYOUT VERTICAL ===== */
     .contact-content {
         grid-template-columns: 1fr;
-        gap: 1.5rem; /* Reduzido de 2rem */
+        gap: clamp(1.25rem, 4vw, 1.5rem);
+        width: 100%;
+        max-width: 100%;
     }
     
     .contact-item {
-        margin-bottom: 1rem; /* Reduzido de 2rem */
-        padding: 1rem; /* Reduzido de 1.5rem */
+        margin-bottom: clamp(0.75rem, 2vw, 1rem);
+        padding: clamp(0.85rem, 3vw, 1rem);
+        min-height: 60px; /* Touch-friendly */
     }
     
     .contact-item i {
-        font-size: 1.25rem; /* Reduzido de 1.5rem */
+        font-size: clamp(1.1rem, 3.5vw, 1.25rem);
+        width: clamp(36px, 8vw, 40px);
     }
     
-    /* ===== PORTFÓLIO MOBILE OTIMIZADO ===== */
+    .contact-item h4 {
+        font-size: clamp(0.95rem, 2.8vw, 1.1rem);
+    }
+    
+    .contact-item p {
+        font-size: clamp(0.85rem, 2.5vw, 0.9rem);
+    }
+    
+    /* ===== PORTFÓLIO MOBILE - GRID SINGLE COLUMN ===== */
     .portfolio-grid {
-        grid-template-columns: 1fr; /* Mudado de 2 para 1 coluna */
-        gap: 0.6rem; /* Reduzido de 0.8rem */
-        padding: 0 0.75rem; /* Reduzido de 1rem */
+        grid-template-columns: 1fr;
+        gap: clamp(0.5rem, 2vw, 0.6rem);
+        padding: 0 clamp(0.75rem, 3vw, 1rem);
+        width: 100%;
+        max-width: 100%;
     }
     
     .portfolio-item {
         transform-style: flat;
-        border-radius: 12px; /* Reduzido de 15px */
-        min-height: 200px; /* Reduzido de 240px */
+        border-radius: clamp(10px, 2.5vw, 12px);
+        min-height: clamp(180px, 45vw, 200px);
+        width: 100%;
+        max-width: 100%;
+        aspect-ratio: 4/3; /* Mantém proporção */
     }
     
     .portfolio-item img {
-        height: 200px; /* Reduzido de 220px */
+        width: 100%;
+        height: 100%;
         object-fit: cover;
+        aspect-ratio: 4/3;
     }
     
-    .portfolio-item:hover {
-        transform: translateY(-3px) scale(1.02); /* Reduzido efeito */
-        box-shadow: 
-            0 15px 35px rgba(0, 0, 0, 0.4),
-            0 0 0 1px rgba(255, 192, 234, 0.2);
+    .portfolio-item:active {
+        transform: scale(0.98);
+        transition: transform 0.1s ease;
     }
     
-    /* ===== ELEMENTOS DE TEXTO REMOVIDOS NO MOBILE ===== */
-    
-    /* ===== FILTROS MOBILE ===== */
+    /* ===== FILTROS MOBILE - TOUCH-FRIENDLY ===== */
     .portfolio-filters {
-        gap: 0.25rem; /* Reduzido de 0.3rem */
-        padding: 0 0.75rem; /* Reduzido de 1rem */
+        gap: clamp(0.25rem, 1vw, 0.3rem);
+        padding: 0 clamp(0.75rem, 3vw, 1rem);
         flex-wrap: wrap;
         justify-content: center;
-        margin-bottom: 1.5rem; /* Reduzido de 2rem */
+        margin-bottom: clamp(1.25rem, 4vw, 1.5rem);
     }
     
     .filter-btn {
-        padding: 0.45rem 0.7rem; /* Reduzido */
-        font-size: 0.75rem; /* Reduzido de 0.8rem */
-        border-radius: 18px; /* Reduzido de 20px */
-        min-width: auto;
+        padding: clamp(0.4rem, 2vw, 0.5rem) clamp(0.65rem, 3vw, 0.75rem);
+        font-size: clamp(0.7rem, 2.2vw, 0.75rem);
+        border-radius: clamp(16px, 4vw, 18px);
+        min-height: 36px; /* Touch-friendly mínimo */
+        min-width: 60px;
         flex: 0 0 auto;
     }
     
@@ -2093,160 +2198,154 @@ html {
     }
 }
 
+/* ===== MOBILE PEQUENO - OTIMIZAÇÕES EXTRA ===== */
 @media (max-width: 480px) {
-    /* ===== SEÇÕES MOBILE PEQUENO ===== */
+    /* ===== SEÇÕES MOBILE PEQUENO - ESPAÇAMENTO MÍNIMO ===== */
     section {
-        padding: 1.5rem 0.75rem; /* Ainda mais reduzido */
+        padding: clamp(1.25rem, 4vw, 1.5rem) clamp(0.75rem, 3vw, 1rem);
     }
     
     .section-title {
-        margin-bottom: 1rem; /* Reduzido */
-        padding: 0 0.5rem;
+        margin-bottom: clamp(0.75rem, 3vw, 1rem);
+        padding: 0 clamp(0.5rem, 2vw, 0.75rem);
     }
     
     .section-title h2 {
-        font-size: 1.25rem; /* Reduzido de 1.5rem */
+        font-size: clamp(1.15rem, 5vw, 1.25rem);
     }
     
-    /* ===== HERO MOBILE PEQUENO ===== */
+    /* ===== HERO MOBILE PEQUENO - LAYOUT COMPACTO ===== */
     .hero {
-        padding-top: 55px; /* Reduzido de 60px */
-        min-height: calc(100vh - 55px);
+        padding-top: clamp(50px, 12vw, 55px);
+        min-height: 100vh;
     }
     
     .hero-content {
-        padding: 0.75rem 0.5rem; /* Reduzido */
+        padding: clamp(0.75rem, 3vw, 1rem) clamp(0.5rem, 2vw, 0.75rem);
     }
     
     .hero h1 {
-        font-size: clamp(1.5rem, 7vw, 2rem); /* Reduzido */
-        margin-bottom: 0.75rem; /* Reduzido */
+        font-size: clamp(1.35rem, 7vw, 1.75rem);
+        margin-bottom: clamp(0.5rem, 2vw, 0.75rem);
     }
     
     .hero p {
-        font-size: 0.85rem; /* Reduzido de 1rem */
-        margin-bottom: 1.25rem; /* Reduzido */
+        font-size: clamp(0.8rem, 2.5vw, 0.9rem);
+        margin-bottom: clamp(1rem, 3vw, 1.25rem);
     }
     
     .typewriter-text {
-        white-space: normal;
-        overflow: visible;
-        font-size: clamp(1.1rem, 5vw, 1.5rem); /* Reduzido de 1.5rem */
-        max-width: 95vw;
-        display: inline-block;
-        word-wrap: break-word;
-        word-break: keep-all;
+        font-size: clamp(1rem, 5vw, 1.35rem);
     }
     
     .hero-buttons {
-        margin-top: 1.25rem; /* Reduzido */
-        gap: 0.75rem; /* Reduzido */
+        margin-top: clamp(1rem, 3vw, 1.25rem);
+        gap: clamp(0.65rem, 2vw, 0.75rem);
     }
     
     .cta-button {
-        padding: 0.75rem 1.5rem; /* Reduzido */
-        font-size: 0.9rem; /* Reduzido de 1rem */
+        padding: clamp(0.7rem, 3vw, 0.85rem) clamp(1.25rem, 6vw, 1.75rem);
+        font-size: clamp(0.85rem, 2.5vw, 0.95rem);
     }
     
     /* ===== SOBRE MOBILE PEQUENO ===== */
     .about-content {
-        gap: 1.25rem; /* Reduzido */
-        padding: 0 0.25rem;
+        gap: clamp(1rem, 4vw, 1.25rem);
+        padding: 0 clamp(0.25rem, 2vw, 0.5rem);
     }
     
     .about-text h2 {
-        font-size: 1.25rem; /* Reduzido */
-        margin-bottom: 0.75rem; /* Reduzido */
+        font-size: clamp(1.15rem, 5vw, 1.25rem);
+        margin-bottom: clamp(0.65rem, 2vw, 0.75rem);
     }
     
     .about-text p {
-        font-size: 0.85rem; /* Reduzido */
-        margin-bottom: 0.75rem; /* Reduzido */
+        font-size: clamp(0.8rem, 2.5vw, 0.85rem);
+        margin-bottom: clamp(0.65rem, 2vw, 0.75rem);
     }
     
     .flip-card {
-        width: 250px; /* Reduzido de 280px */
-        height: 312px; /* Reduzido de 350px */
+        width: clamp(220px, 75vw, 250px);
+        height: clamp(275px, 94vw, 312px);
     }
     
     /* ===== AGENDAMENTO MOBILE PEQUENO ===== */
     .scheduling-content {
-        gap: 1.25rem; /* Reduzido */
+        gap: clamp(1rem, 4vw, 1.25rem);
     }
     
     .calendar-container,
     .form-container {
-        padding: 1.25rem; /* Reduzido de 1.5rem */
-        border-radius: 12px; /* Reduzido */
+        padding: clamp(1rem, 4vw, 1.25rem);
+        border-radius: clamp(10px, 2.5vw, 12px);
     }
     
     .booking-info {
-        padding: 0.65rem; /* Reduzido */
-        margin-bottom: 0.75rem; /* Reduzido */
-        font-size: 0.8rem; /* Reduzido */
+        padding: clamp(0.6rem, 2vw, 0.65rem);
+        margin-bottom: clamp(0.65rem, 2vw, 0.75rem);
+        font-size: clamp(0.75rem, 2.2vw, 0.8rem);
     }
     
     .form-group {
-        margin-bottom: 0.75rem; /* Reduzido */
+        margin-bottom: clamp(0.65rem, 2vw, 0.75rem);
     }
     
     .form-group input,
     .form-group textarea,
     .form-group select {
-        padding: 0.75rem; /* Reduzido */
-        font-size: 0.85rem; /* Reduzido */
+        padding: clamp(0.7rem, 2.5vw, 0.75rem);
+        font-size: clamp(0.8rem, 2.5vw, 0.85rem);
     }
     
     /* ===== CONTATO MOBILE PEQUENO ===== */
     .contact-content {
-        gap: 1.25rem; /* Reduzido */
+        gap: clamp(1rem, 4vw, 1.25rem);
     }
     
     .contact-item {
-        margin-bottom: 0.75rem; /* Reduzido */
-        padding: 0.85rem; /* Reduzido */
+        margin-bottom: clamp(0.65rem, 2vw, 0.75rem);
+        padding: clamp(0.75rem, 3vw, 0.85rem);
     }
     
     .contact-item i {
-        font-size: 1.1rem; /* Reduzido */
+        font-size: clamp(1rem, 3.5vw, 1.1rem);
     }
     
     /* ===== PORTFÓLIO MOBILE PEQUENO ===== */
     .portfolio-grid {
-        grid-template-columns: 1fr;
-        gap: 0.5rem; /* Reduzido de 0.6rem */
-        padding: 0 0.5rem;
+        gap: clamp(0.4rem, 2vw, 0.5rem);
+        padding: 0 clamp(0.5rem, 2vw, 0.75rem);
     }
     
     .portfolio-item {
-        min-height: 180px; /* Reduzido de 220px */
-        border-radius: 10px; /* Reduzido */
-    }
-    
-    .portfolio-item img {
-        height: 180px; /* Reduzido de 200px */
+        min-height: clamp(160px, 40vw, 180px);
+        border-radius: clamp(8px, 2vw, 10px);
     }
     
     /* ===== FILTROS MOBILE PEQUENO ===== */
     .portfolio-filters {
-        gap: 0.2rem;
-        padding: 0 0.5rem;
-        margin-bottom: 1.25rem; /* Reduzido */
+        gap: clamp(0.15rem, 1vw, 0.2rem);
+        padding: 0 clamp(0.5rem, 2vw, 0.75rem);
+        margin-bottom: clamp(1rem, 4vw, 1.25rem);
     }
     
     .filter-btn {
-        padding: 0.4rem 0.6rem;
-        font-size: 0.7rem;
-        border-radius: 15px;
+        padding: clamp(0.35rem, 2vw, 0.4rem) clamp(0.55rem, 3vw, 0.6rem);
+        font-size: clamp(0.65rem, 2.2vw, 0.7rem);
+        border-radius: clamp(12px, 3vw, 15px);
+        min-height: 32px;
     }
     
+    /* ===== SOCIAL LINKS MOBILE PEQUENO ===== */
     .social-links {
-        gap: 0.75rem; /* Reduzido de 1rem */
+        gap: clamp(0.65rem, 2vw, 0.75rem);
     }
     
     .social-links a {
-        width: 36px; /* Reduzido de 40px */
-        height: 36px; /* Reduzido de 40px */
+        width: clamp(32px, 8vw, 36px);
+        height: clamp(32px, 8vw, 36px);
+        min-width: 32px;
+        min-height: 32px;
     }
 }
 
