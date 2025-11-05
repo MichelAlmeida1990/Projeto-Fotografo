@@ -1270,45 +1270,31 @@ function initTypewriter() {
     
     if (!typewriterText || !cursor) return;
     
-    const text = typewriterText.textContent;
-    typewriterText.textContent = '';
+    const text = typewriterText.textContent.trim();
+    // Garantir que o elemento tenha conteúdo mínimo para manter altura
+    typewriterText.textContent = '\u200B'; // Zero-width space para manter altura
     
     let currentIndex = 0;
-    let isDeleting = false;
     let typingSpeed = 100;
     
     function typeWriter() {
-        if (isDeleting) {
-            // Apagando texto
-            typewriterText.textContent = text.substring(0, currentIndex - 1);
-            currentIndex--;
-            typingSpeed = 50;
+        // Digitando texto - garantir que sempre tenha conteúdo visível
+        if (currentIndex === 0) {
+            // Primeiro caractere - remover o zero-width space
+            typewriterText.textContent = text.substring(0, 1);
         } else {
-            // Digitando texto
             typewriterText.textContent = text.substring(0, currentIndex + 1);
-            currentIndex++;
-            typingSpeed = 100;
         }
+        currentIndex++;
         
         // Verificar se terminou de digitar
-        if (!isDeleting && currentIndex === text.length) {
-            // Pausa antes de começar a apagar
-            setTimeout(() => {
-                isDeleting = true;
-            }, 2000);
+        if (currentIndex <= text.length) {
+            setTimeout(typeWriter, typingSpeed);
+        } else {
+            // Animação concluída - manter o texto completo e parar
+            // O cursor continua piscando normalmente
+            typewriterText.textContent = text;
         }
-        
-        // Verificar se terminou de apagar
-        if (isDeleting && currentIndex === 0) {
-            isDeleting = false;
-            // Pausa antes de começar a digitar novamente
-            setTimeout(() => {
-                typeWriter();
-            }, 1000);
-            return;
-        }
-        
-        setTimeout(typeWriter, typingSpeed);
     }
     
     // Iniciar o efeito após um pequeno delay
