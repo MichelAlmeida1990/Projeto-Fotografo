@@ -201,6 +201,34 @@ function ensureContentVisibility() {
                 hero.style.visibility = 'visible';
                 hero.style.minHeight = 'calc(var(--vh, 1vh) * 100)';
             }
+            
+            // GARANTIR que o conteúdo do hero (texto) esteja visível no iOS
+            const heroContent = document.querySelector('.hero-content');
+            if (heroContent) {
+                heroContent.style.display = 'block';
+                heroContent.style.opacity = '1';
+                heroContent.style.visibility = 'visible';
+                heroContent.style.position = 'relative';
+                heroContent.style.zIndex = '1001';
+                heroContent.style.color = 'var(--text-primary)';
+            }
+            
+            // Garantir que o texto typewriter esteja visível
+            const typewriterText = document.querySelector('.typewriter-text');
+            if (typewriterText) {
+                typewriterText.style.opacity = '1';
+                typewriterText.style.visibility = 'visible';
+                typewriterText.style.color = 'var(--light-pink)';
+                typewriterText.style.zIndex = '1002';
+            }
+            
+            // Garantir que o parágrafo do hero esteja visível
+            const heroParagraph = document.querySelector('.hero-content p');
+            if (heroParagraph) {
+                heroParagraph.style.opacity = '1';
+                heroParagraph.style.visibility = 'visible';
+                heroParagraph.style.color = 'var(--text-primary)';
+            }
         } else {
             // Para outros dispositivos, ser menos agressivo
             if (body.style.display === 'none') {
@@ -235,6 +263,29 @@ function ensureContentVisibility() {
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
+    // Adicionar tratamento de erros global para iOS
+    window.addEventListener('error', function(e) {
+        console.error('Erro capturado:', e.error);
+        // No iOS, garantir que o conteúdo apareça mesmo com erro
+        if (isIOS()) {
+            ensureContentVisibility();
+        }
+        // Não propagar o erro para evitar mensagem de erro do navegador
+        e.preventDefault();
+        return false;
+    });
+    
+    // Adicionar tratamento de rejeição de promises não tratadas
+    window.addEventListener('unhandledrejection', function(e) {
+        console.error('Promise rejeitada:', e.reason);
+        // No iOS, garantir que o conteúdo apareça mesmo com erro
+        if (isIOS()) {
+            ensureContentVisibility();
+        }
+        // Prevenir mensagem de erro padrão
+        e.preventDefault();
+    });
+    
     try {
         // Inicializar cálculo de altura da viewport (CRÍTICO para iOS)
         initViewportHeight();
@@ -489,6 +540,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (navLinks && window.innerWidth <= 768) {
                     navLinks.style.display = 'none';
                     navLinks.classList.remove('active');
+                    // Garantir position fixed no iOS
+                    navLinks.style.position = 'fixed';
+                    navLinks.style.top = '70px';
+                    navLinks.style.left = '0';
+                    navLinks.style.right = '0';
+                }
+                
+                // GARANTIR que o conteúdo do hero esteja visível no iOS
+                const heroContent = document.querySelector('.hero-content');
+                if (heroContent) {
+                    heroContent.style.display = 'block';
+                    heroContent.style.opacity = '1';
+                    heroContent.style.visibility = 'visible';
+                    heroContent.style.position = 'relative';
+                    heroContent.style.zIndex = '1001';
+                    heroContent.style.color = 'var(--text-primary)';
+                }
+                
+                // Garantir que o texto typewriter esteja visível
+                const typewriterText = document.querySelector('.typewriter-text');
+                if (typewriterText) {
+                    typewriterText.style.opacity = '1';
+                    typewriterText.style.visibility = 'visible';
+                    typewriterText.style.color = 'var(--light-pink)';
+                    typewriterText.style.zIndex = '1002';
+                }
+                
+                // Garantir que o parágrafo do hero esteja visível
+                const heroParagraph = document.querySelector('.hero-content p');
+                if (heroParagraph) {
+                    heroParagraph.style.opacity = '1';
+                    heroParagraph.style.visibility = 'visible';
+                    heroParagraph.style.color = 'var(--text-primary)';
                 }
             }, 500);
             
@@ -673,10 +757,18 @@ function initMobileMenu() {
         navLinks.style.display = window.innerWidth <= 768 ? 'none' : 'flex';
         navLinks.classList.remove('active');
         
-        // No iOS, garantir que o menu esteja fechado
+        // No iOS, garantir que o menu esteja fechado e posicionado corretamente
         if (isIOS()) {
             navLinks.style.display = 'none';
             navLinks.classList.remove('active');
+            // GARANTIR position fixed no iOS para aparecer abaixo do header
+            if (window.innerWidth <= 768) {
+                navLinks.style.position = 'fixed';
+                navLinks.style.top = '70px';
+                navLinks.style.left = '0';
+                navLinks.style.right = '0';
+                navLinks.style.zIndex = '10001';
+            }
         }
     }
     
@@ -734,6 +826,14 @@ function initMobileMenu() {
     // Função para abrir o menu
     function openMenu() {
         if (navLinks) {
+            // No iOS, garantir position fixed antes de abrir
+            if (isIOS() && window.innerWidth <= 768) {
+                navLinks.style.position = 'fixed';
+                navLinks.style.top = '70px';
+                navLinks.style.left = '0';
+                navLinks.style.right = '0';
+                navLinks.style.zIndex = '10001';
+            }
             navLinks.style.display = 'flex';
             navLinks.classList.add('active');
         }
@@ -749,6 +849,13 @@ function initMobileMenu() {
         if (navLinks) {
             navLinks.style.display = 'none';
             navLinks.classList.remove('active');
+            // No iOS, manter position fixed mesmo quando fechado
+            if (isIOS() && window.innerWidth <= 768) {
+                navLinks.style.position = 'fixed';
+                navLinks.style.top = '70px';
+                navLinks.style.left = '0';
+                navLinks.style.right = '0';
+            }
         }
         if (menuOverlay) {
             menuOverlay.classList.remove('active');
