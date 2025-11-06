@@ -128,7 +128,7 @@ header {
 }
 
 /* Fix específico para iOS Safari - backdrop-filter pode causar tela preta */
-@supports (-webkit-touch-callout: none) {
+/* @supports (-webkit-touch-callout: none) {
     header {
         /* Garantir que backdrop-filter não cause problemas */
         -webkit-backdrop-filter: blur(25px) saturate(180%);
@@ -1947,7 +1947,7 @@ html {
 }
 
 /* Fix para iOS mais novo (iPhone 13+ com iOS 15+) - desabilitar backdrop-filter */
-html.ios-newer header {
+html.ios-15-plus header {
     background: rgba(0, 4, 25, 0.9) !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
@@ -3267,3 +3267,83 @@ body.loaded {
 .mobile-gallery-indicator.active {
     animation: mobileIndicatorPulse 2s ease-in-out infinite;
 } 
+
+/* ===== FIX iOS - VIA CLASSES ===== */
+html.ios-device,
+html.ios-device body {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+html.ios-device body {
+    min-height: calc(var(--vh, 1vh) * 100) !important;
+    background: var(--dark-primary) !important;
+    color: var(--text-primary) !important;
+}
+
+html.ios-visible header,
+html.ios-visible main,
+html.ios-visible .navbar,
+html.ios-visible .hero {
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+html.ios-visible .hero {
+    display: flex !important;
+    min-height: calc(var(--vh, 1vh) * 100) !important;
+}
+
+html.ios-visible .hero-content,
+html.ios-visible .hero-content p,
+html.ios-visible .typewriter-text {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    color: var(--text-primary) !important;
+}
+
+html.ios-visible .typewriter-text {
+    background: linear-gradient(135deg, var(--light-pink), var(--medium-rose)) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+html.ios-visible body > *:not(.loading-screen) {
+    position: relative;
+    z-index: 1;
+}
+
+html.ios-visible .loading-screen.hidden {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    z-index: -1 !important;
+}
+
+@media (max-width: 768px) {
+    html.ios-device .nav-links {
+        position: fixed !important;
+        top: 70px !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 10001 !important;
+    }
+} 
+
+html.ios-device header {
+    background: rgba(0, 4, 25, 0.85);
+}
+
+html.ios-visible .hero {
+    display: flex !important;
+    min-height: calc(var(--vh, 1vh) * 100) !important;
+}
+
+html.ios-visible .ios-visible-element {
+    opacity: 1 !important;
+    visibility: visible !important;
+}

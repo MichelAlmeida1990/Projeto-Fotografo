@@ -95,16 +95,73 @@ function isIOS15Plus() {
     return false;
 }
 
+// ===== DETECTAR DISPOSITIVOS MOBILE =====
+function isMobileDevice() {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera || '';
+    const mobileRegex = /android|iphone|ipad|ipod|windows phone|blackberry|opera mini|iemobile/i;
+    return mobileRegex.test(userAgent) || navigator.maxTouchPoints > 1;
+}
+
+// ===== CLASSES AUXILIARES PARA iOS =====
+function applyIOSBaseClasses() {
+    if (!isIOS()) return;
+
+    const html = document.documentElement;
+    const body = document.body;
+
+    if (html) {
+        html.classList.add('ios-device');
+        if (isIOS15Plus()) {
+            html.classList.add('ios-15-plus');
+        }
+    }
+
+    if (body) {
+        body.classList.add('ios-device');
+    }
+}
+
+function ensureIOSVisibility() {
+    if (!isIOS()) return;
+
+    const html = document.documentElement;
+    const body = document.body;
+
+    if (html) {
+        html.classList.add('ios-visible');
+    }
+    if (body) {
+        body.classList.add('ios-visible');
+    }
+
+    const selectors = ['header', 'main', '.navbar', '.hero', '.hero-content', '.typewriter-text'];
+    selectors.forEach(selector => {
+        const element = document.querySelector(selector);
+        if (element) {
+            element.classList.add('ios-visible-element');
+        }
+    });
+
+    const navLinks = document.querySelector('.nav-links');
+    if (navLinks && window.innerWidth <= 768) {
+        navLinks.classList.remove('active');
+    }
+
+    const menuOverlay = document.querySelector('.menu-overlay');
+    if (menuOverlay) {
+        menuOverlay.classList.remove('active');
+    }
+}
+
 // ===== CALCULAR ALTURA DINÂMICA DA VIEWPORT (FIX iOS 100vh) =====
 function setViewportHeight() {
     try {
-        // Calcular altura real da viewport
-        const vh = window.innerHeight * 0.01;
-        // Definir variável CSS customizada
+        const viewport = window.visualViewport;
+        const height = viewport ? viewport.height : window.innerHeight;
+        const vh = height * 0.01;
         if (document.documentElement) {
             document.documentElement.style.setProperty('--vh', `${vh}px`);
-            // Também definir altura real para uso direto
-            document.documentElement.style.setProperty('--real-height', `${window.innerHeight}px`);
+            document.documentElement.style.setProperty('--real-height', `${height}px`);
         }
     } catch (e) {
         console.warn('Erro ao calcular altura da viewport:', e);
@@ -115,190 +172,159 @@ function setViewportHeight() {
 function initViewportHeight() {
     try {
         setViewportHeight();
-        
-        // Recalcular em eventos de resize e orientationchange
-        window.addEventListener('resize', setViewportHeight);
+
+        const updateViewport = () => {
+            requestAnimationFrame(setViewportHeight);
+        };
+
+        window.addEventListener('resize', updateViewport);
         window.addEventListener('orientationchange', () => {
-            // Delay para iOS processar a mudança de orientação
-            setTimeout(setViewportHeight, 100);
+            setTimeout(updateViewport, 100);
         });
-        
-        // Recalcular periodicamente no iOS (para mudanças na barra de endereço)
-        // Reduzido para evitar problemas de performance
+
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener('resize', updateViewport);
+            window.visualViewport.addEventListener('scroll', updateViewport);
+        }
+
         if (isIOS()) {
-            setTimeout(() => {
-                setViewportHeight();
-            }, 1000);
+            setTimeout(updateViewport, 1000);
         }
     } catch (e) {
         console.warn('Erro ao inicializar altura da viewport:', e);
     }
 }
 
-// ===== FIX iOS - VERSÃO SIMPLIFICADA =====
-function fixIOS() {
-    try {
-        if (!isIOS()) return;
-        
-        const body = document.body;
-        const html = document.documentElement;
-        if (!body || !html) return;
-        
-        // Forçar visibilidade básica
-        [body, html].forEach(el => {
-            el.style.display = 'block';
-            el.style.visibility = 'visible';
-            el.style.opacity = '1';
-        });
-        
-        // Hero e conteúdo
-        document.querySelectorAll('.hero, .hero-content, .typewriter-text').forEach(el => {
-            if (el) {
-                el.style.display = el.classList.contains('hero') ? 'flex' : 'block';
-                el.style.opacity = '1';
-                el.style.visibility = 'visible';
-            }
-        });
-        
-        // Remover overflow hidden
-        body.style.overflow = '';
-        
-        // Garantir que o menu mobile esteja fechado
-        const navLinks = document.querySelector('.nav-links');
-        if (navLinks && window.innerWidth <= 768) {
-            navLinks.style.display = 'none';
-            navLinks.classList.remove('active');
-            navLinks.style.position = 'fixed';
-            navLinks.style.top = '70px';
-            navLinks.style.left = '0';
-            navLinks.style.right = '0';
-            navLinks.style.zIndex = '10001';
-        }
-        
-        const menuOverlay = document.querySelector('.menu-overlay');
-        if (menuOverlay) {
-            menuOverlay.classList.remove('active');
-        }
-        
-    } catch (e) {
-        console.warn('Erro no fix iOS:', e);
-    }
-}
+// ===== GERENCIAMENTO DO LOADING =====
+let loadingScreenRemoved = false;
+let postLoadEnhancementsTriggered = false;
 
-// ===== REMOVER LOADING SCREEN =====
-function removeLoadingScreen() {
-    try {
-        const loadingScreen = document.getElementById('loading-screen');
-        if (!loadingScreen) return;
-        
-        // Web/Desktop: remover normalmente com transição suave
-        loadingScreen.classList.add('hidden');
-        setTimeout(() => {
-            loadingScreen.style.display = 'none';
-            loadingScreen.style.visibility = 'hidden';
-            loadingScreen.style.opacity = '0';
-            loadingScreen.style.pointerEvents = 'none';
+function hideLoadingScreen() {
+    const loadingScreen = document.getElementById('loading-screen');
+
+    if (loadingScreenRemoved) return;
+    loadingScreenRemoved = true;
+
+    if (!loadingScreen) {
+        if (document.body) {
             document.body.classList.add('loaded');
-        }, 800);
-        
-    } catch (e) {
-        console.warn('Erro ao remover loading screen:', e);
-        const loadingScreen = document.getElementById('loading-screen');
+        }
+        return;
+    }
+
+    loadingScreen.classList.add('hidden');
+    loadingScreen.setAttribute('aria-hidden', 'true');
+    if (document.body) {
+        document.body.classList.add('loaded');
+    }
+
+    setTimeout(() => {
         if (loadingScreen && loadingScreen.parentNode) {
             loadingScreen.remove();
         }
-    }
+    }, 400);
 }
 
-// ===== REMOVER LOADING SCREEN COM SEGURANÇA (APENAS MOBILE/iOS) =====
-function removeLoadingScreenSafely() {
+function completeLoading(forceIOSVisibility = false) {
+    if (forceIOSVisibility) {
+        ensureIOSVisibility();
+        setViewportHeight();
+    }
+    hideLoadingScreen();
+}
+
+function scheduleLoadingManager() {
     try {
         const loadingScreen = document.getElementById('loading-screen');
-        if (!loadingScreen) return;
-        
-        const isMobile = window.innerWidth <= 768;
-        const isIOSDevice = isIOS();
-        
-        // Se for web/desktop (não mobile e não iOS), remover normalmente
-        if (!isMobile && !isIOSDevice) {
-            removeLoadingScreen();
+        if (!loadingScreen) {
+            loadingScreenRemoved = true;
             return;
         }
-        
-        // Mobile/iOS: garantir visibilidade PRIMEIRO, depois remover loading
-        // Não esperar todas as imagens (pode demorar muito)
-        if (isIOSDevice) {
-            // No iOS, garantir visibilidade antes de remover loading
-            fixIOS();
+
+        const iosDevice = isIOS();
+        const mobileDevice = isMobileDevice();
+        if (iosDevice || mobileDevice) {
+            ensureIOSVisibility();
         }
-        
-        // Remover loading após pequeno delay (não esperar imagens)
-        loadingScreen.style.opacity = '0';
-        loadingScreen.style.transition = 'opacity 0.5s ease';
-        
+
+        const attemptRemoval = (force = false) => {
+            if (loadingScreenRemoved) return;
+            try {
+                completeLoading(force || iosDevice || mobileDevice);
+            } catch (e) {
+                console.warn('Erro ao tentar remover loading screen:', e);
+            }
+        };
+
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => attemptRemoval(false));
+        });
+
+        const firstDelay = iosDevice ? 900 : mobileDevice ? 1000 : 1200;
+        setTimeout(() => attemptRemoval(true), firstDelay);
+
         setTimeout(() => {
-            if (loadingScreen.parentNode) {
-                loadingScreen.remove();
-            }
-            document.body.classList.add('loaded');
-            
-            // No iOS, garantir visibilidade novamente após remover
-            if (isIOSDevice) {
-                fixIOS();
-                setViewportHeight();
-            }
-        }, 500);
-        
-        // Timeout máximo: remover loading mesmo se algo der errado (após 2s)
-        setTimeout(() => {
-            if (loadingScreen && loadingScreen.parentNode) {
-                loadingScreen.style.display = 'none';
-                loadingScreen.style.visibility = 'hidden';
-                loadingScreen.style.opacity = '0';
-                loadingScreen.remove();
-            }
-            document.body.classList.add('loaded');
-            
-            if (isIOSDevice) {
-                fixIOS();
-                setViewportHeight();
-            }
-        }, 2000);
-        
+            attemptRemoval(true);
+            triggerPostLoadEnhancements();
+        }, 3000);
+
+        window.addEventListener('load', () => {
+            attemptRemoval(true);
+            triggerPostLoadEnhancements();
+        }, { once: true });
     } catch (e) {
-        console.warn('Erro ao remover loading screen:', e);
-        const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen && loadingScreen.parentNode) {
-            loadingScreen.remove();
-        }
-        if (isIOS()) fixIOS();
+        console.error('Erro ao agendar gerenciador de loading:', e);
+        loadingScreenRemoved = true;
     }
 }
 
-// ===== FIX HEADER BACKDROP-FILTER NO iOS 15+ =====
-function fixIOSHeader() {
+function runPostLoadEnhancements() {
     try {
-        if (!isIOS15Plus()) return;
-        
-        const header = document.querySelector('header');
-        if (header) {
-            document.documentElement.classList.add('ios-newer');
-            header.style.background = 'rgba(0, 4, 25, 0.9)';
-            header.style.backdropFilter = 'none';
-            header.style.webkitBackdropFilter = 'none';
-        }
+        setTimeout(() => {
+            initPhotoEffects();
+            initScrollAnimations();
+            initPhotoParticles();
+
+            if (window.innerWidth > 768 && portfolioItems && portfolioItems.length > 0) {
+                initMasonryLayout();
+            }
+
+            if (window.innerWidth <= 768 && portfolioItems && portfolioItems.length > 0) {
+                initMobileGallery();
+            }
+        }, 400);
+
+        setTimeout(() => {
+            initAuthSystem();
+        }, 900);
+
+        setTimeout(() => {
+            if (window.innerWidth <= 768 && portfolioItems && portfolioItems.length > 0) {
+                const mobileGallery = document.querySelector('.mobile-gallery-section');
+                if (!mobileGallery) {
+                    initMobileGallery();
+                }
+            }
+        }, 1800);
     } catch (e) {
-        console.warn('Erro ao fixar header iOS:', e);
+        console.warn('Erro nas melhorias pós-carregamento:', e);
     }
+}
+
+function triggerPostLoadEnhancements() {
+    if (postLoadEnhancementsTriggered) return;
+    postLoadEnhancementsTriggered = true;
+    runPostLoadEnhancements();
 }
 
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
     try {
-        // 1. Inicializar viewport height
         initViewportHeight();
-        
-        // 2. Inicializar todas as funcionalidades
+        applyIOSBaseClasses();
+        ensureIOSVisibility();
+        scheduleLoadingManager();
+
         initMobileMenu();
         initPortfolio();
         initCalendar();
@@ -311,32 +337,25 @@ document.addEventListener('DOMContentLoaded', function() {
         initTypewriter();
         initHeaderScroll();
         initModernCTAButton();
-        
-        // 3. iOS: só fixar visibilidade (NÃO remover loading ainda)
-        if (isIOS()) {
-            fixIOSHeader(); // Fix header backdrop-filter para iOS 15+
-            fixIOS(); // Garantir visibilidade básica
-        }
-        
-        // 4. Tratamento de erros global (apenas para iOS)
+
         if (isIOS()) {
             window.addEventListener('error', function(e) {
                 console.error('Erro capturado:', e.error);
-                fixIOS();
+                ensureIOSVisibility();
                 e.preventDefault();
                 return false;
             });
-            
+
             window.addEventListener('unhandledrejection', function(e) {
                 console.error('Promise rejeitada:', e.reason);
-                fixIOS();
+                ensureIOSVisibility();
                 e.preventDefault();
             });
         }
-        
+
     } catch (e) {
         console.error('Erro na inicialização:', e);
-        if (isIOS()) fixIOS();
+        ensureIOSVisibility();
     }
 });
 
@@ -389,7 +408,7 @@ window.addEventListener('load', function() {
         
     } catch (e) {
         console.warn('Erro no evento load:', e);
-        if (isIOS()) fixIOS();
+        if (isIOS()) ensureIOSVisibility();
         
         // Fallback: remover loading mesmo se houver erro
         const loadingScreen = document.getElementById('loading-screen');
@@ -401,37 +420,54 @@ window.addEventListener('load', function() {
 
 // ===== MENU MOBILE SIMPLIFICADO =====
 function initMobileMenu() {
-    const mobileMenuBtn = document.createElement('button');
-    mobileMenuBtn.className = 'mobile-menu-btn';
-    mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
-    
-    const navbar = document.querySelector('.navbar');
-    const navLinks = document.querySelector('.nav-links');
-    
-    if (!navbar || !navLinks) return;
+    try {
+        const mobileMenuBtn = document.createElement('button');
+        mobileMenuBtn.className = 'mobile-menu-btn';
+        mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        
+        const navbar = document.querySelector('.navbar');
+        const navLinks = document.querySelector('.nav-links');
+        
+        if (!navbar || !navLinks) {
+            console.warn('Navbar ou navLinks não encontrados');
+            return;
+        }
     
     // Criar overlay se não existir
     let menuOverlay = document.querySelector('.menu-overlay');
     if (!menuOverlay) {
         menuOverlay = document.createElement('div');
         menuOverlay.className = 'menu-overlay';
-        document.body.appendChild(menuOverlay);
+        if (document.body) {
+            document.body.appendChild(menuOverlay);
+        } else {
+            console.warn('document.body não está disponível para criar menu overlay');
+            return;
+        }
     }
     
     // Função para atualizar menu baseado no tamanho da tela
     function updateMobileMenu() {
+        if (!navbar || !navLinks || !menuOverlay) return;
+        
         if (window.innerWidth <= 768) {
             // Mobile: mostrar botão, esconder menu
-            if (!document.querySelector('.mobile-menu-btn')) {
+            if (!document.querySelector('.mobile-menu-btn') && navbar) {
                 navbar.appendChild(mobileMenuBtn);
             }
-            navLinks.style.display = 'none';
-            navLinks.classList.remove('active');
-            menuOverlay.classList.remove('active');
-            document.body.style.overflow = '';
+            if (navLinks) {
+                navLinks.style.display = 'none';
+                navLinks.classList.remove('active');
+            }
+            if (menuOverlay) {
+                menuOverlay.classList.remove('active');
+            }
+            if (document.body) {
+                document.body.style.overflow = '';
+            }
             
             // No iOS, garantir position fixed
-            if (isIOS()) {
+            if (isIOS() && navLinks) {
                 navLinks.style.position = 'fixed';
                 navLinks.style.top = '70px';
                 navLinks.style.left = '0';
@@ -442,39 +478,64 @@ function initMobileMenu() {
             // Desktop: esconder botão, mostrar menu
             const existingBtn = document.querySelector('.mobile-menu-btn');
             if (existingBtn) existingBtn.remove();
-            navLinks.style.display = 'flex';
-            navLinks.classList.remove('active');
-            menuOverlay.classList.remove('active');
-            document.body.style.overflow = '';
+            if (navLinks) {
+                navLinks.style.display = 'flex';
+                navLinks.classList.remove('active');
+            }
+            if (menuOverlay) {
+                menuOverlay.classList.remove('active');
+            }
+            if (document.body) {
+                document.body.style.overflow = '';
+            }
         }
     }
     
     // Funções para abrir/fechar menu
     function openMenu() {
         if (window.innerWidth > 768) return;
+        if (!navLinks || !menuOverlay || !mobileMenuBtn) return;
         
-        if (isIOS()) {
+        if (isIOS() && navLinks) {
             navLinks.style.position = 'fixed';
             navLinks.style.top = '70px';
             navLinks.style.left = '0';
             navLinks.style.right = '0';
             navLinks.style.zIndex = '10001';
         }
-        navLinks.style.display = 'flex';
-        navLinks.classList.add('active');
-        menuOverlay.classList.add('active');
-        mobileMenuBtn.innerHTML = '<i class="fas fa-times"></i>';
-        document.body.style.overflow = 'hidden';
+        if (navLinks) {
+            navLinks.style.display = 'flex';
+            navLinks.classList.add('active');
+        }
+        if (menuOverlay) {
+            menuOverlay.classList.add('active');
+        }
+        if (mobileMenuBtn) {
+            mobileMenuBtn.innerHTML = '<i class="fas fa-times"></i>';
+        }
+        if (document.body) {
+            document.body.style.overflow = 'hidden';
+        }
     }
     
     function closeMenu() {
-        navLinks.style.display = 'none';
-        navLinks.classList.remove('active');
-        menuOverlay.classList.remove('active');
-        mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
-        document.body.style.overflow = '';
+        if (!navLinks || !menuOverlay || !mobileMenuBtn) return;
         
-        if (isIOS()) {
+        if (navLinks) {
+            navLinks.style.display = 'none';
+            navLinks.classList.remove('active');
+        }
+        if (menuOverlay) {
+            menuOverlay.classList.remove('active');
+        }
+        if (mobileMenuBtn) {
+            mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        }
+        if (document.body) {
+            document.body.style.overflow = '';
+        }
+        
+        if (isIOS() && navLinks) {
             navLinks.style.position = 'fixed';
             navLinks.style.top = '70px';
             navLinks.style.left = '0';
@@ -483,51 +544,68 @@ function initMobileMenu() {
     }
     
     // Event listeners
-    mobileMenuBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (navLinks.classList.contains('active')) {
-            closeMenu();
-        } else {
-            openMenu();
-        }
-    });
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (navLinks && navLinks.classList.contains('active')) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        });
+    }
     
-    menuOverlay.addEventListener('click', closeMenu);
+    if (menuOverlay) {
+        menuOverlay.addEventListener('click', closeMenu);
+    }
     
-    navLinks.addEventListener('click', (e) => {
-        if (e.target.closest('a')) {
-            setTimeout(closeMenu, 300);
-        }
-    });
+    if (navLinks) {
+        navLinks.addEventListener('click', (e) => {
+            if (e.target && e.target.closest('a')) {
+                setTimeout(closeMenu, 300);
+            }
+        });
+    }
     
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+        if (e.key === 'Escape' && navLinks && navLinks.classList.contains('active')) {
             closeMenu();
         }
     });
     
-    // Inicializar menu fechado
-    updateMobileMenu();
-    window.addEventListener('resize', updateMobileMenu);
-    
-    // Gerenciar galerias no redimensionamento
-    window.addEventListener('resize', debounce(() => {
-        const masonrySection = document.querySelector('.masonry-section');
-        const mobileGallery = document.querySelector('.mobile-gallery-section');
+        // Inicializar menu fechado
+        updateMobileMenu();
+        window.addEventListener('resize', updateMobileMenu);
         
-        if (window.innerWidth <= 768) {
-            if (masonrySection) masonrySection.remove();
-            if (!mobileGallery && portfolioItems && portfolioItems.length > 0) {
-                setTimeout(initMobileGallery, 300);
+        // Gerenciar galerias no redimensionamento
+        window.addEventListener('resize', debounce(() => {
+            try {
+                const masonrySection = document.querySelector('.masonry-section');
+                const mobileGallery = document.querySelector('.mobile-gallery-section');
+                
+                if (window.innerWidth <= 768) {
+                    if (masonrySection && masonrySection.parentNode) {
+                        masonrySection.remove();
+                    }
+                    if (!mobileGallery && portfolioItems && portfolioItems.length > 0) {
+                        setTimeout(initMobileGallery, 300);
+                    }
+                } else {
+                    if (mobileGallery && mobileGallery.parentNode) {
+                        mobileGallery.remove();
+                    }
+                    if (!masonrySection && portfolioItems && portfolioItems.length > 0) {
+                        setTimeout(initMasonryLayout, 300);
+                    }
+                }
+            } catch (e) {
+                console.warn('Erro ao gerenciar galerias no redimensionamento:', e);
             }
-        } else {
-            if (mobileGallery) mobileGallery.remove();
-            if (!masonrySection && portfolioItems && portfolioItems.length > 0) {
-                setTimeout(initMasonryLayout, 300);
-            }
-        }
-    }, 300));
+        }, 300));
+    } catch (e) {
+        console.error('Erro ao inicializar menu mobile:', e);
+    }
 }
 
 // ===== PORTFÓLIO ELEGANTE =====
