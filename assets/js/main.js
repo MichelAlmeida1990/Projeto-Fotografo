@@ -135,508 +135,238 @@ function initViewportHeight() {
     }
 }
 
-// ===== GARANTIR VISIBILIDADE DO CONTEÚDO NO iOS (VERSÃO AGRESSIVA) =====
-function ensureContentVisibility() {
+// ===== FIX iOS - SOLUÇÃO SIMPLES E LIMPA =====
+function fixIOS() {
     try {
+        if (!isIOS()) return;
+        
         const body = document.body;
         const html = document.documentElement;
-        
         if (!body || !html) return;
         
-        // No iOS, ser mais agressivo para garantir visibilidade
+        // 1. Garantir que body e html estejam visíveis
+        body.style.display = 'block';
+        body.style.opacity = '1';
+        body.style.visibility = 'visible';
+        body.style.background = 'var(--dark-primary)';
+        body.style.color = 'var(--text-primary)';
+        
+        html.style.display = 'block';
+        html.style.opacity = '1';
+        html.style.visibility = 'visible';
+        
+        // 2. Garantir que o hero e conteúdo estejam visíveis
+        const hero = document.querySelector('.hero');
+        if (hero) {
+            hero.style.display = 'flex';
+            hero.style.opacity = '1';
+            hero.style.visibility = 'visible';
+        }
+        
+        const heroContent = document.querySelector('.hero-content');
+        if (heroContent) {
+            heroContent.style.display = 'block';
+            heroContent.style.opacity = '1';
+            heroContent.style.visibility = 'visible';
+            heroContent.style.color = 'var(--text-primary)';
+        }
+        
+        const typewriterText = document.querySelector('.typewriter-text');
+        if (typewriterText) {
+            typewriterText.style.opacity = '1';
+            typewriterText.style.visibility = 'visible';
+        }
+        
+        // 3. Remover loading screen se existir
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+            loadingScreen.style.display = 'none';
+            loadingScreen.style.visibility = 'hidden';
+            loadingScreen.style.opacity = '0';
+            loadingScreen.style.pointerEvents = 'none';
+            loadingScreen.style.zIndex = '-1';
+        }
+        
+        // 4. Garantir que o menu mobile esteja fechado
+        const navLinks = document.querySelector('.nav-links');
+        if (navLinks && window.innerWidth <= 768) {
+            navLinks.style.display = 'none';
+            navLinks.classList.remove('active');
+            navLinks.style.position = 'fixed';
+            navLinks.style.top = '70px';
+            navLinks.style.left = '0';
+            navLinks.style.right = '0';
+            navLinks.style.zIndex = '10001';
+        }
+        
+        const menuOverlay = document.querySelector('.menu-overlay');
+        if (menuOverlay) {
+            menuOverlay.classList.remove('active');
+        }
+        
+        document.body.style.overflow = '';
+        
+    } catch (e) {
+        console.warn('Erro no fix iOS:', e);
+    }
+}
+
+// ===== GARANTIR VISIBILIDADE DO CONTEÚDO (VERSÃO SIMPLIFICADA) =====
+function ensureContentVisibility() {
+    try {
+        if (isIOS()) {
+            fixIOS();
+        }
+    } catch (e) {
+        console.warn('Erro ao garantir visibilidade:', e);
+    }
+}
+
+// ===== REMOVER LOADING SCREEN (VERSÃO SIMPLIFICADA) =====
+function removeLoadingScreen() {
+    try {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (!loadingScreen) return;
+        
         const isIOSDevice = isIOS();
         
         if (isIOSDevice) {
-            // FORÇAR visibilidade no iOS
-            body.style.display = 'block';
-            body.style.opacity = '1';
-            body.style.visibility = 'visible';
-            body.style.height = 'auto';
-            body.style.minHeight = '100%';
-            body.style.background = 'var(--dark-primary)';
-            body.style.color = 'var(--text-primary)';
+            // iOS: remover imediatamente
+            fixIOS(); // Garantir visibilidade primeiro
+            loadingScreen.style.display = 'none';
+            loadingScreen.style.visibility = 'hidden';
+            loadingScreen.style.opacity = '0';
+            loadingScreen.style.pointerEvents = 'none';
+            loadingScreen.style.zIndex = '-1';
             
-            html.style.display = 'block';
-            html.style.opacity = '1';
-            html.style.visibility = 'visible';
-            html.style.height = '100%';
-            
-            // Forçar visibilidade de TODAS as seções principais
-            // IMPORTANTE: Não forçar nav-links em mobile (deve ser controlado pelo menu mobile)
-            const allSections = document.querySelectorAll('section, header, .hero, main, .navbar');
-            allSections.forEach(el => {
-                if (el) {
-                    el.style.display = '';
-                    el.style.opacity = '1';
-                    el.style.visibility = 'visible';
-                    // Remover qualquer estilo que possa estar escondendo
-                    if (el.style.display === 'none') el.style.display = '';
-                    if (el.style.opacity === '0') el.style.opacity = '1';
-                    if (el.style.visibility === 'hidden') el.style.visibility = 'visible';
+            // Remover do DOM após pequeno delay
+            setTimeout(() => {
+                if (loadingScreen.parentNode) {
+                    loadingScreen.remove();
                 }
-            });
-            
-            // Garantir que o menu mobile esteja FECHADO por padrão em mobile
-            const navLinks = document.querySelector('.nav-links');
-            if (navLinks && window.innerWidth <= 768) {
-                // Em mobile, o menu deve estar fechado por padrão
-                navLinks.style.display = 'none';
-                navLinks.classList.remove('active');
-                
-                // Garantir que o overlay também esteja fechado
-                const menuOverlay = document.querySelector('.menu-overlay');
-                if (menuOverlay) {
-                    menuOverlay.classList.remove('active');
-                }
-                
-                // Garantir que o body não tenha overflow hidden
-                document.body.style.overflow = '';
-            }
-            
-            // Garantir que o hero esteja visível
-            const hero = document.querySelector('.hero');
-            if (hero) {
-                hero.style.display = 'flex';
-                hero.style.opacity = '1';
-                hero.style.visibility = 'visible';
-                hero.style.minHeight = 'calc(var(--vh, 1vh) * 100)';
-            }
-            
-            // GARANTIR que o conteúdo do hero (texto) esteja visível no iOS
-            const heroContent = document.querySelector('.hero-content');
-            if (heroContent) {
-                heroContent.style.display = 'block';
-                heroContent.style.opacity = '1';
-                heroContent.style.visibility = 'visible';
-                heroContent.style.position = 'relative';
-                heroContent.style.zIndex = '1001';
-                heroContent.style.color = 'var(--text-primary)';
-            }
-            
-            // Garantir que o texto typewriter esteja visível
-            const typewriterText = document.querySelector('.typewriter-text');
-            if (typewriterText) {
-                typewriterText.style.opacity = '1';
-                typewriterText.style.visibility = 'visible';
-                typewriterText.style.color = 'var(--light-pink)';
-                typewriterText.style.zIndex = '1002';
-            }
-            
-            // Garantir que o parágrafo do hero esteja visível
-            const heroParagraph = document.querySelector('.hero-content p');
-            if (heroParagraph) {
-                heroParagraph.style.opacity = '1';
-                heroParagraph.style.visibility = 'visible';
-                heroParagraph.style.color = 'var(--text-primary)';
-            }
+                fixIOS(); // Garantir novamente após remover
+            }, 100);
         } else {
-            // Para outros dispositivos, ser menos agressivo
-            if (body.style.display === 'none') {
-                body.style.display = '';
-            }
-            if (body.style.opacity === '0') {
-                body.style.opacity = '';
-            }
-            if (body.style.visibility === 'hidden') {
-                body.style.visibility = '';
-            }
-        }
-        
-        // Garantir que o loading screen não esteja bloqueando
-        const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen) {
-            if (loadingScreen.classList.contains('hidden') || isIOSDevice) {
+            // Outros dispositivos: transição suave
+            loadingScreen.classList.add('hidden');
+            setTimeout(() => {
                 loadingScreen.style.display = 'none';
                 loadingScreen.style.visibility = 'hidden';
                 loadingScreen.style.opacity = '0';
                 loadingScreen.style.pointerEvents = 'none';
-                loadingScreen.style.zIndex = '-1';
-                loadingScreen.style.position = 'fixed';
-                loadingScreen.style.top = '-9999px';
-                loadingScreen.style.left = '-9999px';
-            }
+            }, 800);
         }
     } catch (e) {
-        console.warn('Erro ao garantir visibilidade do conteúdo:', e);
+        console.warn('Erro ao remover loading screen:', e);
+        if (isIOS()) fixIOS();
     }
 }
 
-// ===== INICIALIZAÇÃO =====
-document.addEventListener('DOMContentLoaded', function() {
-    // Adicionar tratamento de erros global para iOS
-    window.addEventListener('error', function(e) {
-        console.error('Erro capturado:', e.error);
-        // No iOS, garantir que o conteúdo apareça mesmo com erro
-        if (isIOS()) {
-            ensureContentVisibility();
-        }
-        // Não propagar o erro para evitar mensagem de erro do navegador
-        e.preventDefault();
-        return false;
-    });
-    
-    // Adicionar tratamento de rejeição de promises não tratadas
-    window.addEventListener('unhandledrejection', function(e) {
-        console.error('Promise rejeitada:', e.reason);
-        // No iOS, garantir que o conteúdo apareça mesmo com erro
-        if (isIOS()) {
-            ensureContentVisibility();
-        }
-        // Prevenir mensagem de erro padrão
-        e.preventDefault();
-    });
-    
+// ===== FIX HEADER BACKDROP-FILTER NO iOS 15+ =====
+function fixIOSHeader() {
     try {
-        // Inicializar cálculo de altura da viewport (CRÍTICO para iOS)
+        if (!isIOS15Plus()) return;
+        
+        const header = document.querySelector('header');
+        if (header) {
+            document.documentElement.classList.add('ios-newer');
+            header.style.background = 'rgba(0, 4, 25, 0.9)';
+            header.style.backdropFilter = 'none';
+            header.style.webkitBackdropFilter = 'none';
+        }
+    } catch (e) {
+        console.warn('Erro ao fixar header iOS:', e);
+    }
+}
+
+// ===== INICIALIZAÇÃO SIMPLIFICADA =====
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        // 1. Inicializar viewport height
         initViewportHeight();
         
-        // Garantir visibilidade do conteúdo imediatamente
-        ensureContentVisibility();
-        
-        // Detectar iOS e ajustar timeout
+        // 2. Detectar iOS e aplicar fixes
         const isIOSDevice = isIOS();
-        const isIOSNewer = isIOS15Plus(); // iPhone 13+ geralmente tem iOS 15+
-        const loadingTimeout = isIOSDevice ? 1500 : 3000; // iOS ainda mais rápido
         
-        // No iOS mais novo (iPhone 13+), desabilitar backdrop-filter que pode causar tela preta
-        if (isIOSNewer) {
-            try {
-                // Adicionar classe CSS para desabilitar backdrop-filter
-                document.documentElement.classList.add('ios-newer');
-                
-                // Desabilitar backdrop-filter no header via JavaScript
-                const header = document.querySelector('header');
-                if (header) {
-                    // Usar background mais opaco e desabilitar backdrop-filter
-                    header.style.background = 'rgba(0, 4, 25, 0.9)';
-                    header.style.backdropFilter = 'none';
-                    header.style.webkitBackdropFilter = 'none';
-                }
-            } catch (e) {
-                console.warn('Erro ao desabilitar backdrop-filter no iOS mais novo:', e);
-            }
-        }
-        
-        // Função para remover completamente o loading screen
-        function removeLoadingScreen() {
-            try {
-                const loadingScreen = document.getElementById('loading-screen');
-                
-                // No iOS, PRIMEIRO garantir visibilidade do conteúdo, DEPOIS remover loading
-                // No iOS mais novo (iPhone 13+), ser ainda mais agressivo
-                if (isIOSDevice) {
-                    // No iOS mais novo, garantir que backdrop-filter não cause problemas
-                    if (isIOSNewer) {
-                        const header = document.querySelector('header');
-                        if (header) {
-                            header.style.background = 'rgba(0, 4, 25, 0.9)';
-                            header.style.backdropFilter = 'none';
-                            header.style.webkitBackdropFilter = 'none';
-                        }
-                    }
-                    // PASSO 1: Forçar visibilidade do conteúdo ANTES de remover loading
-                    ensureContentVisibility();
-                    
-                    // PASSO 2: Forçar reflow para garantir renderização
-                    void document.body.offsetWidth;
-                    void document.documentElement.offsetWidth;
-                    
-                    // PASSO 3: Remover loading screen IMEDIATAMENTE (sem delay)
-                    if (loadingScreen) {
-                        // Esconder completamente
-                        loadingScreen.style.cssText = `
-                            display: none !important;
-                            visibility: hidden !important;
-                            opacity: 0 !important;
-                            pointer-events: none !important;
-                            z-index: -1 !important;
-                            position: fixed !important;
-                            top: -9999px !important;
-                            left: -9999px !important;
-                            width: 0 !important;
-                            height: 0 !important;
-                        `;
-                        
-                        // Forçar reflow novamente
-                        void document.body.offsetWidth;
-                        
-                        // Remover do DOM após pequeno delay
-                        setTimeout(() => {
-                            try {
-                                if (loadingScreen && loadingScreen.parentNode) {
-                                    loadingScreen.remove();
-                                }
-                                // Forçar visibilidade novamente após remover
-                                ensureContentVisibility();
-                                setViewportHeight();
-                                
-                                // Forçar renderização com requestAnimationFrame
-                                requestAnimationFrame(() => {
-                                    ensureContentVisibility();
-                                    setViewportHeight();
-                                    
-                                    // Duplo check para garantir
-                                    requestAnimationFrame(() => {
-                                        ensureContentVisibility();
-                                    });
-                                });
-                            } catch (e) {
-                                console.warn('Erro ao remover loading screen do DOM:', e);
-                                ensureContentVisibility();
-                            }
-                        }, 50); // Delay muito curto no iOS
-                    } else {
-                        // Se não houver loading screen, garantir visibilidade
-                        ensureContentVisibility();
-                    }
-                } else {
-                    // Para outros dispositivos, usar transição suave
-                    if (loadingScreen) {
-                        loadingScreen.classList.add('hidden');
-                        setTimeout(() => {
-                            try {
-                                loadingScreen.style.display = 'none';
-                                loadingScreen.style.visibility = 'hidden';
-                                loadingScreen.style.opacity = '0';
-                                loadingScreen.style.pointerEvents = 'none';
-                                ensureContentVisibility();
-                            } catch (e) {
-                                console.warn('Erro ao esconder loading screen:', e);
-                            }
-                        }, 800);
-                    } else {
-                        ensureContentVisibility();
-                    }
-                }
-            } catch (e) {
-                console.warn('Erro na função removeLoadingScreen:', e);
-                ensureContentVisibility();
-            }
-        }
-        
-        // No iOS, remover loading screen MAIS CEDO e garantir visibilidade
         if (isIOSDevice) {
-            // Remover loading screen mais cedo no iOS (1 segundo)
+            // Fix header backdrop-filter para iOS 15+
+            fixIOSHeader();
+            
+            // Garantir visibilidade imediatamente
+            fixIOS();
+            
+            // Remover loading screen mais cedo (1s)
             setTimeout(removeLoadingScreen, 1000);
             
-            // Backup: garantir visibilidade após 2 segundos
+            // Backup: garantir visibilidade após 2s
             setTimeout(() => {
-                ensureContentVisibility();
+                fixIOS();
                 const loadingScreen = document.getElementById('loading-screen');
                 if (loadingScreen) {
-                    loadingScreen.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
+                    loadingScreen.style.display = 'none';
+                    loadingScreen.style.visibility = 'hidden';
+                    loadingScreen.style.opacity = '0';
                     if (loadingScreen.parentNode) {
                         loadingScreen.remove();
                     }
                 }
-                ensureContentVisibility();
             }, 2000);
         } else {
-            // Para outros dispositivos, usar timeout normal
-            setTimeout(removeLoadingScreen, loadingTimeout);
+            // Outros dispositivos: timeout normal (3s)
+            setTimeout(removeLoadingScreen, 3000);
         }
         
-        // Garantir visibilidade após carregamento completo (backup para iOS)
+        // 3. Evento load (backup)
         window.addEventListener('load', function() {
             try {
-                ensureContentVisibility();
-                setViewportHeight();
-                
-                // No iOS, remover loading screen IMEDIATAMENTE após load
                 if (isIOSDevice) {
-                    // No iOS mais novo, garantir que backdrop-filter não cause problemas
-                    if (isIOSNewer) {
-                        const header = document.querySelector('header');
-                        if (header) {
-                            header.style.background = 'rgba(0, 4, 25, 0.9)';
-                            header.style.backdropFilter = 'none';
-                            header.style.webkitBackdropFilter = 'none';
-                        }
-                    }
-                    
-                    const loadingScreen = document.getElementById('loading-screen');
-                    if (loadingScreen) {
-                        loadingScreen.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 0 !important; height: 0 !important;';
-                        setTimeout(() => {
-                            if (loadingScreen.parentNode) {
-                                loadingScreen.remove();
-                            }
-                            ensureContentVisibility();
-                            setViewportHeight();
-                            
-                            // No iOS mais novo, garantir backdrop-filter desabilitado após remover loading
-                            if (isIOSNewer) {
-                                const header = document.querySelector('header');
-                                if (header) {
-                                    header.style.background = 'rgba(0, 4, 25, 0.9)';
-                                    header.style.backdropFilter = 'none';
-                                    header.style.webkitBackdropFilter = 'none';
-                                }
-                            }
-                        }, 100);
-                    }
+                    fixIOS();
+                    fixIOSHeader();
+                    removeLoadingScreen();
+                } else {
+                    removeLoadingScreen();
                 }
-                
-                // Forçar remoção do loading screen se ainda estiver visível após 2 segundos (iOS) ou 3 segundos (outros)
-                setTimeout(() => {
-                    try {
-                        // No iOS mais novo, garantir que backdrop-filter não cause problemas
-                        if (isIOSNewer) {
-                            const header = document.querySelector('header');
-                            if (header) {
-                                header.style.background = 'rgba(0, 4, 25, 0.9)';
-                                header.style.backdropFilter = 'none';
-                                header.style.webkitBackdropFilter = 'none';
-                            }
-                        }
-                        
-                        const loadingScreen = document.getElementById('loading-screen');
-                        if (loadingScreen) {
-                            if (isIOSDevice) {
-                                // No iOS, remover completamente
-                                loadingScreen.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
-                                if (loadingScreen.parentNode) {
-                                    loadingScreen.remove();
-                                }
-                            } else {
-                                loadingScreen.classList.add('hidden');
-                                loadingScreen.style.display = 'none';
-                                loadingScreen.style.visibility = 'hidden';
-                                loadingScreen.style.opacity = '0';
-                                loadingScreen.style.pointerEvents = 'none';
-                            }
-                            ensureContentVisibility();
-                            setViewportHeight();
-                            
-                            // No iOS mais novo, garantir backdrop-filter desabilitado após remover loading
-                            if (isIOSNewer) {
-                                const header = document.querySelector('header');
-                                if (header) {
-                                    header.style.background = 'rgba(0, 4, 25, 0.9)';
-                                    header.style.backdropFilter = 'none';
-                                    header.style.webkitBackdropFilter = 'none';
-                                }
-                            }
-                        }
-                    } catch (e) {
-                        console.warn('Erro ao remover loading screen:', e);
-                    }
-                }, isIOSDevice ? 2000 : 3000);
             } catch (e) {
                 console.warn('Erro no evento load:', e);
-                ensureContentVisibility();
+                if (isIOSDevice) fixIOS();
             }
         });
         
-        // No iOS, adicionar listener adicional para garantir visibilidade
+        // 4. Tratamento de erros global (apenas para iOS)
         if (isIOSDevice) {
-            // Forçar visibilidade após um pequeno delay
+            window.addEventListener('error', function(e) {
+                console.error('Erro capturado:', e.error);
+                fixIOS();
+                e.preventDefault();
+                return false;
+            });
+            
+            window.addEventListener('unhandledrejection', function(e) {
+                console.error('Promise rejeitada:', e.reason);
+                fixIOS();
+                e.preventDefault();
+            });
+        }
+        
+        // 5. No iOS, garantir visibilidade após pequeno delay
+        if (isIOSDevice) {
             setTimeout(() => {
-                ensureContentVisibility();
+                fixIOS();
                 setViewportHeight();
-                
-                // Garantir que o menu mobile esteja fechado
-                const navLinks = document.querySelector('.nav-links');
-                if (navLinks && window.innerWidth <= 768) {
-                    navLinks.style.display = 'none';
-                    navLinks.classList.remove('active');
-                    // Garantir position fixed no iOS
-                    navLinks.style.position = 'fixed';
-                    navLinks.style.top = '70px';
-                    navLinks.style.left = '0';
-                    navLinks.style.right = '0';
-                }
-                
-                // GARANTIR que o conteúdo do hero esteja visível no iOS
-                const heroContent = document.querySelector('.hero-content');
-                if (heroContent) {
-                    heroContent.style.display = 'block';
-                    heroContent.style.opacity = '1';
-                    heroContent.style.visibility = 'visible';
-                    heroContent.style.position = 'relative';
-                    heroContent.style.zIndex = '1001';
-                    heroContent.style.color = 'var(--text-primary)';
-                }
-                
-                // Garantir que o texto typewriter esteja visível
-                const typewriterText = document.querySelector('.typewriter-text');
-                if (typewriterText) {
-                    typewriterText.style.opacity = '1';
-                    typewriterText.style.visibility = 'visible';
-                    typewriterText.style.color = 'var(--light-pink)';
-                    typewriterText.style.zIndex = '1002';
-                }
-                
-                // Garantir que o parágrafo do hero esteja visível
-                const heroParagraph = document.querySelector('.hero-content p');
-                if (heroParagraph) {
-                    heroParagraph.style.opacity = '1';
-                    heroParagraph.style.visibility = 'visible';
-                    heroParagraph.style.color = 'var(--text-primary)';
-                }
             }, 500);
             
-            // No iOS mais novo, verificar periodicamente se o conteúdo ainda está visível
-            // Mas com menos frequência para evitar conflitos
-            if (isIOSNewer) {
-                let visibilityCheckCount = 0;
-                const visibilityCheckInterval = setInterval(() => {
-                    visibilityCheckCount++;
-                    const body = document.body;
-                    
-                    // Verificar se o conteúdo desapareceu
-                    if (body && (body.style.display === 'none' || body.style.opacity === '0' || body.style.visibility === 'hidden')) {
-                        ensureContentVisibility();
+            // Verificação periódica para iOS 15+ (apenas 5 vezes)
+            if (isIOS15Plus()) {
+                let checkCount = 0;
+                const checkInterval = setInterval(() => {
+                    if (checkCount >= 5) {
+                        clearInterval(checkInterval);
+                        return;
                     }
-                    
-                    // Garantir que o menu mobile esteja fechado se estiver em mobile
-                    // Mas apenas se não tiver a classe active (para não interferir quando o usuário abrir)
-                    const navLinks = document.querySelector('.nav-links');
-                    if (navLinks && window.innerWidth <= 768) {
-                        // Se o menu não tem a classe active mas está visível, fechar
-                        if (!navLinks.classList.contains('active') && navLinks.style.display === 'flex') {
-                            navLinks.style.display = 'none';
-                            document.body.style.overflow = '';
-                        }
-                        // Se o menu tem a classe active mas não está visível, mostrar
-                        if (navLinks.classList.contains('active') && navLinks.style.display === 'none') {
-                            navLinks.style.display = 'flex';
-                        }
-                    }
-                    
-                    // Parar após 10 verificações (10 segundos) para não ficar executando indefinidamente
-                    if (visibilityCheckCount >= 10) {
-                        clearInterval(visibilityCheckInterval);
-                    }
+                    checkCount++;
+                    fixIOS();
                 }, 1000);
             }
-            
-            // Forçar visibilidade quando a página ganha foco
-            window.addEventListener('focus', function() {
-                ensureContentVisibility();
-                
-                // Garantir que o menu mobile esteja fechado
-                const navLinks = document.querySelector('.nav-links');
-                if (navLinks && window.innerWidth <= 768) {
-                    navLinks.style.display = 'none';
-                    navLinks.classList.remove('active');
-                }
-            });
-            
-            // Forçar visibilidade quando a página fica visível
-            document.addEventListener('visibilitychange', function() {
-                if (!document.hidden) {
-                    ensureContentVisibility();
-                    setViewportHeight();
-                    
-                    // Garantir que o menu mobile esteja fechado
-                    const navLinks = document.querySelector('.nav-links');
-                    if (navLinks && window.innerWidth <= 768) {
-                        navLinks.style.display = 'none';
-                        navLinks.classList.remove('active');
-                    }
-                }
-            });
         }
     } catch (e) {
         console.error('Erro na inicialização:', e);
@@ -710,7 +440,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 3000);
 });
 
-// ===== MENU MOBILE ELEGANTE =====
+// ===== MENU MOBILE SIMPLIFICADO =====
 function initMobileMenu() {
     const mobileMenuBtn = document.createElement('button');
     mobileMenuBtn.className = 'mobile-menu-btn';
@@ -719,62 +449,106 @@ function initMobileMenu() {
     const navbar = document.querySelector('.navbar');
     const navLinks = document.querySelector('.nav-links');
     
-    // Adicionar botão mobile apenas em telas pequenas
+    if (!navbar || !navLinks) return;
+    
+    // Criar overlay se não existir
+    let menuOverlay = document.querySelector('.menu-overlay');
+    if (!menuOverlay) {
+        menuOverlay = document.createElement('div');
+        menuOverlay.className = 'menu-overlay';
+        document.body.appendChild(menuOverlay);
+    }
+    
+    // Função para atualizar menu baseado no tamanho da tela
     function updateMobileMenu() {
         if (window.innerWidth <= 768) {
+            // Mobile: mostrar botão, esconder menu
             if (!document.querySelector('.mobile-menu-btn')) {
                 navbar.appendChild(mobileMenuBtn);
             }
-            // GARANTIR que o menu esteja FECHADO em mobile
-            if (navLinks) {
-                navLinks.style.display = 'none';
-                navLinks.classList.remove('active');
-            }
-            
-            // Garantir que o overlay esteja fechado
-            const menuOverlay = document.querySelector('.menu-overlay');
-            if (menuOverlay) {
-                menuOverlay.classList.remove('active');
-            }
-            
-            // Garantir que o body não tenha overflow hidden
-            document.body.style.overflow = '';
-        } else {
-            const existingBtn = document.querySelector('.mobile-menu-btn');
-            if (existingBtn) {
-                existingBtn.remove();
-            }
-            if (navLinks) {
-                navLinks.style.display = 'flex';
-                navLinks.classList.remove('active');
-            }
-        }
-    }
-    
-    // Garantir que o menu esteja fechado ao inicializar
-    if (navLinks) {
-        // SEMPRE fechar o menu ao inicializar, independente do tamanho da tela
-        navLinks.style.display = window.innerWidth <= 768 ? 'none' : 'flex';
-        navLinks.classList.remove('active');
-        
-        // No iOS, garantir que o menu esteja fechado e posicionado corretamente
-        if (isIOS()) {
             navLinks.style.display = 'none';
             navLinks.classList.remove('active');
-            // GARANTIR position fixed no iOS para aparecer abaixo do header
-            if (window.innerWidth <= 768) {
+            menuOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+            
+            // No iOS, garantir position fixed
+            if (isIOS()) {
                 navLinks.style.position = 'fixed';
                 navLinks.style.top = '70px';
                 navLinks.style.left = '0';
                 navLinks.style.right = '0';
                 navLinks.style.zIndex = '10001';
             }
+        } else {
+            // Desktop: esconder botão, mostrar menu
+            const existingBtn = document.querySelector('.mobile-menu-btn');
+            if (existingBtn) existingBtn.remove();
+            navLinks.style.display = 'flex';
+            navLinks.classList.remove('active');
+            menuOverlay.classList.remove('active');
+            document.body.style.overflow = '';
         }
     }
     
-    // Garantir que o body não tenha overflow hidden
-    document.body.style.overflow = '';
+    // Funções para abrir/fechar menu
+    function openMenu() {
+        if (window.innerWidth > 768) return;
+        
+        if (isIOS()) {
+            navLinks.style.position = 'fixed';
+            navLinks.style.top = '70px';
+            navLinks.style.left = '0';
+            navLinks.style.right = '0';
+            navLinks.style.zIndex = '10001';
+        }
+        navLinks.style.display = 'flex';
+        navLinks.classList.add('active');
+        menuOverlay.classList.add('active');
+        mobileMenuBtn.innerHTML = '<i class="fas fa-times"></i>';
+        document.body.style.overflow = 'hidden';
+    }
     
+    function closeMenu() {
+        navLinks.style.display = 'none';
+        navLinks.classList.remove('active');
+        menuOverlay.classList.remove('active');
+        mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        document.body.style.overflow = '';
+        
+        if (isIOS()) {
+            navLinks.style.position = 'fixed';
+            navLinks.style.top = '70px';
+            navLinks.style.left = '0';
+            navLinks.style.right = '0';
+        }
+    }
+    
+    // Event listeners
+    mobileMenuBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (navLinks.classList.contains('active')) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+    
+    menuOverlay.addEventListener('click', closeMenu);
+    
+    navLinks.addEventListener('click', (e) => {
+        if (e.target.closest('a')) {
+            setTimeout(closeMenu, 300);
+        }
+    });
+    
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+            closeMenu();
+        }
+    });
+    
+    // Inicializar menu fechado
     updateMobileMenu();
     window.addEventListener('resize', updateMobileMenu);
     
@@ -784,119 +558,17 @@ function initMobileMenu() {
         const mobileGallery = document.querySelector('.mobile-gallery-section');
         
         if (window.innerWidth <= 768) {
-            // Remover masonry em mobile
-            if (masonrySection) {
-                masonrySection.remove();
-                console.log('Masonry layout removido para mobile');
-            }
-            
-            // Adicionar galeria mobile se não existir
+            if (masonrySection) masonrySection.remove();
             if (!mobileGallery && portfolioItems && portfolioItems.length > 0) {
-                setTimeout(() => {
-                    initMobileGallery();
-                }, 300);
+                setTimeout(initMobileGallery, 300);
             }
         } else {
-            // Remover galeria mobile em desktop
-            if (mobileGallery) {
-                mobileGallery.remove();
-                console.log('Galeria mobile removida para desktop');
-            }
-            
-            // Adicionar masonry em desktop se não existir
+            if (mobileGallery) mobileGallery.remove();
             if (!masonrySection && portfolioItems && portfolioItems.length > 0) {
-                setTimeout(() => {
-                    initMasonryLayout();
-                }, 300);
+                setTimeout(initMasonryLayout, 300);
             }
         }
     }, 300));
-    
-    // Criar overlay de fundo (se não existir)
-    let menuOverlay = document.querySelector('.menu-overlay');
-    if (!menuOverlay) {
-        menuOverlay = document.createElement('div');
-        menuOverlay.className = 'menu-overlay';
-        document.body.appendChild(menuOverlay);
-    }
-    
-    // Garantir que o overlay esteja fechado ao inicializar
-    menuOverlay.classList.remove('active');
-    
-    // Função para abrir o menu
-    function openMenu() {
-        if (navLinks) {
-            // No iOS, garantir position fixed antes de abrir
-            if (isIOS() && window.innerWidth <= 768) {
-                navLinks.style.position = 'fixed';
-                navLinks.style.top = '70px';
-                navLinks.style.left = '0';
-                navLinks.style.right = '0';
-                navLinks.style.zIndex = '10001';
-            }
-            navLinks.style.display = 'flex';
-            navLinks.classList.add('active');
-        }
-        if (menuOverlay) {
-            menuOverlay.classList.add('active');
-        }
-        mobileMenuBtn.innerHTML = '<i class="fas fa-times"></i>';
-        document.body.style.overflow = 'hidden';
-    }
-    
-    // Função para fechar o menu
-    function closeMenu() {
-        if (navLinks) {
-            navLinks.style.display = 'none';
-            navLinks.classList.remove('active');
-            // No iOS, manter position fixed mesmo quando fechado
-            if (isIOS() && window.innerWidth <= 768) {
-                navLinks.style.position = 'fixed';
-                navLinks.style.top = '70px';
-                navLinks.style.left = '0';
-                navLinks.style.right = '0';
-            }
-        }
-        if (menuOverlay) {
-            menuOverlay.classList.remove('active');
-        }
-        mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
-        document.body.style.overflow = '';
-    }
-    
-    // Toggle do menu
-    mobileMenuBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        
-        // Usar a classe active para verificar se o menu está aberto
-        if (navLinks && navLinks.classList.contains('active')) {
-            closeMenu();
-        } else {
-            openMenu();
-        }
-    });
-    
-    // Fechar ao clicar no overlay
-    menuOverlay.addEventListener('click', () => {
-        closeMenu();
-    });
-    
-    // Fechar ao clicar em qualquer link
-    navLinks.addEventListener('click', (e) => {
-        if (e.target.closest('a')) {
-            setTimeout(() => {
-                closeMenu();
-            }, 300);
-        }
-    });
-    
-    // Fechar com tecla ESC
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && navLinks.style.display === 'flex') {
-            closeMenu();
-        }
-    });
 }
 
 // ===== PORTFÓLIO ELEGANTE =====

@@ -1953,86 +1953,40 @@ html.ios-newer header {
     -webkit-backdrop-filter: none !important;
 }
 
-/* Fix para iOS - garantir que o conteúdo apareça após loading */
+/* ===== FIX iOS - CSS SIMPLIFICADO ===== */
 @supports (-webkit-touch-callout: none) {
-    /* FORÇAR visibilidade do body e html no iOS */
-    body {
+    /* 1. Garantir visibilidade básica */
+    html, body {
         display: block !important;
         opacity: 1 !important;
         visibility: visible !important;
+    }
+    
+    body {
         min-height: calc(var(--vh, 1vh) * 100) !important;
-        height: auto !important;
         background: var(--dark-primary) !important;
         color: var(--text-primary) !important;
-        position: relative !important;
-        z-index: 1 !important;
     }
     
-    html {
-        display: block !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        height: 100% !important;
-        position: relative !important;
-        z-index: 1 !important;
-    }
-    
-    /* FORÇAR remoção completa do loading screen no iOS */
+    /* 2. Remover loading screen */
     .loading-screen.hidden {
         display: none !important;
         opacity: 0 !important;
         visibility: hidden !important;
         pointer-events: none !important;
         z-index: -1 !important;
-        position: fixed !important;
-        top: -9999px !important;
-        left: -9999px !important;
-        width: 0 !important;
-        height: 0 !important;
     }
     
-    .loading-screen {
-        /* No iOS, garantir que loading screen não bloqueie conteúdo */
-        will-change: opacity, visibility;
-        -webkit-transform: translateZ(0);
-        transform: translateZ(0);
-    }
-    
-    /* FORÇAR visibilidade de TODAS as seções principais no iOS */
-    /* IMPORTANTE: Não incluir .nav-links aqui - deve ser controlado pelo menu mobile */
-    section, header, .hero, main, .navbar {
-        display: block !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        position: relative !important;
-        z-index: 2 !important;
-    }
-    
-    header {
-        position: fixed !important;
-        z-index: 10000 !important;
-    }
-    
+    /* 3. Garantir visibilidade do hero e conteúdo */
     .hero {
         display: flex !important;
         min-height: calc(var(--vh, 1vh) * 100) !important;
         opacity: 1 !important;
         visibility: visible !important;
-        position: relative !important;
-        z-index: 1 !important;
     }
     
-    /* GARANTIR que o conteúdo do hero esteja visível no iOS */
     .hero-content {
         display: block !important;
-        opacity: 1 !important;
-        visibility: visible !important;
-        position: relative !important;
-        z-index: 1001 !important;
-        color: var(--text-primary) !important;
-    }
-    
-    .hero-content p {
         opacity: 1 !important;
         visibility: visible !important;
         color: var(--text-primary) !important;
@@ -2041,24 +1995,15 @@ html.ios-newer header {
     .typewriter-text {
         opacity: 1 !important;
         visibility: visible !important;
-        color: var(--light-pink) !important;
-        z-index: 1002 !important;
-        /* Garantir que o gradiente funcione */
         background: linear-gradient(135deg, var(--light-pink), var(--medium-rose)) !important;
         -webkit-background-clip: text !important;
         -webkit-text-fill-color: transparent !important;
         background-clip: text !important;
     }
     
-    /* GARANTIR que o menu mobile esteja FECHADO em mobile no iOS */
-    /* IMPORTANTE: Não forçar position relative aqui - deve manter position fixed */
-    /* Em mobile, garantir que nav-links esteja fechado por padrão e posicionado corretamente */
+    /* 4. Menu mobile no iOS */
     @media (max-width: 768px) {
         .nav-links {
-            /* Não forçar display - deve ser controlado pelo JavaScript */
-            opacity: 1 !important;
-            visibility: visible !important;
-            /* GARANTIR position fixed para aparecer abaixo do header */
             position: fixed !important;
             top: 70px !important;
             left: 0 !important;
@@ -2075,10 +2020,10 @@ html.ios-newer header {
         }
     }
     
-    /* Garantir que o conteúdo principal esteja acima do loading screen */
-    body > *:not(.loading-screen) {
-        position: relative !important;
-        z-index: 1 !important;
+    /* 5. Header fixo */
+    header {
+        position: fixed !important;
+        z-index: 10000 !important;
     }
 }
 
