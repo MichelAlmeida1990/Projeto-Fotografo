@@ -31,8 +31,9 @@ html {
     display: block;
     opacity: 1;
     visibility: visible;
-    /* Fix para iOS 100vh bug */
+    /* Fix para iOS 100vh bug - usar unidades dinâmicas quando disponível */
     min-height: -webkit-fill-available;
+    min-height: 100dvh; /* Unidade dinâmica moderna */
 }
 
 body {
@@ -40,7 +41,10 @@ body {
     background: var(--dark-primary);
     color: var(--text-primary);
     line-height: 1.6;
-    min-height: 100vh;
+    /* Fix iOS 100vh - usar variável CSS calculada via JS */
+    min-height: calc(var(--vh, 1vh) * 100);
+    min-height: 100dvh; /* Fallback moderno */
+    min-height: -webkit-fill-available; /* Fallback iOS antigo */
     overflow-x: hidden; /* Prevenir scroll horizontal */
     overflow-y: auto;
     -webkit-font-smoothing: antialiased; /* Melhor renderização de texto */
@@ -49,8 +53,8 @@ body {
     display: block;
     opacity: 1;
     visibility: visible;
-    /* Fix para iOS 100vh bug */
-    min-height: -webkit-fill-available;
+    /* Garantir que body tenha altura mínima */
+    height: auto;
 }
 
 /* ===== IMAGENS RESPONSIVAS ===== */
@@ -110,6 +114,28 @@ header {
     box-shadow: 
         0 8px 32px rgba(0, 4, 25, 0.2),
         inset 0 1px 0 rgba(255, 193, 204, 0.1);
+    /* Fix iOS - garantir renderização correta */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: background, backdrop-filter;
+}
+
+/* Fallback para iOS quando backdrop-filter não funciona corretamente */
+@supports not (backdrop-filter: blur(25px)) {
+    header {
+        background: rgba(0, 4, 25, 0.85);
+    }
+}
+
+/* Fix específico para iOS Safari - backdrop-filter pode causar tela preta */
+@supports (-webkit-touch-callout: none) {
+    header {
+        /* Garantir que backdrop-filter não cause problemas */
+        -webkit-backdrop-filter: blur(25px) saturate(180%);
+        backdrop-filter: blur(25px) saturate(180%);
+        /* Fallback sólido caso backdrop-filter falhe */
+        background: rgba(0, 4, 25, 0.75);
+    }
 }
 
 header:hover {
@@ -501,13 +527,20 @@ header.scrolled {
 
 /* ===== HERO SECTION ELEGANTE ===== */
 .hero {
-    min-height: 100vh;
+    /* Fix iOS 100vh - usar variável CSS calculada via JS */
+    min-height: calc(var(--vh, 1vh) * 100);
+    min-height: 100dvh; /* Fallback moderno */
+    min-height: 100vh; /* Fallback para navegadores antigos */
+    min-height: -webkit-fill-available; /* Fallback iOS antigo */
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
     overflow: hidden;
     padding-top: 70px; /* Espaço para o header fixo */
+    /* Garantir visibilidade */
+    opacity: 1;
+    visibility: visible;
 }
 
 .hero-background {
@@ -1739,6 +1772,10 @@ html {
     align-items: center;
     z-index: 9999;
     transition: opacity 0.8s ease-out, visibility 0.8s ease-out;
+    /* Garantir que não bloqueie conteúdo quando escondido */
+    will-change: opacity, visibility, z-index;
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
 }
 
 .loading-content {
@@ -1891,6 +1928,9 @@ html {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+    z-index: -1;
+    /* No iOS, garantir remoção completa */
+    display: none !important;
 }
 
 /* Fix para iOS - garantir que o conteúdo apareça após loading */
@@ -1899,6 +1939,15 @@ html {
         display: block !important;
         opacity: 1 !important;
         visibility: visible !important;
+        min-height: calc(var(--vh, 1vh) * 100) !important;
+        height: auto !important;
+    }
+    
+    html {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        height: 100% !important;
     }
     
     .loading-screen.hidden {
@@ -1907,12 +1956,27 @@ html {
         visibility: hidden !important;
         pointer-events: none !important;
         z-index: -1 !important;
+        position: fixed !important;
+        top: -9999px !important;
+        left: -9999px !important;
     }
     
-    section, header, .hero {
+    .loading-screen {
+        /* No iOS, garantir que loading screen não bloqueie conteúdo */
+        will-change: opacity, visibility;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+    }
+    
+    section, header, .hero, main {
         display: block !important;
         opacity: 1 !important;
         visibility: visible !important;
+    }
+    
+    .hero {
+        display: flex !important;
+        min-height: calc(var(--vh, 1vh) * 100) !important;
     }
 }
 
