@@ -64,6 +64,37 @@ function isIOS() {
            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
 
+// ===== DETECTAR VERSÃO DO iOS =====
+function getIOSVersion() {
+    const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+    const match = userAgent.match(/OS (\d+)_(\d+)_?(\d+)?/);
+    
+    if (match) {
+        return {
+            major: parseInt(match[1], 10),
+            minor: parseInt(match[2], 10),
+            patch: match[3] ? parseInt(match[3], 10) : 0
+        };
+    }
+    
+    return null;
+}
+
+// ===== VERIFICAR SE É iOS 15+ (iPhone 13+ geralmente tem iOS 15+) =====
+function isIOS15Plus() {
+    const version = getIOSVersion();
+    if (version) {
+        return version.major >= 15;
+    }
+    // Se não conseguir detectar, assumir que é iOS mais novo se for iPhone 13 ou mais novo
+    const userAgent = navigator.userAgent || '';
+    // iPhone 13 foi lançado com iOS 15
+    if (/iPhone.*1[3-9]|iPhone.*2[0-9]/.test(userAgent)) {
+        return true;
+    }
+    return false;
+}
+
 // ===== CALCULAR ALTURA DINÂMICA DA VIEWPORT (FIX iOS 100vh) =====
 function setViewportHeight() {
     try {
@@ -104,7 +135,7 @@ function initViewportHeight() {
     }
 }
 
-// ===== GARANTIR VISIBILIDADE DO CONTEÚDO NO iOS =====
+// ===== GARANTIR VISIBILIDADE DO CONTEÚDO NO iOS (VERSÃO AGRESSIVA) =====
 function ensureContentVisibility() {
     try {
         const body = document.body;
@@ -112,35 +143,72 @@ function ensureContentVisibility() {
         
         if (!body || !html) return;
         
-        // Apenas garantir que body e html não estejam escondidos (menos agressivo)
-        if (body.style.display === 'none') {
-            body.style.display = '';
-        }
-        if (body.style.opacity === '0') {
-            body.style.opacity = '';
-        }
-        if (body.style.visibility === 'hidden') {
-            body.style.visibility = '';
-        }
+        // No iOS, ser mais agressivo para garantir visibilidade
+        const isIOSDevice = isIOS();
         
-        if (html.style.display === 'none') {
-            html.style.display = '';
-        }
-        if (html.style.opacity === '0') {
-            html.style.opacity = '';
-        }
-        if (html.style.visibility === 'hidden') {
-            html.style.visibility = '';
+        if (isIOSDevice) {
+            // FORÇAR visibilidade no iOS
+            body.style.display = 'block';
+            body.style.opacity = '1';
+            body.style.visibility = 'visible';
+            body.style.height = 'auto';
+            body.style.minHeight = '100%';
+            body.style.background = 'var(--dark-primary)';
+            body.style.color = 'var(--text-primary)';
+            
+            html.style.display = 'block';
+            html.style.opacity = '1';
+            html.style.visibility = 'visible';
+            html.style.height = '100%';
+            
+            // Forçar visibilidade de TODAS as seções principais
+            const allSections = document.querySelectorAll('section, header, .hero, main, .navbar, .nav-links');
+            allSections.forEach(el => {
+                if (el) {
+                    el.style.display = '';
+                    el.style.opacity = '1';
+                    el.style.visibility = 'visible';
+                    // Remover qualquer estilo que possa estar escondendo
+                    if (el.style.display === 'none') el.style.display = '';
+                    if (el.style.opacity === '0') el.style.opacity = '1';
+                    if (el.style.visibility === 'hidden') el.style.visibility = 'visible';
+                }
+            });
+            
+            // Garantir que o hero esteja visível
+            const hero = document.querySelector('.hero');
+            if (hero) {
+                hero.style.display = 'flex';
+                hero.style.opacity = '1';
+                hero.style.visibility = 'visible';
+                hero.style.minHeight = 'calc(var(--vh, 1vh) * 100)';
+            }
+        } else {
+            // Para outros dispositivos, ser menos agressivo
+            if (body.style.display === 'none') {
+                body.style.display = '';
+            }
+            if (body.style.opacity === '0') {
+                body.style.opacity = '';
+            }
+            if (body.style.visibility === 'hidden') {
+                body.style.visibility = '';
+            }
         }
         
         // Garantir que o loading screen não esteja bloqueando
         const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen && loadingScreen.classList.contains('hidden')) {
-            loadingScreen.style.display = 'none';
-            loadingScreen.style.visibility = 'hidden';
-            loadingScreen.style.opacity = '0';
-            loadingScreen.style.pointerEvents = 'none';
-            loadingScreen.style.zIndex = '-1';
+        if (loadingScreen) {
+            if (loadingScreen.classList.contains('hidden') || isIOSDevice) {
+                loadingScreen.style.display = 'none';
+                loadingScreen.style.visibility = 'hidden';
+                loadingScreen.style.opacity = '0';
+                loadingScreen.style.pointerEvents = 'none';
+                loadingScreen.style.zIndex = '-1';
+                loadingScreen.style.position = 'fixed';
+                loadingScreen.style.top = '-9999px';
+                loadingScreen.style.left = '-9999px';
+            }
         }
     } catch (e) {
         console.warn('Erro ao garantir visibilidade do conteúdo:', e);
@@ -158,50 +226,103 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Detectar iOS e ajustar timeout
         const isIOSDevice = isIOS();
+        const isIOSNewer = isIOS15Plus(); // iPhone 13+ geralmente tem iOS 15+
         const loadingTimeout = isIOSDevice ? 1500 : 3000; // iOS ainda mais rápido
+        
+        // No iOS mais novo (iPhone 13+), desabilitar backdrop-filter que pode causar tela preta
+        if (isIOSNewer) {
+            try {
+                // Adicionar classe CSS para desabilitar backdrop-filter
+                document.documentElement.classList.add('ios-newer');
+                
+                // Desabilitar backdrop-filter no header via JavaScript
+                const header = document.querySelector('header');
+                if (header) {
+                    // Usar background mais opaco e desabilitar backdrop-filter
+                    header.style.background = 'rgba(0, 4, 25, 0.9)';
+                    header.style.backdropFilter = 'none';
+                    header.style.webkitBackdropFilter = 'none';
+                }
+            } catch (e) {
+                console.warn('Erro ao desabilitar backdrop-filter no iOS mais novo:', e);
+            }
+        }
         
         // Função para remover completamente o loading screen
         function removeLoadingScreen() {
             try {
                 const loadingScreen = document.getElementById('loading-screen');
-                if (loadingScreen) {
-                    // Garantir que o conteúdo esteja visível ANTES de remover loading
+                
+                // No iOS, PRIMEIRO garantir visibilidade do conteúdo, DEPOIS remover loading
+                // No iOS mais novo (iPhone 13+), ser ainda mais agressivo
+                if (isIOSDevice) {
+                    // No iOS mais novo, garantir que backdrop-filter não cause problemas
+                    if (isIOSNewer) {
+                        const header = document.querySelector('header');
+                        if (header) {
+                            header.style.background = 'rgba(0, 4, 25, 0.9)';
+                            header.style.backdropFilter = 'none';
+                            header.style.webkitBackdropFilter = 'none';
+                        }
+                    }
+                    // PASSO 1: Forçar visibilidade do conteúdo ANTES de remover loading
                     ensureContentVisibility();
                     
-                    // No iOS, remover completamente do DOM ao invés de apenas esconder
-                    if (isIOSDevice) {
-                        // Forçar visibilidade do conteúdo primeiro
-                        ensureContentVisibility();
+                    // PASSO 2: Forçar reflow para garantir renderização
+                    void document.body.offsetWidth;
+                    void document.documentElement.offsetWidth;
+                    
+                    // PASSO 3: Remover loading screen IMEDIATAMENTE (sem delay)
+                    if (loadingScreen) {
+                        // Esconder completamente
+                        loadingScreen.style.cssText = `
+                            display: none !important;
+                            visibility: hidden !important;
+                            opacity: 0 !important;
+                            pointer-events: none !important;
+                            z-index: -1 !important;
+                            position: fixed !important;
+                            top: -9999px !important;
+                            left: -9999px !important;
+                            width: 0 !important;
+                            height: 0 !important;
+                        `;
                         
-                        // Remover do DOM imediatamente
-                        loadingScreen.style.display = 'none';
-                        loadingScreen.style.visibility = 'hidden';
-                        loadingScreen.style.opacity = '0';
-                        loadingScreen.style.pointerEvents = 'none';
-                        loadingScreen.style.zIndex = '-1';
-                        
-                        // Forçar reflow
+                        // Forçar reflow novamente
                         void document.body.offsetWidth;
                         
                         // Remover do DOM após pequeno delay
                         setTimeout(() => {
                             try {
-                                if (loadingScreen.parentNode) {
+                                if (loadingScreen && loadingScreen.parentNode) {
                                     loadingScreen.remove();
                                 }
+                                // Forçar visibilidade novamente após remover
                                 ensureContentVisibility();
+                                setViewportHeight();
                                 
-                                // Forçar renderização novamente
+                                // Forçar renderização com requestAnimationFrame
                                 requestAnimationFrame(() => {
                                     ensureContentVisibility();
                                     setViewportHeight();
+                                    
+                                    // Duplo check para garantir
+                                    requestAnimationFrame(() => {
+                                        ensureContentVisibility();
+                                    });
                                 });
                             } catch (e) {
                                 console.warn('Erro ao remover loading screen do DOM:', e);
+                                ensureContentVisibility();
                             }
-                        }, 100);
+                        }, 50); // Delay muito curto no iOS
                     } else {
-                        // Para outros dispositivos, usar transição suave
+                        // Se não houver loading screen, garantir visibilidade
+                        ensureContentVisibility();
+                    }
+                } else {
+                    // Para outros dispositivos, usar transição suave
+                    if (loadingScreen) {
                         loadingScreen.classList.add('hidden');
                         setTimeout(() => {
                             try {
@@ -214,10 +335,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 console.warn('Erro ao esconder loading screen:', e);
                             }
                         }, 800);
+                    } else {
+                        ensureContentVisibility();
                     }
-                } else {
-                    // Se não houver loading screen, garantir visibilidade
-                    ensureContentVisibility();
                 }
             } catch (e) {
                 console.warn('Erro na função removeLoadingScreen:', e);
@@ -225,8 +345,27 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
         
-        // Esconder loading screen após carregamento
-        setTimeout(removeLoadingScreen, loadingTimeout);
+        // No iOS, remover loading screen MAIS CEDO e garantir visibilidade
+        if (isIOSDevice) {
+            // Remover loading screen mais cedo no iOS (1 segundo)
+            setTimeout(removeLoadingScreen, 1000);
+            
+            // Backup: garantir visibilidade após 2 segundos
+            setTimeout(() => {
+                ensureContentVisibility();
+                const loadingScreen = document.getElementById('loading-screen');
+                if (loadingScreen) {
+                    loadingScreen.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
+                    if (loadingScreen.parentNode) {
+                        loadingScreen.remove();
+                    }
+                }
+                ensureContentVisibility();
+            }, 2000);
+        } else {
+            // Para outros dispositivos, usar timeout normal
+            setTimeout(removeLoadingScreen, loadingTimeout);
+        }
         
         // Garantir visibilidade após carregamento completo (backup para iOS)
         window.addEventListener('load', function() {
@@ -234,14 +373,62 @@ document.addEventListener('DOMContentLoaded', function() {
                 ensureContentVisibility();
                 setViewportHeight();
                 
-                // Forçar remoção do loading screen se ainda estiver visível após 3 segundos
+                // No iOS, remover loading screen IMEDIATAMENTE após load
+                if (isIOSDevice) {
+                    // No iOS mais novo, garantir que backdrop-filter não cause problemas
+                    if (isIOSNewer) {
+                        const header = document.querySelector('header');
+                        if (header) {
+                            header.style.background = 'rgba(0, 4, 25, 0.9)';
+                            header.style.backdropFilter = 'none';
+                            header.style.webkitBackdropFilter = 'none';
+                        }
+                    }
+                    
+                    const loadingScreen = document.getElementById('loading-screen');
+                    if (loadingScreen) {
+                        loadingScreen.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important; position: fixed !important; top: -9999px !important; left: -9999px !important; width: 0 !important; height: 0 !important;';
+                        setTimeout(() => {
+                            if (loadingScreen.parentNode) {
+                                loadingScreen.remove();
+                            }
+                            ensureContentVisibility();
+                            setViewportHeight();
+                            
+                            // No iOS mais novo, garantir backdrop-filter desabilitado após remover loading
+                            if (isIOSNewer) {
+                                const header = document.querySelector('header');
+                                if (header) {
+                                    header.style.background = 'rgba(0, 4, 25, 0.9)';
+                                    header.style.backdropFilter = 'none';
+                                    header.style.webkitBackdropFilter = 'none';
+                                }
+                            }
+                        }, 100);
+                    }
+                }
+                
+                // Forçar remoção do loading screen se ainda estiver visível após 2 segundos (iOS) ou 3 segundos (outros)
                 setTimeout(() => {
                     try {
+                        // No iOS mais novo, garantir que backdrop-filter não cause problemas
+                        if (isIOSNewer) {
+                            const header = document.querySelector('header');
+                            if (header) {
+                                header.style.background = 'rgba(0, 4, 25, 0.9)';
+                                header.style.backdropFilter = 'none';
+                                header.style.webkitBackdropFilter = 'none';
+                            }
+                        }
+                        
                         const loadingScreen = document.getElementById('loading-screen');
                         if (loadingScreen) {
                             if (isIOSDevice) {
                                 // No iOS, remover completamente
-                                loadingScreen.remove();
+                                loadingScreen.style.cssText = 'display: none !important; visibility: hidden !important; opacity: 0 !important; pointer-events: none !important; z-index: -1 !important;';
+                                if (loadingScreen.parentNode) {
+                                    loadingScreen.remove();
+                                }
                             } else {
                                 loadingScreen.classList.add('hidden');
                                 loadingScreen.style.display = 'none';
@@ -251,15 +438,48 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                             ensureContentVisibility();
                             setViewportHeight();
+                            
+                            // No iOS mais novo, garantir backdrop-filter desabilitado após remover loading
+                            if (isIOSNewer) {
+                                const header = document.querySelector('header');
+                                if (header) {
+                                    header.style.background = 'rgba(0, 4, 25, 0.9)';
+                                    header.style.backdropFilter = 'none';
+                                    header.style.webkitBackdropFilter = 'none';
+                                }
+                            }
                         }
                     } catch (e) {
                         console.warn('Erro ao remover loading screen:', e);
                     }
-                }, 3000);
+                }, isIOSDevice ? 2000 : 3000);
             } catch (e) {
                 console.warn('Erro no evento load:', e);
+                ensureContentVisibility();
             }
         });
+        
+        // No iOS, adicionar listener adicional para garantir visibilidade
+        if (isIOSDevice) {
+            // Forçar visibilidade após um pequeno delay
+            setTimeout(() => {
+                ensureContentVisibility();
+                setViewportHeight();
+            }, 500);
+            
+            // Forçar visibilidade quando a página ganha foco
+            window.addEventListener('focus', function() {
+                ensureContentVisibility();
+            });
+            
+            // Forçar visibilidade quando a página fica visível
+            document.addEventListener('visibilitychange', function() {
+                if (!document.hidden) {
+                    ensureContentVisibility();
+                    setViewportHeight();
+                }
+            });
+        }
     } catch (e) {
         console.error('Erro na inicialização:', e);
         // Fallback básico - garantir que o conteúdo apareça mesmo com erro
