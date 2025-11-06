@@ -162,7 +162,8 @@ function ensureContentVisibility() {
             html.style.height = '100%';
             
             // Forçar visibilidade de TODAS as seções principais
-            const allSections = document.querySelectorAll('section, header, .hero, main, .navbar, .nav-links');
+            // IMPORTANTE: Não forçar nav-links em mobile (deve ser controlado pelo menu mobile)
+            const allSections = document.querySelectorAll('section, header, .hero, main, .navbar');
             allSections.forEach(el => {
                 if (el) {
                     el.style.display = '';
@@ -174,6 +175,23 @@ function ensureContentVisibility() {
                     if (el.style.visibility === 'hidden') el.style.visibility = 'visible';
                 }
             });
+            
+            // Garantir que o menu mobile esteja FECHADO por padrão em mobile
+            const navLinks = document.querySelector('.nav-links');
+            if (navLinks && window.innerWidth <= 768) {
+                // Em mobile, o menu deve estar fechado por padrão
+                navLinks.style.display = 'none';
+                navLinks.classList.remove('active');
+                
+                // Garantir que o overlay também esteja fechado
+                const menuOverlay = document.querySelector('.menu-overlay');
+                if (menuOverlay) {
+                    menuOverlay.classList.remove('active');
+                }
+                
+                // Garantir que o body não tenha overflow hidden
+                document.body.style.overflow = '';
+            }
             
             // Garantir que o hero esteja visível
             const hero = document.querySelector('.hero');
@@ -465,11 +483,43 @@ document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 ensureContentVisibility();
                 setViewportHeight();
+                
+                // Garantir que o menu mobile esteja fechado
+                const navLinks = document.querySelector('.nav-links');
+                if (navLinks && window.innerWidth <= 768) {
+                    navLinks.style.display = 'none';
+                    navLinks.classList.remove('active');
+                }
             }, 500);
+            
+            // No iOS mais novo, verificar periodicamente se o conteúdo ainda está visível
+            if (isIOSNewer) {
+                setInterval(() => {
+                    const body = document.body;
+                    if (body && (body.style.display === 'none' || body.style.opacity === '0' || body.style.visibility === 'hidden')) {
+                        ensureContentVisibility();
+                    }
+                    
+                    // Garantir que o menu mobile esteja fechado se estiver em mobile
+                    const navLinks = document.querySelector('.nav-links');
+                    if (navLinks && window.innerWidth <= 768 && navLinks.style.display === 'flex') {
+                        navLinks.style.display = 'none';
+                        navLinks.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                }, 1000);
+            }
             
             // Forçar visibilidade quando a página ganha foco
             window.addEventListener('focus', function() {
                 ensureContentVisibility();
+                
+                // Garantir que o menu mobile esteja fechado
+                const navLinks = document.querySelector('.nav-links');
+                if (navLinks && window.innerWidth <= 768) {
+                    navLinks.style.display = 'none';
+                    navLinks.classList.remove('active');
+                }
             });
             
             // Forçar visibilidade quando a página fica visível
@@ -477,6 +527,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (!document.hidden) {
                     ensureContentVisibility();
                     setViewportHeight();
+                    
+                    // Garantir que o menu mobile esteja fechado
+                    const navLinks = document.querySelector('.nav-links');
+                    if (navLinks && window.innerWidth <= 768) {
+                        navLinks.style.display = 'none';
+                        navLinks.classList.remove('active');
+                    }
                 }
             });
         }
@@ -566,15 +623,37 @@ function initMobileMenu() {
         if (window.innerWidth <= 768) {
             if (!document.querySelector('.mobile-menu-btn')) {
                 navbar.appendChild(mobileMenuBtn);
-                navLinks.style.display = 'none';
             }
+            // GARANTIR que o menu esteja FECHADO em mobile
+            if (navLinks) {
+                navLinks.style.display = 'none';
+                navLinks.classList.remove('active');
+            }
+            
+            // Garantir que o overlay esteja fechado
+            const menuOverlay = document.querySelector('.menu-overlay');
+            if (menuOverlay) {
+                menuOverlay.classList.remove('active');
+            }
+            
+            // Garantir que o body não tenha overflow hidden
+            document.body.style.overflow = '';
         } else {
             const existingBtn = document.querySelector('.mobile-menu-btn');
             if (existingBtn) {
                 existingBtn.remove();
             }
-            navLinks.style.display = 'flex';
+            if (navLinks) {
+                navLinks.style.display = 'flex';
+                navLinks.classList.remove('active');
+            }
         }
+    }
+    
+    // Garantir que o menu esteja fechado ao inicializar
+    if (navLinks) {
+        navLinks.style.display = window.innerWidth <= 768 ? 'none' : 'flex';
+        navLinks.classList.remove('active');
     }
     
     updateMobileMenu();
