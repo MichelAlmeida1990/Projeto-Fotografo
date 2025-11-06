@@ -135,7 +135,7 @@ function initViewportHeight() {
     }
 }
 
-// ===== FIX iOS - SOLUÇÃO SIMPLES E LIMPA =====
+// ===== FIX iOS - VERSÃO SIMPLIFICADA =====
 function fixIOS() {
     try {
         if (!isIOS()) return;
@@ -144,50 +144,26 @@ function fixIOS() {
         const html = document.documentElement;
         if (!body || !html) return;
         
-        // 1. Garantir que body e html estejam visíveis
-        body.style.display = 'block';
-        body.style.opacity = '1';
-        body.style.visibility = 'visible';
-        body.style.background = 'var(--dark-primary)';
-        body.style.color = 'var(--text-primary)';
+        // Forçar visibilidade básica
+        [body, html].forEach(el => {
+            el.style.display = 'block';
+            el.style.visibility = 'visible';
+            el.style.opacity = '1';
+        });
         
-        html.style.display = 'block';
-        html.style.opacity = '1';
-        html.style.visibility = 'visible';
+        // Hero e conteúdo
+        document.querySelectorAll('.hero, .hero-content, .typewriter-text').forEach(el => {
+            if (el) {
+                el.style.display = el.classList.contains('hero') ? 'flex' : 'block';
+                el.style.opacity = '1';
+                el.style.visibility = 'visible';
+            }
+        });
         
-        // 2. Garantir que o hero e conteúdo estejam visíveis
-        const hero = document.querySelector('.hero');
-        if (hero) {
-            hero.style.display = 'flex';
-            hero.style.opacity = '1';
-            hero.style.visibility = 'visible';
-        }
+        // Remover overflow hidden
+        body.style.overflow = '';
         
-        const heroContent = document.querySelector('.hero-content');
-        if (heroContent) {
-            heroContent.style.display = 'block';
-            heroContent.style.opacity = '1';
-            heroContent.style.visibility = 'visible';
-            heroContent.style.color = 'var(--text-primary)';
-        }
-        
-        const typewriterText = document.querySelector('.typewriter-text');
-        if (typewriterText) {
-            typewriterText.style.opacity = '1';
-            typewriterText.style.visibility = 'visible';
-        }
-        
-        // 3. Remover loading screen se existir
-        const loadingScreen = document.getElementById('loading-screen');
-        if (loadingScreen) {
-            loadingScreen.style.display = 'none';
-            loadingScreen.style.visibility = 'hidden';
-            loadingScreen.style.opacity = '0';
-            loadingScreen.style.pointerEvents = 'none';
-            loadingScreen.style.zIndex = '-1';
-        }
-        
-        // 4. Garantir que o menu mobile esteja fechado
+        // Garantir que o menu mobile esteja fechado
         const navLinks = document.querySelector('.nav-links');
         if (navLinks && window.innerWidth <= 768) {
             navLinks.style.display = 'none';
@@ -204,60 +180,97 @@ function fixIOS() {
             menuOverlay.classList.remove('active');
         }
         
-        document.body.style.overflow = '';
-        
     } catch (e) {
         console.warn('Erro no fix iOS:', e);
     }
 }
 
-// ===== GARANTIR VISIBILIDADE DO CONTEÚDO (VERSÃO SIMPLIFICADA) =====
-function ensureContentVisibility() {
-    try {
-        if (isIOS()) {
-            fixIOS();
-        }
-    } catch (e) {
-        console.warn('Erro ao garantir visibilidade:', e);
-    }
-}
-
-// ===== REMOVER LOADING SCREEN (VERSÃO SIMPLIFICADA) =====
+// ===== REMOVER LOADING SCREEN =====
 function removeLoadingScreen() {
     try {
         const loadingScreen = document.getElementById('loading-screen');
         if (!loadingScreen) return;
         
-        const isIOSDevice = isIOS();
-        
-        if (isIOSDevice) {
-            // iOS: remover imediatamente
-            fixIOS(); // Garantir visibilidade primeiro
+        // Web/Desktop: remover normalmente com transição suave
+        loadingScreen.classList.add('hidden');
+        setTimeout(() => {
             loadingScreen.style.display = 'none';
             loadingScreen.style.visibility = 'hidden';
             loadingScreen.style.opacity = '0';
             loadingScreen.style.pointerEvents = 'none';
-            loadingScreen.style.zIndex = '-1';
+            document.body.classList.add('loaded');
+        }, 800);
+        
+    } catch (e) {
+        console.warn('Erro ao remover loading screen:', e);
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen && loadingScreen.parentNode) {
+            loadingScreen.remove();
+        }
+    }
+}
+
+// ===== REMOVER LOADING SCREEN COM SEGURANÇA (APENAS MOBILE/iOS) =====
+function removeLoadingScreenSafely() {
+    try {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (!loadingScreen) return;
+        
+        const isMobile = window.innerWidth <= 768;
+        const isIOSDevice = isIOS();
+        
+        // Se for web/desktop (não mobile e não iOS), remover normalmente
+        if (!isMobile && !isIOSDevice) {
+            removeLoadingScreen();
+            return;
+        }
+        
+        // Mobile/iOS: garantir visibilidade PRIMEIRO, depois remover loading
+        // Não esperar todas as imagens (pode demorar muito)
+        if (isIOSDevice) {
+            // No iOS, garantir visibilidade antes de remover loading
+            fixIOS();
+        }
+        
+        // Remover loading após pequeno delay (não esperar imagens)
+        loadingScreen.style.opacity = '0';
+        loadingScreen.style.transition = 'opacity 0.5s ease';
+        
+        setTimeout(() => {
+            if (loadingScreen.parentNode) {
+                loadingScreen.remove();
+            }
+            document.body.classList.add('loaded');
             
-            // Remover do DOM após pequeno delay
-            setTimeout(() => {
-                if (loadingScreen.parentNode) {
-                    loadingScreen.remove();
-                }
-                fixIOS(); // Garantir novamente após remover
-            }, 100);
-        } else {
-            // Outros dispositivos: transição suave
-            loadingScreen.classList.add('hidden');
-            setTimeout(() => {
+            // No iOS, garantir visibilidade novamente após remover
+            if (isIOSDevice) {
+                fixIOS();
+                setViewportHeight();
+            }
+        }, 500);
+        
+        // Timeout máximo: remover loading mesmo se algo der errado (após 2s)
+        setTimeout(() => {
+            if (loadingScreen && loadingScreen.parentNode) {
                 loadingScreen.style.display = 'none';
                 loadingScreen.style.visibility = 'hidden';
                 loadingScreen.style.opacity = '0';
-                loadingScreen.style.pointerEvents = 'none';
-            }, 800);
-        }
+                loadingScreen.remove();
+            }
+            document.body.classList.add('loaded');
+            
+            if (isIOSDevice) {
+                fixIOS();
+                setViewportHeight();
+            }
+        }, 2000);
+        
     } catch (e) {
         console.warn('Erro ao remover loading screen:', e);
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen && loadingScreen.parentNode) {
+            loadingScreen.remove();
+        }
         if (isIOS()) fixIOS();
     }
 }
@@ -279,61 +292,34 @@ function fixIOSHeader() {
     }
 }
 
-// ===== INICIALIZAÇÃO SIMPLIFICADA =====
+// ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
     try {
         // 1. Inicializar viewport height
         initViewportHeight();
         
-        // 2. Detectar iOS e aplicar fixes
-        const isIOSDevice = isIOS();
+        // 2. Inicializar todas as funcionalidades
+        initMobileMenu();
+        initPortfolio();
+        initCalendar();
+        initFormValidation();
+        initSmoothScrolling();
+        initAnimations();
+        initContactForm();
+        initModal();
+        initFloatingElements();
+        initTypewriter();
+        initHeaderScroll();
+        initModernCTAButton();
         
-        if (isIOSDevice) {
-            // Fix header backdrop-filter para iOS 15+
-            fixIOSHeader();
-            
-            // Garantir visibilidade imediatamente
-            fixIOS();
-            
-            // Remover loading screen mais cedo (1s)
-            setTimeout(removeLoadingScreen, 1000);
-            
-            // Backup: garantir visibilidade após 2s
-            setTimeout(() => {
-                fixIOS();
-                const loadingScreen = document.getElementById('loading-screen');
-                if (loadingScreen) {
-                    loadingScreen.style.display = 'none';
-                    loadingScreen.style.visibility = 'hidden';
-                    loadingScreen.style.opacity = '0';
-                    if (loadingScreen.parentNode) {
-                        loadingScreen.remove();
-                    }
-                }
-            }, 2000);
-        } else {
-            // Outros dispositivos: timeout normal (3s)
-            setTimeout(removeLoadingScreen, 3000);
+        // 3. iOS: só fixar visibilidade (NÃO remover loading ainda)
+        if (isIOS()) {
+            fixIOSHeader(); // Fix header backdrop-filter para iOS 15+
+            fixIOS(); // Garantir visibilidade básica
         }
         
-        // 3. Evento load (backup)
-        window.addEventListener('load', function() {
-            try {
-                if (isIOSDevice) {
-                    fixIOS();
-                    fixIOSHeader();
-                    removeLoadingScreen();
-                } else {
-                    removeLoadingScreen();
-                }
-            } catch (e) {
-                console.warn('Erro no evento load:', e);
-                if (isIOSDevice) fixIOS();
-            }
-        });
-        
         // 4. Tratamento de erros global (apenas para iOS)
-        if (isIOSDevice) {
+        if (isIOS()) {
             window.addEventListener('error', function(e) {
                 console.error('Erro capturado:', e.error);
                 fixIOS();
@@ -348,96 +334,69 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // 5. No iOS, garantir visibilidade após pequeno delay
-        if (isIOSDevice) {
-            setTimeout(() => {
-                fixIOS();
-                setViewportHeight();
-            }, 500);
-            
-            // Verificação periódica para iOS 15+ (apenas 5 vezes)
-            if (isIOS15Plus()) {
-                let checkCount = 0;
-                const checkInterval = setInterval(() => {
-                    if (checkCount >= 5) {
-                        clearInterval(checkInterval);
-                        return;
-                    }
-                    checkCount++;
-                    fixIOS();
-                }, 1000);
-            }
-        }
     } catch (e) {
         console.error('Erro na inicialização:', e);
-        // Fallback básico - garantir que o conteúdo apareça mesmo com erro
-        ensureContentVisibility();
+        if (isIOS()) fixIOS();
     }
+});
 
-    // Inicializar todas as funcionalidades (fora do try-catch para garantir execução)
+// ===== REMOVER LOADING SCREEN QUANDO TUDO ESTIVER PRONTO =====
+window.addEventListener('load', function() {
     try {
-        initMobileMenu();
-        initPortfolio();
-        initCalendar();
-        initFormValidation();
-        initSmoothScrolling();
-        initAnimations();
-        initContactForm();
-        initModal();
-        initFloatingElements();
-        initTypewriter();
-        initHeaderScroll();
-        initModernCTAButton();
-    } catch (e) {
-        console.error('Erro ao inicializar funcionalidades:', e);
-    }
-    
-    // Inicializar efeitos fotográficos avançados
-    setTimeout(() => {
-        initPhotoEffects();
-        initScrollAnimations();
-        initPhotoParticles();
+        const isMobile = window.innerWidth <= 768;
+        const isIOSDevice = isIOS();
         
-        console.log('Inicializando galerias...');
-        console.log('Window width:', window.innerWidth);
-        console.log('Portfolio items:', portfolioItems ? portfolioItems.length : 'undefined');
-        
-        // Inicializar masonry layout apenas em desktop após carregamento
-        if (window.innerWidth > 768 && portfolioItems && portfolioItems.length > 0) {
-            console.log('Inicializando masonry layout...');
-            initMasonryLayout();
+        // No iOS, garantir visibilidade primeiro
+        if (isIOSDevice) {
+            fixIOS();
+            fixIOSHeader();
         }
         
-        // Inicializar galeria mobile se estiver em mobile
-        if (window.innerWidth <= 768 && portfolioItems && portfolioItems.length > 0) {
-            console.log('Inicializando galeria mobile...');
-            initMobileGallery();
-        } else {
-            console.log('Condições não atendidas para galeria mobile:');
-            console.log('- Width <= 768:', window.innerWidth <= 768);
-            console.log('- Portfolio items exist:', !!portfolioItems);
-            console.log('- Portfolio items length > 0:', portfolioItems ? portfolioItems.length > 0 : false);
-        }
+        // Mobile/iOS: remover loading com segurança (espera imagens)
+        // Web/Desktop: remover loading normalmente
+        removeLoadingScreenSafely();
         
-        // Remover initAdvancedFeatures temporariamente para evitar conflitos
-        // initAdvancedFeatures();
-    }, 2000);
-
-    // Inicializar sistema de autenticação após um pequeno delay
-    setTimeout(() => {
-        initAuthSystem();
-    }, 500);
-    
-    // Verificação final para galeria mobile (backup)
-    setTimeout(() => {
-        if (window.innerWidth <= 768 && portfolioItems && portfolioItems.length > 0) {
-            const mobileGallery = document.querySelector('.mobile-gallery-section');
-            if (!mobileGallery) {
-                console.log('🔄 Verificação final: Criando galeria mobile...');
+        // Inicializar efeitos fotográficos após um delay
+        setTimeout(() => {
+            initPhotoEffects();
+            initScrollAnimations();
+            initPhotoParticles();
+            
+            // Inicializar galerias
+            if (window.innerWidth > 768 && portfolioItems && portfolioItems.length > 0) {
+                initMasonryLayout();
+            }
+            
+            if (window.innerWidth <= 768 && portfolioItems && portfolioItems.length > 0) {
                 initMobileGallery();
             }
+        }, 500);
+        
+        // Inicializar sistema de autenticação
+        setTimeout(() => {
+            initAuthSystem();
+        }, 1000);
+        
+        // Verificação final para galeria mobile (backup)
+        setTimeout(() => {
+            if (window.innerWidth <= 768 && portfolioItems && portfolioItems.length > 0) {
+                const mobileGallery = document.querySelector('.mobile-gallery-section');
+                if (!mobileGallery) {
+                    initMobileGallery();
+                }
+            }
+        }, 2000);
+        
+    } catch (e) {
+        console.warn('Erro no evento load:', e);
+        if (isIOS()) fixIOS();
+        
+        // Fallback: remover loading mesmo se houver erro
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen && loadingScreen.parentNode) {
+            loadingScreen.remove();
         }
-    }, 3000);
+    }
 });
 
 // ===== MENU MOBILE SIMPLIFICADO =====
