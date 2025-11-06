@@ -58,18 +58,93 @@ function removeDuplicates(items) {
     return uniqueItems;
 }
 
+// ===== DETECÇÃO iOS =====
+function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+// ===== GARANTIR VISIBILIDADE DO CONTEÚDO NO iOS =====
+function ensureContentVisibility() {
+    const body = document.body;
+    const html = document.documentElement;
+    
+    // Garantir que body e html estejam visíveis
+    body.style.display = 'block';
+    body.style.opacity = '1';
+    body.style.visibility = 'visible';
+    html.style.display = 'block';
+    html.style.opacity = '1';
+    html.style.visibility = 'visible';
+    
+    // Garantir que todas as seções principais estejam visíveis
+    const mainSections = document.querySelectorAll('section, header, .hero');
+    mainSections.forEach(section => {
+        if (section) {
+            section.style.display = '';
+            section.style.opacity = '1';
+            section.style.visibility = 'visible';
+        }
+    });
+}
+
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', function() {
+    // Garantir visibilidade do conteúdo imediatamente
+    ensureContentVisibility();
+    
+    // Detectar iOS e ajustar timeout
+    const isIOSDevice = isIOS();
+    const loadingTimeout = isIOSDevice ? 2000 : 3000; // iOS mais rápido
+    
     // Esconder loading screen após carregamento
     setTimeout(() => {
         const loadingScreen = document.getElementById('loading-screen');
         if (loadingScreen) {
+            // Garantir que o conteúdo esteja visível antes de esconder loading
+            ensureContentVisibility();
+            
             loadingScreen.classList.add('hidden');
             setTimeout(() => {
                 loadingScreen.style.display = 'none';
-            }, 800);
+                loadingScreen.style.visibility = 'hidden';
+                loadingScreen.style.opacity = '0';
+                loadingScreen.style.pointerEvents = 'none';
+                
+                // Forçar visibilidade do conteúdo após remover loading
+                ensureContentVisibility();
+                
+                // No iOS, forçar reflow para garantir renderização
+                if (isIOSDevice) {
+                    void document.body.offsetWidth;
+                    requestAnimationFrame(() => {
+                        ensureContentVisibility();
+                    });
+                }
+            }, isIOSDevice ? 400 : 800); // iOS mais rápido
+        } else {
+            // Se não houver loading screen, garantir visibilidade
+            ensureContentVisibility();
         }
-    }, 3000); // Aumentei para 3 segundos para apreciar o loading
+    }, loadingTimeout);
+    
+    // Garantir visibilidade após carregamento completo (backup para iOS)
+    window.addEventListener('load', function() {
+        ensureContentVisibility();
+        
+        // Forçar remoção do loading screen se ainda estiver visível após 4 segundos
+        setTimeout(() => {
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen && !loadingScreen.classList.contains('hidden')) {
+                loadingScreen.classList.add('hidden');
+                loadingScreen.style.display = 'none';
+                loadingScreen.style.visibility = 'hidden';
+                loadingScreen.style.opacity = '0';
+                loadingScreen.style.pointerEvents = 'none';
+                ensureContentVisibility();
+            }
+        }, 4000);
+    });
 
     // Inicializar todas as funcionalidades
     initMobileMenu();
