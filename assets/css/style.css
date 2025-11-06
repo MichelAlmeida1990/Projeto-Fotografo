@@ -1999,7 +1999,8 @@ html.ios-newer header {
     }
     
     /* FORÇAR visibilidade de TODAS as seções principais no iOS */
-    section, header, .hero, main, .navbar, .nav-links {
+    /* IMPORTANTE: Não incluir .nav-links aqui - deve ser controlado pelo menu mobile */
+    section, header, .hero, main, .navbar {
         display: block !important;
         opacity: 1 !important;
         visibility: visible !important;
@@ -2019,6 +2020,26 @@ html.ios-newer header {
         visibility: visible !important;
         position: relative !important;
         z-index: 1 !important;
+    }
+    
+    /* GARANTIR que o menu mobile esteja FECHADO em mobile no iOS */
+    .nav-links {
+        /* Não forçar display - deve ser controlado pelo JavaScript */
+        opacity: 1 !important;
+        visibility: visible !important;
+        position: relative !important;
+        z-index: 2 !important;
+    }
+    
+    /* Em mobile, garantir que nav-links esteja fechado por padrão */
+    @media (max-width: 768px) {
+        .nav-links:not(.active) {
+            display: none !important;
+        }
+        
+        .nav-links.active {
+            display: flex !important;
+        }
     }
     
     /* Garantir que o conteúdo principal esteja acima do loading screen */

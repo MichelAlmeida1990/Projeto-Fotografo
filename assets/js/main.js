@@ -493,19 +493,36 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 500);
             
             // No iOS mais novo, verificar periodicamente se o conteúdo ainda está visível
+            // Mas com menos frequência para evitar conflitos
             if (isIOSNewer) {
-                setInterval(() => {
+                let visibilityCheckCount = 0;
+                const visibilityCheckInterval = setInterval(() => {
+                    visibilityCheckCount++;
                     const body = document.body;
+                    
+                    // Verificar se o conteúdo desapareceu
                     if (body && (body.style.display === 'none' || body.style.opacity === '0' || body.style.visibility === 'hidden')) {
                         ensureContentVisibility();
                     }
                     
                     // Garantir que o menu mobile esteja fechado se estiver em mobile
+                    // Mas apenas se não tiver a classe active (para não interferir quando o usuário abrir)
                     const navLinks = document.querySelector('.nav-links');
-                    if (navLinks && window.innerWidth <= 768 && navLinks.style.display === 'flex') {
-                        navLinks.style.display = 'none';
-                        navLinks.classList.remove('active');
-                        document.body.style.overflow = '';
+                    if (navLinks && window.innerWidth <= 768) {
+                        // Se o menu não tem a classe active mas está visível, fechar
+                        if (!navLinks.classList.contains('active') && navLinks.style.display === 'flex') {
+                            navLinks.style.display = 'none';
+                            document.body.style.overflow = '';
+                        }
+                        // Se o menu tem a classe active mas não está visível, mostrar
+                        if (navLinks.classList.contains('active') && navLinks.style.display === 'none') {
+                            navLinks.style.display = 'flex';
+                        }
+                    }
+                    
+                    // Parar após 10 verificações (10 segundos) para não ficar executando indefinidamente
+                    if (visibilityCheckCount >= 10) {
+                        clearInterval(visibilityCheckInterval);
                     }
                 }, 1000);
             }
@@ -652,9 +669,19 @@ function initMobileMenu() {
     
     // Garantir que o menu esteja fechado ao inicializar
     if (navLinks) {
+        // SEMPRE fechar o menu ao inicializar, independente do tamanho da tela
         navLinks.style.display = window.innerWidth <= 768 ? 'none' : 'flex';
         navLinks.classList.remove('active');
+        
+        // No iOS, garantir que o menu esteja fechado
+        if (isIOS()) {
+            navLinks.style.display = 'none';
+            navLinks.classList.remove('active');
+        }
     }
+    
+    // Garantir que o body não tenha overflow hidden
+    document.body.style.overflow = '';
     
     updateMobileMenu();
     window.addEventListener('resize', updateMobileMenu);
@@ -693,31 +720,50 @@ function initMobileMenu() {
         }
     }, 300));
     
-    // Criar overlay de fundo
-    const menuOverlay = document.createElement('div');
-    menuOverlay.className = 'menu-overlay';
-    document.body.appendChild(menuOverlay);
+    // Criar overlay de fundo (se não existir)
+    let menuOverlay = document.querySelector('.menu-overlay');
+    if (!menuOverlay) {
+        menuOverlay = document.createElement('div');
+        menuOverlay.className = 'menu-overlay';
+        document.body.appendChild(menuOverlay);
+    }
+    
+    // Garantir que o overlay esteja fechado ao inicializar
+    menuOverlay.classList.remove('active');
     
     // Função para abrir o menu
     function openMenu() {
-        navLinks.style.display = 'flex';
-        menuOverlay.classList.add('active');
+        if (navLinks) {
+            navLinks.style.display = 'flex';
+            navLinks.classList.add('active');
+        }
+        if (menuOverlay) {
+            menuOverlay.classList.add('active');
+        }
         mobileMenuBtn.innerHTML = '<i class="fas fa-times"></i>';
         document.body.style.overflow = 'hidden';
     }
     
     // Função para fechar o menu
     function closeMenu() {
-        navLinks.style.display = 'none';
-        menuOverlay.classList.remove('active');
+        if (navLinks) {
+            navLinks.style.display = 'none';
+            navLinks.classList.remove('active');
+        }
+        if (menuOverlay) {
+            menuOverlay.classList.remove('active');
+        }
         mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
         document.body.style.overflow = '';
     }
     
     // Toggle do menu
     mobileMenuBtn.addEventListener('click', (e) => {
+        e.preventDefault();
         e.stopPropagation();
-        if (navLinks.style.display === 'flex') {
+        
+        // Usar a classe active para verificar se o menu está aberto
+        if (navLinks && navLinks.classList.contains('active')) {
             closeMenu();
         } else {
             openMenu();
