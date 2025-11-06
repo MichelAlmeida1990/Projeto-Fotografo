@@ -195,10 +195,56 @@ function initMobileMenu() {
         }
     }, 300));
     
-    mobileMenuBtn.addEventListener('click', () => {
-        navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
-        mobileMenuBtn.innerHTML = navLinks.style.display === 'flex' ? 
-            '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+    // Criar overlay de fundo
+    const menuOverlay = document.createElement('div');
+    menuOverlay.className = 'menu-overlay';
+    document.body.appendChild(menuOverlay);
+    
+    // Função para abrir o menu
+    function openMenu() {
+        navLinks.style.display = 'flex';
+        menuOverlay.classList.add('active');
+        mobileMenuBtn.innerHTML = '<i class="fas fa-times"></i>';
+        document.body.style.overflow = 'hidden';
+    }
+    
+    // Função para fechar o menu
+    function closeMenu() {
+        navLinks.style.display = 'none';
+        menuOverlay.classList.remove('active');
+        mobileMenuBtn.innerHTML = '<i class="fas fa-bars"></i>';
+        document.body.style.overflow = '';
+    }
+    
+    // Toggle do menu
+    mobileMenuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (navLinks.style.display === 'flex') {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    });
+    
+    // Fechar ao clicar no overlay
+    menuOverlay.addEventListener('click', () => {
+        closeMenu();
+    });
+    
+    // Fechar ao clicar em qualquer link
+    navLinks.addEventListener('click', (e) => {
+        if (e.target.closest('a')) {
+            setTimeout(() => {
+                closeMenu();
+            }, 300);
+        }
+    });
+    
+    // Fechar com tecla ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && navLinks.style.display === 'flex') {
+            closeMenu();
+        }
     });
 }
 
