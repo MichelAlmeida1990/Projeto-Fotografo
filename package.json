@@ -1,0 +1,18 @@
+{
+  "name": "projeto-fotografo",
+  "version": "1.0.0",
+  "description": "Portfólio Fotográfico Profissional",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000",
+    "build": "echo 'Static site - no build needed'",
+    "deploy": "echo 'Deploy configured for GitHub Pages, Netlify, and Vercel'"
+  },
+  "keywords": ["photography", "portfolio", "responsive", "professional"],
+  "author": "Michel Almeida",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
